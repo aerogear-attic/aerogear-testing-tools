@@ -14,16 +14,16 @@
 
     <!-- Artifact Configuration -->
     <groupId>org.jboss.aerogear.test.arquillian</groupId>
-    <artifactId>arquillian-openshift-non-deploying-container</artifactId>
+    <artifactId>arquillian-non-deploying-container</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>Arquillian OpenShift Test Support</name>
-    <description>OpenShift tooling for the Arquillian Project</description>
+    <name>Arquillian Non Deploying Container</name>
+    <description>A fake container that tests against already deployed archive but supports URI/URL injection</description>
 
     <!-- Properties -->
     <properties>
 
         <!-- Versioning -->
-        <version.arquillian>1.1.3.Final</version.arquillian>
+        <version.arquillian>1.1.4.Final</version.arquillian>
 
     </properties>
 

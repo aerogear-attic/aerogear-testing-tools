@@ -15,10 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.test.arquillian.container.openshift;
+package org.jboss.aerogear.test.arquillian.container;
 
 import org.jboss.arquillian.container.spi.client.container.DeployableContainer;
-import org.jboss.arquillian.container.test.spi.client.deployment.DeploymentScenarioGenerator;
 import org.jboss.arquillian.core.spi.LoadableExtension;
 
 /**
@@ -26,10 +25,10 @@ import org.jboss.arquillian.core.spi.LoadableExtension;
  *
  * @author <a href="mailto:ecervena@redhat.com">Emil Cervenan</a>
  */
-public class NonDeployingOpenshiftContainerExtension implements LoadableExtension {
+public class NonDeployingContainerExtension implements LoadableExtension {
 
     @Override
     public void register(ExtensionBuilder builder) {
-        builder.service(DeployableContainer.class, NonDeployingOpenshiftContainer.class);
+        builder.service(DeployableContainer.class, NonDeployingContainer.class);
     }
 }

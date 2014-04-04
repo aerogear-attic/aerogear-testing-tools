@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2011, Red Hat Middleware LLC, and individual contributors
+ * Copyright 2014, Red Hat Middleware LLC, and individual contributors
  * by the @authors tag. See the copyright.txt in the distribution for a
  * full listing of individual contributors.
  *
@@ -14,9 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.test.arquillian.container.openshift;
+package org.jboss.aerogear.test.arquillian.container;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,23 +34,24 @@ import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.spi.ServiceLoader;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.descriptor.api.Descriptor;
-import org.json.JSONObject;
 
 /**
- * OpenShift fake container. With this container you can run your arquillian tests
+ * Arquillian non-deploying container. With this container you can run your Arquillian tests
+ * against already deployed application.
  *
  * <p>
- * See {@link OpenShiftContainerConfiguration} for required configuration
+ * See {@link NonDeployingConfiguration} for required configuration
  * </p>
  *
+ * @author <a href="mailto:kpiwko@redhat.com">Karel Piwko</a>
  * @author <a href="mailto:ecervena@redhat.com">Emil Cervenan</a>
  *
  */
-public class NonDeployingOpenshiftContainer implements DeployableContainer<NonDeployingOpenshiftConfiguration> {
+public class NonDeployingContainer implements DeployableContainer<NonDeployingConfiguration> {
 
-    private static final Logger log = Logger.getLogger(NonDeployingOpenshiftContainer.class.getName());
+    private static final Logger log = Logger.getLogger(NonDeployingContainer.class.getName());
 
-    private NonDeployingOpenshiftConfiguration configuration;
+    private NonDeployingConfiguration configuration;
 
     @Inject
     private Instance<ServiceLoader> serviceLoader;
@@ -60,19 +62,19 @@ public class NonDeployingOpenshiftContainer implements DeployableContainer<NonDe
     }
 
     @Override
-    public Class<NonDeployingOpenshiftConfiguration> getConfigurationClass() {
-        return NonDeployingOpenshiftConfiguration.class;
+    public Class<NonDeployingConfiguration> getConfigurationClass() {
+        return NonDeployingConfiguration.class;
     }
 
     @Override
-    public void setup(NonDeployingOpenshiftConfiguration configuration) {
+    public void setup(NonDeployingConfiguration configuration) {
         configuration.validate();
         this.configuration = configuration;
     }
 
     @Override
     public void start() throws LifecycleException {
-        log.log(Level.INFO, "Assuming that OpenShift cartridge is ready at {0}", configuration.getAppUrl());
+        log.log(Level.INFO, "Assuming that remote deployment is ready at {0}", configuration.getAppUri());
     }
 
     @Override
@@ -106,8 +108,7 @@ public class NonDeployingOpenshiftContainer implements DeployableContainer<NonDe
 
         // try remapping contextPath from JSON map
         if (configuration.getContextRootRemap() != null) {
-            JSONObject map = new JSONObject(configuration.getContextRootRemap());
-            String remappedContextPath = map.optString(contextPath);
+            String remappedContextPath = configuration.getContextRootRemap().optString(contextPath);
             if (remappedContextPath.length() != 0) {
                 log.log(Level.INFO, "Applying contextPath remap from {0} to {1}", new Object[] {
                     contextPath,
@@ -118,9 +119,10 @@ public class NonDeployingOpenshiftContainer implements DeployableContainer<NonDe
 
         log.log(Level.INFO,
             "Pretending deployment of archive {0} to {1}", new Object[] {
-                archive.getName(), buildUrl(configuration.getAppUrl(), contextPath) });
+                archive.getName(), buildUrl(configuration.getAppUri(), contextPath) });
 
-        HTTPContext context = new HTTPContext("openshift", configuration.getHost(), configuration.getPort());
+        HTTPContext context = new HTTPContext("openshift", configuration.getAppUri().getHost(), configuration.getAppUri()
+            .getPort());
         Servlet servlet = new Servlet("deployment", contextPath);
         context.add(servlet);
         metaData.addContext(context);
@@ -132,9 +134,9 @@ public class NonDeployingOpenshiftContainer implements DeployableContainer<NonDe
     public void undeploy(Archive<?> archive) throws DeploymentException {
     }
 
-    private URL buildUrl(URL url, String contextPath) throws DeploymentException {
+    private URL buildUrl(URI uri, String contextPath) throws DeploymentException {
         try {
-            return new URL(url, contextPath);
+            return new URL(uri.toURL(), contextPath);
         } catch (MalformedURLException e) {
             throw new DeploymentException("Unable to construct URL for deployment", e);
         }
