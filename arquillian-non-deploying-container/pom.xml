@@ -19,6 +19,21 @@
     <name>Arquillian Non Deploying Container</name>
     <description>A fake container that tests against already deployed archive but supports URI/URL injection</description>
 
+    <developers>
+        <developer>
+            <name>Karel Piwko</name>
+            <email>kpiwko@redhat.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://git@github.com:aerogear/aerogear-testing-tools.git</connection>
+        <developerConnection>scm:git:ssh://github.com/aerogear/aerogear-testing-tools.git</developerConnection>
+        <url>git://github.com/aerogear/aerogear-testing-tools.git</url>
+        <tag>HEAD</tag>
+    </scm>
+
+
     <!-- Properties -->
     <properties>
 
