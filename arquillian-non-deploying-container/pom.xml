@@ -39,6 +39,8 @@
 
         <!-- Versioning -->
         <version.arquillian>1.1.4.Final</version.arquillian>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.6</maven.compiler.source>
 
     </properties>
 
@@ -152,7 +154,7 @@
                 <configuration>
                     <signature>
                         <groupId>org.codehaus.mojo.signature</groupId>
-                        <artifactId>java15</artifactId>
+                        <artifactId>java16</artifactId>
                         <version>1.0</version>
                     </signature>
                 </configuration>
