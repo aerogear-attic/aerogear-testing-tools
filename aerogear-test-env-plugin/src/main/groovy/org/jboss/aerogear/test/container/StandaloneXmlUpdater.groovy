@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.MessageFormat
 
 import org.arquillian.spacelift.execution.Task
+import org.arquillian.spacelift.execution.Tasks
 import org.jboss.aerogear.test.xml.XmlFileLoader;
 import org.jboss.aerogear.test.xml.XmlTextLoader;
 import org.jboss.aerogear.test.xml.XmlUpdater;
@@ -42,7 +43,7 @@ class StandaloneXmlUpdater extends Task<Object, File> {
     protected File process(Object input) throws Exception {
 
         def server = Tasks.chain(standaloneXmlFile, XmlFileLoader).execute().await()
-        def sslConnectorElement = Task.chain(MessageFormat.format(SSL_CONNECTOR_TEMPLATE, keystorePass, keystoreFile.getAbsolutePath(), truststoreFile.getAbsolutePath(), protocol),
+        def sslConnectorElement = Tasks.chain(MessageFormat.format(SSL_CONNECTOR_TEMPLATE, keystorePass, keystoreFile.getAbsolutePath(), truststoreFile.getAbsolutePath(), protocol),
                 XmlTextLoader)
                 .execute().await()
 

@@ -24,7 +24,7 @@ class DomainXmlUpdater extends Task<Object, File> {
     private def truststoreFile
     private def protocol
 
-    def xml(xmlFile) {
+    def file(xmlFile) {
         this.domainXmlFile = xmlFile
         this
     }
@@ -41,7 +41,7 @@ class DomainXmlUpdater extends Task<Object, File> {
     protected File process(Object input) throws Exception {
 
         def domain = Tasks.chain(domainXmlFile, XmlFileLoader).execute().await()
-        def sslConnectorElement = Task.chain(MessageFormat.format(SSL_CONNECTOR_TEMPLATE, keystorePass, keystoreFile.getAbsolutePath(), truststoreFile.getAbsolutePath(), protocol),
+        def sslConnectorElement = Tasks.chain(MessageFormat.format(SSL_CONNECTOR_TEMPLATE, keystorePass, keystoreFile.getAbsolutePath(), truststoreFile.getAbsolutePath(), protocol),
                 XmlTextLoader).execute().await()
 
         domain.profiles.profile.find {p -> p.@name == "default"}.subsystem.find { s -> s.@xmlns.contains('jboss:domain:web:')}.connector.findAll{ c -> c.@name == "https" }.each { it.replaceNode { } }

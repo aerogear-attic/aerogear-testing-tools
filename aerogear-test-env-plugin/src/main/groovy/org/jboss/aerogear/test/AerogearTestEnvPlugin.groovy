@@ -101,7 +101,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
                 profile.enabledInstallations.each { installationName ->
                     if(installationName == '*' || installationName == installation.name ) {
                         logger.lifecycle(":prepare-env:install ${installation.name}")
-                        installation.installAndModify(ant)
+                        installation.install()
                     }
                 }
             }

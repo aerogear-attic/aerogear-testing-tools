@@ -13,7 +13,7 @@ class MavenExecutor extends Task<Object, Void>{
 
     def static final log = LoggerFactory.getLogger('MavenExecutor')
 
-    def projectDir
+    def projectPom
 
     def batchMode = true
 
@@ -45,7 +45,7 @@ class MavenExecutor extends Task<Object, Void>{
 
         command.parameters(getProfiles())
         command.parameter('-f')
-        command.parameter(projectDir + "/pom.xml")
+        command.parameter(projectPom)
         command.parameter('-s')
         command.parameter(settingsXml)
         command.parameters(goals)
@@ -54,6 +54,11 @@ class MavenExecutor extends Task<Object, Void>{
         command.interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
 
         return null;
+    }
+
+    def pom(projectPom) {
+        this.projectPom = projectPom
+        this
     }
 
     def withoutBatchMode() {

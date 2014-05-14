@@ -42,7 +42,7 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
 
 
     @Override
-    protected Object process(Object properties) throws Exception {
+    protected Void process(Object properties) throws Exception {
 
         if(container) {
             configureContainer(container, properties);

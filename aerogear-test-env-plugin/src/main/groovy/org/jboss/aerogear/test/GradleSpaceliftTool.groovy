@@ -61,8 +61,6 @@ class GradleSpaceliftTool {
         def clazz = classLoader.parseClass(toolClass)
         def instance = clazz.newInstance()
 
-        System.out.println("DELEGATE class" + delegate.getClass().getName())
-
         // FIXME here we access static fields via instance as we don't have class object
         instance.defaultCommand = getOsSpecificCommand(command, delegate)
 
@@ -77,7 +75,7 @@ class GradleSpaceliftTool {
 
         // if this is a closure, execute it
         if(mapClosureOrCollection instanceof Closure) {
-            mapClosureOrCollection.delegate = delegate
+            mapClosureOrCollection.delegate = this
             return mapClosureOrCollection.doCall()
         }
         // if this is a single value, just return it

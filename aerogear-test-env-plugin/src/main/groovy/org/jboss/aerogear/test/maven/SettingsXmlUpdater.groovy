@@ -99,12 +99,12 @@ class SettingsXmlUpdater extends Task<Object, Void> {
             def profileActivationElement = Tasks.chain(MessageFormat.format(PROFILE_ACTIVATION_TEMPLATE, r.repositoryId), XmlTextLoader).execute().await()
 
             // remove previous profiles with the same id
-            settings.profiles.profile.findAll { p -> p.id.text() == "${repositoryId}" }.each { it.replaceNode {} }
+            settings.profiles.profile.findAll { p -> p.id.text() == "${r.repositoryId}" }.each { it.replaceNode {} }
             // append profiles
             settings.profiles.each { it.append(profileElement) }
 
             // remove previous profile activations
-            settings.activeProfiles.activeProfile.findAll { ap -> ap.text() == "${repositoryId}" }.each { it.replaceNode {} }
+            settings.activeProfiles.activeProfile.findAll { ap -> ap.text() == "${r.repositoryId}" }.each { it.replaceNode {} }
 
             // append profile activations
             settings.activeProfiles.each { it.append(profileActivationElement) }
