@@ -1,0 +1,23 @@
+apply plugin: 'groovy'
+
+repositories {
+    mavenCentral()
+    // adding staging repository, might be handy for lastest Arquillian Native version
+    maven {
+        name 'jboss-staging-repository-group'
+        url 'https://repository.jboss.org/nexus/content/groups/staging'
+    }
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+
+    // commons lang is used to do platform checks
+    compile 'org.apache.commons:commons-lang3:3.1'
+
+    // Spacelift abstracts execution of external commands
+    compile 'org.arquillian.spacelift:arquillian-spacelift:1.0.0.Alpha2'
+    
+    testCompile 'junit:junit:4.11'
+}
