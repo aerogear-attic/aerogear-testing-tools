@@ -125,9 +125,10 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
         project.tasks.getByName("executeTests").dependsOn(project.tasks.getByName("prepare-env"))
 
         // test task alias, you can use tests instead of executeTests
-        project.task('tests') << {
+        project.task('test') << {
         }
-        project.tasks.getByName("tests").dependsOn(project.tasks.getByName("executeTests"))
+
+        project.tasks.getByName("test").dependsOn(project.tasks.getByName("executeTests"))
     }
 
 

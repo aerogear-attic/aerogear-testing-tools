@@ -66,48 +66,48 @@ class MavenExecutor extends Task<Object, Void>{
         this
     }
 
-    def withSettings(settingsXml) {
+    def settings(settingsXml) {
         this.settingsXml = settingsXml
         this
     }
 
-    def withGoal(goal) {
+    def goal(goal) {
         this.goals.add(goal)
         this
     }
 
-    def withGoals(CharSequence...goals) {
+    def goals(CharSequence...goals) {
         this.goals.addAll(goals)
         this
     }
 
-    def withProperty(property) {
+    def property(property) {
         this.properties.add(property)
         this
     }
 
-    def withProperties(CharSequence...properties) {
+    def properties(CharSequence...properties) {
         this.properties.addAll(properties)
         this
     }
 
-    def withProfile(profile) {
+    def profile(profile) {
         this.profiles.add(profile)
         this
     }
 
-    def withProfiles(CharSequence...profiles) {
+    def profiles(CharSequence...profiles) {
         this.profiles.addAll(profiles)
         this
     }
 
-    def withAndroidTarget(target) {
+    def androidTarget(target) {
         // TODO identify all possible combinations for Android Target settings
         this.properties << "arq.group.containers.container.android.configuration.target=${target}"
         this
     }
 
-    def withSurefireSuffix(suffix) {
+    def surefireSuffix(suffix) {
         this.properties << "surefire.reportNameSuffix=${suffix}"
         this
     }
