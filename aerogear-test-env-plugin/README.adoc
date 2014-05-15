@@ -1,0 +1,174 @@
+= Aerogear Test Environment Plugin
+
+This Gradle plugin is able to prepare test environment and execute tests.
+Plugin is using Arquillian Spacelift project to execute external commands.
+
+In order to enable the plugin, define:
+
+[source,groovy]
+----
+apply plugin: 'aerogear-test-env'
+----
+
+== Tasks
+
+This plugin provides following tasks:
+
+prepare-env::
+    Installs all installations defined by profile
+test::
+    Executes tests defined in profile. Depends on +prepare-env+
+show-configuration::
+    Shows global configuration and available profiles
+
+== DSL
+
+Plugin uses following DSL structure:
+
+[code,groovy]
+----
+aerogearTestEnv {
+
+    workspace
+    installationsDir
+    localRepository
+    killServers
+    keystoreFile
+    truststoreFile
+    enableStaging
+    enableSnapshots
+
+    tools {
+        tool1 {
+        }
+    }
+
+    profiles {
+        profile1 {
+        }
+    }
+
+    installations {
+        installation1 {
+        }
+    }
+
+    tests {
+        test1 {
+        }
+    }
+
+    
+}
+----
+
+globalSetupProperties::
+    There are a few properties with sane default. You can modify them to alter execution flow.
++
+* workspace - a directory where you work, by default this directory 
+* installationsDir - a directory where installation files are cached
+* localRepository - Maven local repository path
+* killServers - {true|false} whether to kill Java processes first
+* keystoreFile - path to JKS keystore file
+* truststoreFile - path to JKS truststore file
+* enableStaging - enable JBoss Staging repository
+* enableSnapshots - enable JBoss Snapshots repository
+
+tools::
+    Tools allow you to define external commands that should be available on local system. Syntax is following:
++
+[source,groovy]
+----
+toolName {
+    command = string OR list of strings OR closure OR map of strings, list of strings or closures
+}
+----
++
+    Command defines what will be executed. In case you provide _string_ or _list of strings_, it will be transformed to 
+    Spacelift +CommandBuilder+. In case you are using _closure_, you are supposed to return +CommandBuilder+. In case of
+    map, you can use *windows*, *linux* and *mac* keys that will match the platform. The block will register a +CommandTool+ 
+    you can retrieve by +GradleSpacelift.tools('toolName') later on.
+    Following tools are always expected to be present: _ant_ and _mvn_
+
+profiles::
+    Profiles consist of installations to be installed and tests to be executed. You can use -Pprofile=_profileName_ to trigger
+    specific profile, otherwise default profile is triggered. _default_ profile is expected to be present. Note, you need
+    define profileName quoted in case of _default_.
++
+[source,groovy]
+----
+profileName {
+    enabledInstallations = ['installation1', 'installation2']
+    tests = ['test1', 'test3', 'test27']
+}
+----
+
+installations::
+    Installations provides a way how to bring additional tools to you test environment. Installation is automatically downloaded
+    or fetched from local cache and extracted, based on current OS.
++
+[source,groovy]
+----
+installationName {
+    product = string
+    version = string
+    fileName = string OR map of strings
+    remoteUrl = string OR map of strings
+    home = string OR map of strings
+    tool {
+        name = 'toolName'
+        command = same as command for tool in tools closure
+    }
+    postActions {
+    }
+}
+----
++
+    Following properties are used:
++
+* product - name of product, used for storing installation in _installationsDir_
+* version - version of product, used for storing installation in _installationsDir_
+* fileName - name of file as downloaded in _workspace_. Can be map, same keys as for _tool_
+* remoteUrl - URL where to download from. Can be map, same keys as for _tool_
+* home - name of dir in _workspace_ where installation is extracted. Can be map, same keys as for _tool_
+* tool - allows to define +tool+ that will be available after installation is done
++ postActions - defines action to be performed after installation is extracted
++
+    Note: Installation can bring multiple tools. You can provide more then one +tool+ closure.
+
+tests::
+    Tests define a block of commands to be executed in *test* Gradle task.
++
+[source,groovy]
+----
+testName {
+    execute {
+        // your commands here
+    }
+}
+----
++
+
+
+== Spacelift Tools and Task
+
+You can benefit from following tools and tasks, either from Spacelift or provided by this plugin:
+
+* DownloadTool - downloads a file
+* UnzipTool - extracts a zip file
+* CommandTool - executes external command
+* AntExecutor - executes Ant command. Requires _ant_ tool
+* MavenExecuter - executes Maven command. Requires _mvn_ tool
+* XmlFileLoader - loads xml from file into +Node+
+* XmlTextLoader - loads xml from text into +Node+
+* XmlUpdater - stores +Node+ into file
+* ArquillianXmlUpdater - updates container and/or extension properties in _arquillian.xml_ files
+* PomXmlUpdater - updates properties in _pom.xml_ files
+* SettingsXmlUpdater - updates _settings.xml_ with additional repositories, sets +localRepository+
+* KillJavas - kills running Java processes (Selenium, JBoss AS/WildFly containers) and processes occupying ports
+* StandaloneXmlUpdater - allows to add keystore/truststore configuration to _standalone.xml_
+* DomainXmlUpdater - allows to add keystore/truststore configuration to _domain.xml_
+* AndroidSdkUpdater - allows to fetch binaries for specific Android SDK target - you need to agree with Android SDK license first. Requires _android_ tool.
+* AndroidSdkOptForStats - allows to opt out for stats - you need to agree with Android SDK license first
+
+
