@@ -13,6 +13,44 @@ import static org.junit.Assert.assertThat
 class SpaceliftToolBinaryTest {
 
     @Test
+    public void multipleTools() {
+        Project project = ProjectBuilder.builder().build()
+
+        project.apply plugin: 'aerogear-test-env'
+
+        project.aerogearTestEnv {
+            tools {
+                ant { command = "ant" }
+                mvn { command = "mvn"}
+            }
+            profiles {
+            }
+            installations {
+            }
+            tests {
+            }
+        }
+
+        // initialize current project tools - this is effectively init-tools task
+        GradleSpacelift.currentProject(project)
+
+        // find ant tool
+        def antTool = GradleSpacelift.tools("ant")
+        assertThat antTool, is(notNullValue())
+
+        // call ant help
+        GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
+
+        // find mvn tool
+        def mvnTool = GradleSpacelift.tools("ant")
+        assertThat mvnTool, is(notNullValue())
+
+        // call mvn help
+        GradleSpacelift.tools("mvn").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
+
+    }
+
+    @Test
     public void binaryAsString() {
         Project project = ProjectBuilder.builder().build()
 
