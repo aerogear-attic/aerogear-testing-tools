@@ -3,9 +3,8 @@ package org.jboss.aerogear.test;
 import org.arquillian.spacelift.execution.Tasks
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.jboss.aerogear.test.android.AndroidSdkOptForStats;
-import org.jboss.aerogear.test.android.AndroidSdkUpdater
-import org.jboss.aerogear.test.arquillian.ArquillianXmlUpdater;
+import org.jboss.aerogear.test.android.AndroidSdkOptForStats
+import org.jboss.aerogear.test.arquillian.ArquillianXmlUpdater
 import org.junit.Test
 
 import static org.hamcrest.CoreMatchers.*

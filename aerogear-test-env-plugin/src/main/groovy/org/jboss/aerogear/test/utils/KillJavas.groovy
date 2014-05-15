@@ -5,6 +5,7 @@ import org.arquillian.spacelift.execution.Task
 import org.arquillian.spacelift.execution.Tasks
 import org.arquillian.spacelift.process.CommandBuilder
 import org.arquillian.spacelift.process.impl.CommandTool
+import org.jboss.aerogear.test.GradleSpacelift;
 import org.slf4j.LoggerFactory
 
 /**
@@ -52,6 +53,8 @@ class KillJavas extends Task<Object, Void>{
             println "Cleanup environment failed with ${e.getMessage()}"
             e.printStackTrace()
         }
+
+        return null
     }
 
     def executeBash(String command) {
@@ -70,6 +73,7 @@ class KillJavas extends Task<Object, Void>{
             if(m) {
                 list << m[0][1]
             }
+            list
         }
 
         def totalKilled = pids.inject(0) {total, pid ->
@@ -89,6 +93,7 @@ class KillJavas extends Task<Object, Void>{
             if(m) {
                 list << m[0][1]
             }
+            list
         }
 
         def totalKilled = pids.inject(0) {total, pid ->
@@ -101,7 +106,7 @@ class KillJavas extends Task<Object, Void>{
 
     def kill(String pid, String signal) {
 
-        if (SystemUtils.IS_OS_WINDOWS) {
+        if (!SystemUtils.IS_OS_WINDOWS) {
             executeBash("kill ${signal} ${pid}")
         }
         else {
