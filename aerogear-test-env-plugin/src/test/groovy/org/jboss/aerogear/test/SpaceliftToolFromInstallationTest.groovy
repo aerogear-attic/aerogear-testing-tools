@@ -8,7 +8,6 @@ import org.jboss.aerogear.test.arquillian.ArquillianXmlUpdater
 import org.junit.Test
 
 import static org.hamcrest.CoreMatchers.*
-
 import static org.junit.Assert.assertThat
 
 public class SpaceliftToolFromInstallationTest {

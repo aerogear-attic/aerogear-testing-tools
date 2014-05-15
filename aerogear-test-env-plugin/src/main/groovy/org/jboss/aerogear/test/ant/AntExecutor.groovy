@@ -14,8 +14,6 @@ class AntExecutor extends Task<Object, Void>{
 
     def projectDir
 
-    def command = []
-
     def targets = []
 
     def buildFile

@@ -3,6 +3,8 @@ package org.jboss.aerogear.test
 import org.apache.commons.lang3.SystemUtils
 import org.apache.log4j.Logger
 import org.arquillian.spacelift.process.CommandBuilder
+import org.arquillian.spacelift.process.impl.CommandTool
+import org.arquillian.spacelift.execution.Tasks
 import org.arquillian.spacelift.tool.ToolRegistry
 import org.gradle.api.Project
 
@@ -17,7 +19,7 @@ class GradleSpaceliftTool {
     // required by gradle to be defined
     String name
 
-    // path to the binary, might be map in case of system specific stuff
+    // prepared command tool
     def command
 
     private Project project
@@ -37,17 +39,21 @@ class GradleSpaceliftTool {
         // dynamically construct class that represent the tool
         def toolClass = """
             import org.arquillian.spacelift.process.CommandBuilder
+            import org.arquillian.spacelift.process.impl.CommandTool
+            import java.util.Map;
 
             class ToolBinary_${name} extends org.arquillian.spacelift.process.impl.CommandTool {
 
-                static CommandBuilder defaultCommand
+                static CommandTool commandTool
 
                 ToolBinary_${name}() {
-                    // default command might be null for the first time instance is created, ignore it
-                    if(defaultCommand!=null) {
-                        // clone command builder
-                        // TODO spacelift might provide a nicer API here
-                        super.commandBuilder = new CommandBuilder(defaultCommand.build().getFullCommand().toArray(new CharSequence[0]))
+                    if (commandTool != null) {
+                        // set environment
+                        for (Map.Entry<String, String> entry : commandTool.environment) {
+                            super.environment.put(entry.getKey(), entry.getValue());
+                        }
+                        // set command builder
+                        super.commandBuilder = commandTool.commandBuilder;
                     }
                 }
 
@@ -62,7 +68,7 @@ class GradleSpaceliftTool {
         def instance = clazz.newInstance()
 
         // FIXME here we access static fields via instance as we don't have class object
-        instance.defaultCommand = getOsSpecificCommand(command, delegate)
+        instance.commandTool = getOsSpecificCommand(command, delegate)
 
         // register tool using dynamically constructed class
         registry.register(clazz)
@@ -70,8 +76,8 @@ class GradleSpaceliftTool {
         logger.info("Tool ${name} was registered")
     }
 
-    // get command builder
-    CommandBuilder getOsSpecificCommand(mapClosureOrCollection, delegate) {
+    // get command tool
+    CommandTool getOsSpecificCommand(mapClosureOrCollection, delegate) {
 
         // if this is a closure, execute it
         if(mapClosureOrCollection instanceof Closure) {
@@ -103,15 +109,14 @@ class GradleSpaceliftTool {
                     command.parameters(param.toString())
                 }
             }
-            return command
+			return Tasks.prepare(CommandTool).command(command)
         }
 
-        // got a string value here
-        return new CommandBuilder(mapClosureOrCollection);
+        return Tasks.prepare(CommandTool).command(new CommandBuilder(mapClosureOrCollection));
     }
 
     @Override
     public String toString() {
-        return "SpaceliftTool ${name}, command: ${getOsSpecificCommand(command)}"
+        return "SpaceliftTool ${name}, commandTool: ${getOsSpecificCommand(commandTool)}"
     }
 }
