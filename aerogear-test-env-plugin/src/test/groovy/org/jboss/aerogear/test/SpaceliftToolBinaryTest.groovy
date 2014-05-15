@@ -42,7 +42,7 @@ class SpaceliftToolBinaryTest {
         GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
 
         // find mvn tool
-        def mvnTool = GradleSpacelift.tools("ant")
+        def mvnTool = GradleSpacelift.tools("mvn")
         assertThat mvnTool, is(notNullValue())
 
         // call mvn help
