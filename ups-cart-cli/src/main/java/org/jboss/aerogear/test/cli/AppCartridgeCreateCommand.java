@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.arquillian.spacelift.process.CommandBuilder;
-import org.arquillian.spacelift.process.ProcessExecutor;
+import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.process.ProcessInteractionBuilder;
-import org.arquillian.spacelift.process.impl.DefaultProcessExecutorFactory;
+import org.arquillian.spacelift.process.impl.CommandTool;
 import org.jboss.aerogear.test.GitHubRepository;
 
 @Command(name = "cart-create", description = "Create OpenShift Cartridge based on latest commit in given organization, repository and branch. Requires rhc tools installed")
@@ -38,8 +37,6 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
     @Arguments(title = "cartridges", description = "Additional Cartridges to be instantiated together with the one defined by commit. By default: mysql-5.1, myphpadmin-4")
     public List<String> additionalCartridges = Arrays.asList("mysql-5.1", "phpmyadmin-4");
 
-    private ProcessExecutor executor = new DefaultProcessExecutorFactory().getProcessExecutorInstance();
-
     @Override
     public void run() {
 
@@ -54,17 +51,19 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
             latestCommit });
 
         if (force) {
-            executor.execute(new ProcessInteractionBuilder().outputs(".*").build(),
-                new CommandBuilder().add("rhc", "app", "delete", "--confirm", appName)
-                    .build());
+            Tasks.prepare(CommandTool.class)
+                .programName("rhc").parameters("app", "delete", "--confirm", appName)
+                .interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut())
+                .execute().await();
         }
 
-        executor.execute(new ProcessInteractionBuilder().outputs(".*").build(),
-            new CommandBuilder().add("rhc", "app", "create", "-g", gearSize, "--no-git", appName)
-                .add("http://cartreflect-claytondev.rhcloud.com/reflect?github=" + organization + "/" + repository + "&commit="
-                    + latestCommit)
-                .add(additionalCartridges)
-                .build());
-
+        Tasks.prepare(CommandTool.class)
+            .programName("rhc")
+            .parameters("app", "create", "-g", gearSize, "--no-git", appName)
+            .parameter("http://cartreflect-claytondev.rhcloud.com/reflect?github=" + organization + "/" + repository
+                + "&commit=" + latestCommit)
+            .parameters(additionalCartridges)
+            .interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut())
+            .execute().await();
     }
 }
