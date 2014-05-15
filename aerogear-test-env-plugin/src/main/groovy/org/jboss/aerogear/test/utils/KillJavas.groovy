@@ -55,11 +55,11 @@ class KillJavas extends Task<Object, Void>{
     }
 
     def executeBash(String command) {
-        Tasks.prepare(CommandTool).binary("bash").parameters("-c").splitToParameters(command).execute().await().output()
+        Tasks.prepare(CommandTool).programName("bash").parameters("-c").splitToParameters(command).execute().await().output()
     }
 
     def executeCmd(String command) {
-        Tasks.prepare(CommandTool).binary("cmd").parameters("/C").splitToParameters(command).execute().await().output()
+        Tasks.prepare(CommandTool).programName("cmd").parameters("/C").splitToParameters(command).execute().await().output()
     }
 
     def jpsKill(String name, String signal) {
