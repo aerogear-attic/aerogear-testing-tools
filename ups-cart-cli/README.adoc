@@ -1,0 +1,15 @@
+= Aerogear Unified Push Server CLI tool
+
+This tool can be used to create cartridge on OpenShift and also setup some of it initial data.
+
+== Build
+
+[source]
+mvn clean package
+
+== Usage
+
+[source]
+target/ups-cart help
+
+

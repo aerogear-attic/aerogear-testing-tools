@@ -1,0 +1,21 @@
+= Arquillian Non-Deploying Container 
+
+This container does not deploy anything, instead it returns URI based on provided +baseURI+ and to-be-deployed-by-somebody-else archive name.
+
+Its purpose is to allow Arquillian to inject URI/URL into @Deployment for tests that connect to already existing deployment, installed by different means.
+
+=== Usage
+
+1. Put container as +test+ scoped dependency to the project
+
+2. Define properties in _arquillian.xml_ that would make possible to construct URL.
+    
+    * +baseURI+ base URI of the deployment, this is *required* 
+    * +contextRootRemap+ a JSON map to remap context root given by deployment to different path
+
+TIP: Remapping can be used to modify deployment URI for archives that have different context path on local container and on remote container
+
+== TODO
+
+* 
+* Implement a ping for constructed URL - to check that application was indeed deployment at given location first

@@ -1,0 +1,22 @@
+= Arquillian Smart URL
+
+Arquillian Smart URL allows you to modify URL/URI injected by @ArquillianResource.
+
+In order to modify the URL, just add +@UriScheme()+ annotation to the field or parameter you are injecting into.
+
+== Capabilities
+
+* _port_ - modifies port
+* _name_ - scheme of URL, either http or https
+* _user_ - name of user for HTTP Basic auth
+* _password_ - name of password for HTTP Basic auth
+
+== Release new version
+
+Maven Release plugin does not work for projects that are not represented by Git repository.
+Follow this process to release new version
+
+1. Update version to release version in pom.xml
+2. Execute +mvn deploy -Pjboss-release+
+3. Tag current commit via +git tag+
+4. Bump version to next development version

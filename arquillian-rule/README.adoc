@@ -1,0 +1,26 @@
+= Arquillian Rule
+
+Arquillian Rule Extension allows you to inject a JUnit MethodRule into test. This rule has a few advantages when compared to basic JUnit rule:
+
+1. It is executed in Arquillian lifecycle, encapsulating Test event.
+2. Its fields are automatically injected
+3. You can modify tests to run multiple times with this rule
+
+== Usage
+
+[source,java]
+----
+@RunWith(ArquillianRules.class)
+public class MyTest {
+
+    @ArquillianRule
+    public MethodRule rule = new MyMethodRuleImpl();
+
+    @Test
+    public void test() {
+    }
+}
+----
+
+Rule is always executed using around-invoke for test method. So its lifecycle is very similar to  +@Before+ and +@After+ method.
+If you rather want to executed rule in +@BeforeClass+ and +@AfterClass+ manner, make rule +static+ and implement a check whether rule was already executed.

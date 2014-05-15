@@ -1,0 +1,35 @@
+= Aerogear Testing Tooling
+
+This repository contains various tools used to test Aerogear project.
+
+== Arquillian OpenShift Non Deploying Container
+
+This is an Arquillian container that does not deploy anything but uses container configuration to return deployment URL.
+You can use this container to easily switch between functional tests that test local deployment and functional tests that
+test same deployment already available on OpenShift cartridge
+
+== Arquillian Rule
+
+This is an Arquillian extension that bring enhanced support of JUnit MethodRule to Arquillian. 
+Following
+
+* Rule attributes are injected by Arquillian
+* Rule is executed as around invoke of Test execution. This means after last Before and before first After. This allows Rule to access 
+  the some context as test itself
+* Rule is injected by @ArquillianRule, being completely ignored from JUnit point of view
+
+Rule is always method based. However, if made static and with internal flag, it can be force to run once per class as well.
+
+== Arquillian Smart URL
+
+This is an Arquillian extension that allows to change injected URL via @ArquillianResource to a different protocol. This comes handy
+if you want for instance test against _https_, as Arquillian always return _http_.
+
+== Unified Push Server Cartridge CLI
+
+This is a command line tool that allows to create and control UPS. Is is able to:
+
+* create an OpenShift cartridge, based on github organization, repository, commit (branch)
+* add sample data to UPS (Push Application, Variants, Installations)
+* delete all data on UPS
+* dump selected data, so they can be used for instance to configure mobile application
