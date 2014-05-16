@@ -4,266 +4,267 @@ import org.arquillian.spacelift.process.CommandBuilder
 import org.arquillian.spacelift.process.ProcessResult
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Assume;
 import org.junit.Test
 import org.junit.Assert
 import org.arquillian.spacelift.execution.Tasks
 import org.arquillian.spacelift.process.impl.CommandTool
 
 import static org.hamcrest.CoreMatchers.*
-
 import static org.junit.Assert.assertThat
 
 class SpaceliftToolBinaryTest {
 
-	@Test
-	public void addEnvironmentPropertyToTool() {
-		
-		if (System.getenv("ANT_HOME") == null) {
-			Assert.fail("Be sure you have set ANT_HOME env property and try again.")
-		}
-		
-		Project project = ProjectBuilder.builder().build()
+    @Test
+    public void addEnvironmentPropertyToTool() {
 
-		project.apply plugin: 'aerogear-test-env'
+        Assume.assumeNotNull(System.getenv("ANT_HOME"))
 
-		project.aerogearTestEnv {
-			tools {
-				ant {
-					command = {
-						Tasks.prepare(CommandTool)
-							.command(new CommandBuilder("ant"))
-							.addEnvironment("ANT_HOME", System.getenv("ANT_HOME"))
-					}
-				}
-			}
-			profiles {
-			}
-			installations {
-			}
-			tests {
-			}
-		}
+        Project project = ProjectBuilder.builder().build()
 
-		// initialize current project tools - this is effectively init-tools task
-		GradleSpacelift.currentProject(project)
+        project.apply plugin: 'aerogear-test-env'
 
-		// find ant tool
-		def antTool = GradleSpacelift.tools("ant")
-		assertThat antTool, is(notNullValue())
+        project.aerogearTestEnv {
+            tools {
+                ant {
+                    command = {
+                        Tasks.prepare(CommandTool)
+                            .command(new CommandBuilder("ant"))
+                            .addEnvironment("ANT_HOME", System.getenv("ANT_HOME"))
+                    }
+                }
+            }
+            profiles {
+            }
+            installations {
+            }
+            tests {
+            }
+        }
 
-		// call ant help
-		GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
-	}
+        // initialize current project tools - this is effectively init-tools task
+        GradleSpacelift.currentProject(project)
 
-	@Test
-	public void multipleTools() {
-		Project project = ProjectBuilder.builder().build()
+        // find ant tool
+        def antTool = GradleSpacelift.tools("ant")
+        assertThat antTool, is(notNullValue())
 
-		project.apply plugin: 'aerogear-test-env'
+        // call ant help
+        GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
+    }
 
-		project.aerogearTestEnv {
-			tools {
-				ant { command = { Tasks.prepare(CommandTool).command(new CommandBuilder("ant")) }}
-				mvn { command = { Tasks.prepare(CommandTool).command(new CommandBuilder("mvn")) }}
-			}
-			profiles {
-			}
-			installations {
-			}
-			tests {
-			}
-		}
+    @Test
+    public void multipleTools() {
+        Project project = ProjectBuilder.builder().build()
 
-		// initialize current project tools - this is effectively init-tools task
-		GradleSpacelift.currentProject(project)
+        project.apply plugin: 'aerogear-test-env'
 
-		// find ant tool
-		def antTool = GradleSpacelift.tools("ant")
-		assertThat antTool, is(notNullValue())
+        project.aerogearTestEnv {
+            tools {
+                ant { command = { Tasks.prepare(CommandTool).command(new CommandBuilder("ant")) }}
+                mvn { command = { Tasks.prepare(CommandTool).command(new CommandBuilder("mvn")) }}
+            }
+            profiles {
+            }
+            installations {
+            }
+            tests {
+            }
+        }
 
-		// call ant help
-		GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
+        // initialize current project tools - this is effectively init-tools task
+        GradleSpacelift.currentProject(project)
 
-		// find mvn tool
-		def mvnTool = GradleSpacelift.tools("mvn")
-		assertThat mvnTool, is(notNullValue())
+        // find ant tool
+        def antTool = GradleSpacelift.tools("ant")
+        assertThat antTool, is(notNullValue())
 
-		// call mvn help
-		GradleSpacelift.tools("mvn").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
+        // call ant help
+        GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
 
-	}
+        // find mvn tool
+        def mvnTool = GradleSpacelift.tools("mvn")
+        assertThat mvnTool, is(notNullValue())
 
-	@Test
-	public void binaryAsString() {
-		Project project = ProjectBuilder.builder().build()
+        // call mvn help
+        GradleSpacelift.tools("mvn").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
 
-		project.apply plugin: 'aerogear-test-env'
+    }
 
-		project.aerogearTestEnv {
-			tools { ant { command = "ant"
-				}   }
-			profiles {
-			}
-			installations {
-			}
-			tests {
-			}
-		}
+    @Test
+    public void binaryAsString() {
+        Project project = ProjectBuilder.builder().build()
 
-		// initialize current project tools - this is effectively init-tools task
-		GradleSpacelift.currentProject(project)
+        project.apply plugin: 'aerogear-test-env'
 
-		// find ant tool
-		def antTool = GradleSpacelift.tools("ant")
-		assertThat antTool, is(notNullValue())
+        project.aerogearTestEnv {
+            tools {
+                ant {
+                    command = "ant"
+                }
+            }
+            profiles {
+            }
+            installations {
+            }
+            tests {
+            }
+        }
 
-		// call ant help
-		GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
-	}
+        // initialize current project tools - this is effectively init-tools task
+        GradleSpacelift.currentProject(project)
 
-	@Test
-	public void binaryAsMap() {
-		Project project = ProjectBuilder.builder().build()
+        // find ant tool
+        def antTool = GradleSpacelift.tools("ant")
+        assertThat antTool, is(notNullValue())
 
-		project.apply plugin: 'aerogear-test-env'
+        // call ant help
+        GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
+    }
 
-		project.aerogearTestEnv {
-			tools {
-				ant {
-					command = [linux:"ant", windows:"ant.bat"]
-				}
-			}
-			profiles {
-			}
-			installations {
-			}
-			tests {
-			}
-		}
+    @Test
+    public void binaryAsMap() {
+        Project project = ProjectBuilder.builder().build()
 
-		// initialize current project tools - this is effectively init-tools task
-		GradleSpacelift.currentProject(project)
+        project.apply plugin: 'aerogear-test-env'
 
-		// find ant tool
-		def antTool = GradleSpacelift.tools("ant")
-		assertThat antTool, is(notNullValue())
+        project.aerogearTestEnv {
+            tools {
+                ant {
+                    command = [linux:"ant", windows:"ant.bat"]
+                }
+            }
+            profiles {
+            }
+            installations {
+            }
+            tests {
+            }
+        }
 
-		// call ant help
-		GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
-	}
+        // initialize current project tools - this is effectively init-tools task
+        GradleSpacelift.currentProject(project)
 
-	@Test
-	public void binaryAsClosure() {
-		Project project = ProjectBuilder.builder().build()
+        // find ant tool
+        def antTool = GradleSpacelift.tools("ant")
+        assertThat antTool, is(notNullValue())
 
-		project.apply plugin: 'aerogear-test-env'
+        // call ant help
+        GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
+    }
 
-		project.aerogearTestEnv {
-			tools {
-				ant {
-					command = {
-						def antHome = System.getenv("ANT_HOME")
-						if (antHome != null && !antHome.isEmpty()) {
-							return Tasks.prepare(CommandTool).command(new CommandBuilder(antHome + "/bin/ant"))
-						} else {
-							return Tasks.prepare(CommandTool).command(new CommandBuilder("ant"))
-						}
-					}
-				}
-			}
-			profiles {
-			}
-			installations {
-			}
-			tests {
-			}
-		}
+    @Test
+    public void binaryAsClosure() {
+        Project project = ProjectBuilder.builder().build()
 
-		// initialize current project tools - this is effectively init-tools task
-		GradleSpacelift.currentProject(project)
+        project.apply plugin: 'aerogear-test-env'
 
-		// find ant tool
-		def antTool = GradleSpacelift.tools("ant")
-		assertThat antTool, is(notNullValue())
+        project.aerogearTestEnv {
+            tools {
+                ant {
+                    command = {
+                        def antHome = System.getenv("ANT_HOME")
+                        if (antHome != null && !antHome.isEmpty()) {
+                            return Tasks.prepare(CommandTool).command(new CommandBuilder(antHome + "/bin/ant"))
+                        } else {
+                            return Tasks.prepare(CommandTool).command(new CommandBuilder("ant"))
+                        }
+                    }
+                }
+            }
+            profiles {
+            }
+            installations {
+            }
+            tests {
+            }
+        }
 
-		// call ant help
-		ProcessResult result = GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
-		assertThat result.exitValue(), is(0)
-	}
+        // initialize current project tools - this is effectively init-tools task
+        GradleSpacelift.currentProject(project)
 
-	@Test
-	public void binaryAsMapOfClosures() {
-		Project project = ProjectBuilder.builder().build()
+        // find ant tool
+        def antTool = GradleSpacelift.tools("ant")
+        assertThat antTool, is(notNullValue())
 
-		project.apply plugin: 'aerogear-test-env'
+        // call ant help
+        ProcessResult result = GradleSpacelift.tools("ant").parameters("-help").interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
+        assertThat result.exitValue(), is(0)
+    }
 
-		project.setProperty("androidHome", "foobar")
+    @Test
+    public void binaryAsMapOfClosures() {
+        Project project = ProjectBuilder.builder().build()
 
-		project.aerogearTestEnv {
-			tools {
-				android {
-					command = [
-						linux: {
-							Tasks.prepare(CommandTool).command(new CommandBuilder(new File(project.androidHome, "tools/android.bat").getAbsolutePath()))
-						},
-						windows: {
-							Tasks.prepare(CommandTool).command(new CommandBuilder("cmd.exe", "/C", new File(project.androidHome, "tools/android.bat").getAbsolutePath()))
-						}
-					]
-				}
-			}
-			profiles {
-			}
-			installations {
-			}
-			tests {
-			}
-		}
+        project.apply plugin: 'aerogear-test-env'
 
-		// initialize current project tools - this is effectively init-tools task
-		GradleSpacelift.currentProject(project)
+        project.setProperty("androidHome", "foobar")
 
-		// find android tool
-		def antTool = GradleSpacelift.tools("android")
-		assertThat antTool, is(notNullValue())
-	}
+        project.aerogearTestEnv {
+            tools {
+                android {
+                    command = [
+                        linux: {
+                            Tasks.prepare(CommandTool).command(new CommandBuilder(new File(project.androidHome, "tools/android.bat").getAbsolutePath()))
+                        },
+                        windows: {
+                            Tasks.prepare(CommandTool).command(new CommandBuilder("cmd.exe", "/C", new File(project.androidHome, "tools/android.bat").getAbsolutePath()))
+                        }
+                    ]
+                }
+            }
+            profiles {
+            }
+            installations {
+            }
+            tests {
+            }
+        }
 
-	@Test
-	public void binaryAsMapOfArrays() {
-		Project project = ProjectBuilder.builder().build()
+        // initialize current project tools - this is effectively init-tools task
+        GradleSpacelift.currentProject(project)
 
-		project.apply plugin: 'aerogear-test-env'
+        // find android tool
+        def antTool = GradleSpacelift.tools("android")
+        assertThat antTool, is(notNullValue())
+    }
 
-		project.setProperty("androidHome", "foobar")
+    @Test
+    public void binaryAsMapOfArrays() {
+        Project project = ProjectBuilder.builder().build()
 
-		project.aerogearTestEnv {
-			tools {
-				android {
-					command = [
-						linux: [
-							new File(project.androidHome, "tools/android.bat").getAbsolutePath()
-						],
-						windows: [
-							"cmd.exe",
-							"/C",
-							new File(project.androidHome, "tools/android.bat").getAbsolutePath()
-						]
-					]
-				}
-			}
-			profiles {
-			}
-			installations {
-			}
-			tests {
-			}
-		}
+        project.apply plugin: 'aerogear-test-env'
 
-		// initialize current project tools - this is effectively init-tools task
-		GradleSpacelift.currentProject(project)
+        project.setProperty("androidHome", "foobar")
 
-		// find android tool
-		def antTool = GradleSpacelift.tools("android")
-		assertThat antTool, is(notNullValue())
-	}
+        project.aerogearTestEnv {
+            tools {
+                android {
+                    command = [
+                        linux: [
+                            new File(project.androidHome, "tools/android.bat").getAbsolutePath()
+                        ],
+                        windows: [
+                            "cmd.exe",
+                            "/C",
+                            new File(project.androidHome, "tools/android.bat").getAbsolutePath()
+                        ]
+                    ]
+                }
+            }
+            profiles {
+            }
+            installations {
+            }
+            tests {
+            }
+        }
+
+        // initialize current project tools - this is effectively init-tools task
+        GradleSpacelift.currentProject(project)
+
+        // find android tool
+        def antTool = GradleSpacelift.tools("android")
+        assertThat antTool, is(notNullValue())
+    }
 }

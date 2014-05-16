@@ -109,7 +109,7 @@ class GradleSpaceliftTool {
                     command.parameters(param.toString())
                 }
             }
-			return Tasks.prepare(CommandTool).command(command)
+            return Tasks.prepare(CommandTool).command(command)
         }
 
         return Tasks.prepare(CommandTool).command(new CommandBuilder(mapClosureOrCollection));
