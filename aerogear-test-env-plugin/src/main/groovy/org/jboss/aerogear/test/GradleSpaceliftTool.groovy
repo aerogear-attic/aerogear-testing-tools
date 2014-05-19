@@ -42,18 +42,16 @@ class GradleSpaceliftTool {
             import org.arquillian.spacelift.process.impl.CommandTool
             import java.util.Map;
 
-            class ToolBinary_${name} extends org.arquillian.spacelift.process.impl.CommandTool {
+            class ToolBinary_${name} extends CommandTool {
 
                 static CommandTool commandTool
 
                 ToolBinary_${name}() {
                     if (commandTool != null) {
-                        // set environment
-                        for (Map.Entry<String, String> entry : commandTool.environment) {
-                            super.environment.put(entry.getKey(), entry.getValue());
-                        }
-                        // set command builder
-                        super.commandBuilder = commandTool.commandBuilder;
+                        // clone environment
+                        super.environment.putAll(commandTool.environment)
+                        // set command builder, clone it to get a fresh instance
+                        super.commandBuilder = new CommandBuilder(commandTool.commandBuilder);
                     }
                 }
 
