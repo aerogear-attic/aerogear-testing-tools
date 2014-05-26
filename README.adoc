@@ -33,3 +33,8 @@ This is a command line tool that allows to create and control UPS. Is is able to
 * add sample data to UPS (Push Application, Variants, Installations)
 * delete all data on UPS
 * dump selected data, so they can be used for instance to configure mobile application
+
+== Spacelift JBoss instance manager
+
+By this artifact, you can start and stop JBoss instances programmatically via Spacelift tooling and use jboss-cli scripts via Spacelift as well.
+Please See README in that project itself.
