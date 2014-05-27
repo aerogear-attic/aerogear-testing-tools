@@ -36,7 +36,7 @@ import org.arquillian.spacelift.tool.Tool;
  *
  */
 public class JBossCLI extends Tool<Object, Void> {
-    
+
     private Map<String, String> environment;
 
     String user;
@@ -116,7 +116,7 @@ public class JBossCLI extends Tool<Object, Void> {
         final CommandTool jbossCliTool = getJBossCliTool();
 
         if (controller != null) {
-            jbossCliTool.parameters("--controller", controller);
+            jbossCliTool.parameter("--controller=" + controller);
         }
 
         if (connect) {
@@ -124,23 +124,23 @@ public class JBossCLI extends Tool<Object, Void> {
         }
 
         if (file != null) {
-            jbossCliTool.parameters("--file=", file.getAbsolutePath());
+            jbossCliTool.parameter("--file=" + file.getAbsolutePath());
         }
 
         if (this.command.size() == 1) {
-            jbossCliTool.parameters("--command=" + this.command.get(0));
+            jbossCliTool.parameter("--command=" + this.command.get(0));
         }
 
         if (this.command.size() > 1) {
-            jbossCliTool.parameters("--commands=" + getCommands());
+            jbossCliTool.parameter("--commands=" + getCommands());
         }
 
         if (user != null) {
-            jbossCliTool.parameters("--user", user);
+            jbossCliTool.parameter("--user=" + user);
         }
 
         if (password != null) {
-            jbossCliTool.parameters("--password", password);
+            jbossCliTool.parameter("--password" + password);
         }
 
         jbossCliTool.execute().await();

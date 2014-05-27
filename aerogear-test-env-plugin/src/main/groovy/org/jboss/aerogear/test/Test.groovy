@@ -18,13 +18,19 @@ class Test {
         this.project = project
     }
 
-    def executeTest(boolean onAndroid) {
+    def executeTest(boolean onAndroid, boolean onDatabase) {
         if (execute) {
             if (onAndroid) {
                 project.androidTargets.each { androidTarget ->
                     println "execution on Android target: ${androidTarget}"
                     execute.delegate = this
                     execute.doCall(androidTarget)
+                }
+            } else if (onDatabase) {
+                project.databases.each { database ->
+                    println "execution against database: ${database}"
+                    execute.delegate = this
+                    execute.doCall(database)
                 }
             } else {
                 execute.delegate = this

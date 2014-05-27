@@ -95,6 +95,10 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
             // parses android versions to run suite on
             // they are specified as comma separated list like -PandroidTargets="10,17"
             parseAndroidTargets(project)
+            
+            // parses databases to run suite on
+            // they are specified as comma separated list like -Pdatabases="mysql,db2"
+            parseDatabases(project)
 
             // execute only installations that were enabled in profile
             project.aerogearTestEnv.installations.each { installation ->
@@ -114,7 +118,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
             project.aerogearTestEnv.tests.each { test ->
                 project.selectedProfile.tests.each { testInProfile ->
                     if (testInProfile == test.name) {
-                        test.executeTest(project.selectedProfile.name == "android")
+                        test.executeTest(project.selectedProfile.name == "android", project.selectedProfile.name == "database")
                     }
                 }
             }
@@ -139,6 +143,15 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
             println "Parsed Android targets from command line property -PandroidTargets: " + project.androidTargets
         } else {
             project.ext.set("androidTargets", project.defaultAndroidTargets)
+        }
+    }
+
+    private def parseDatabases(Project project) {
+        if (project.hasProperty('databases')) {
+            project.databases = project.databases.split(",")
+            println "Parsed databases from command line property -Pdatabases: " + project.databases
+        } else {
+            project.ext.set("databases", project.defaultDatabases)
         }
     }
 
