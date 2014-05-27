@@ -9,8 +9,12 @@ import org.jboss.aerogear.test.xml.XmlFileLoader
 import org.jboss.aerogear.test.xml.XmlTextLoader;
 import org.jboss.aerogear.test.xml.XmlUpdater;
 
+import org.slf4j.LoggerFactory
+
 class SettingsXmlUpdater extends Task<Object, Void> {
 
+    def static final log = LoggerFactory.getLogger('SettingsXmlUpdater')
+    
     def static final PROFILE_TEMPLATE = '''
         <profile>
             <id>{0}</id>

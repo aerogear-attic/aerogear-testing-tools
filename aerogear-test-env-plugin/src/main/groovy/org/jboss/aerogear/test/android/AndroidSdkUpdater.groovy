@@ -9,7 +9,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class AndroidSdkUpdater extends Task<Object, Void>{
-    static final Logger log = LoggerFactory.getLogger('AndroidSdk')
+
+    static final Logger log = LoggerFactory.getLogger('AndroidSdkUpdater')
 
     private String target
 
@@ -44,19 +45,19 @@ class AndroidSdkUpdater extends Task<Object, Void>{
         // use "android list sdk --all --extended" to get what should be installed
         def androidVersion = androidVersionInteger(target)
 
-        def exitCodes = 1..255
+        def exitCodes = 0..255
 
         GradleSpacelift.tools('android').parameters([
             "update",
             "sdk",
             "--filter",
             //
-            // The version of build-tools is statically set to 19.0.1 - the latest one by 8/1/2014.
+            // The version of build-tools is statically set to 19.1 - the latest one by 27/5/2014.
             // Investigate, how to get the latest build-tools version programmatically.
             //
             // Backed by JIRA: https://issues.jboss.org/browse/MP-209
             //
-            "platform-tool,android-${androidVersion},sysimg-${androidVersion},addon-google_apis-google-${androidVersion},addon-google_apis_x86-google-${androidVersion},build-tools-19.0.3",
+            "platform-tool,android-${androidVersion},sysimg-${androidVersion},addon-google_apis-google-${androidVersion},addon-google_apis_x86-google-${androidVersion},build-tools-19.1",
             "--all",
             "--no-ui"]
         ).interaction(new ProcessInteractionBuilder()
@@ -66,7 +67,7 @@ class AndroidSdkUpdater extends Task<Object, Void>{
         .when('^(?!Error).*$').printToOut()
         .when('^!Error.*$').printToErr()
         )
-        .shouldExitWith(0, exitCodes.toArray(new Integer[0]))
+        .shouldExitWith(exitCodes.toArray(new Integer[0]))
         .execute().await()
 
         log.info("Android SDK was updated.")

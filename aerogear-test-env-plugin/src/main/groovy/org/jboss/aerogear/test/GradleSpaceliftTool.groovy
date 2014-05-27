@@ -100,6 +100,9 @@ class GradleSpaceliftTool {
                 throw new IllegalStateException("Unknown system ${System.getProperty('os.name')}")
             }
         }
+        else if (mapClosureOrCollection instanceof CommandTool) {
+            return mapClosureOrCollection
+        }
         else if(mapClosureOrCollection instanceof Collection) {
             CommandBuilder command = new CommandBuilder(mapClosureOrCollection[0].toString())
             mapClosureOrCollection.eachWithIndex { param, i ->
