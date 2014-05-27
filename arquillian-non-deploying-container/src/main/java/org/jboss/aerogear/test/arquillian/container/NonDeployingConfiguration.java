@@ -36,38 +36,43 @@ public class NonDeployingConfiguration implements ContainerConfiguration {
 
     private String contextRootRemap;
 
-    private URI _baseURI;
+    public String getBaseURI() {
+        return baseURI;
+    }
 
-    private JSONObject _contextRootRemap;
+    public void setBaseURI(String baseURI) {
+        this.baseURI = baseURI;
+    }
+
+    public void setContextRootRemap(String contextRootRemap) {
+        this.contextRootRemap = contextRootRemap;
+    }
+
+    public String getContextRootRemap() {
+        return contextRootRemap;
+    }
 
     @Override
     public void validate() throws ConfigurationException {
 
-        if (baseURI == null) {
+        if (getBaseURI() == null) {
             throw new ConfigurationException("Parameter \"baseURI\" must not be null nor empty");
         }
         else {
             try {
-                this._baseURI = new URI(baseURI);
+                new URI(getBaseURI());
             } catch (URISyntaxException e) {
                 throw new ConfigurationException("Parameter \"baseURI\" does not represent a valid URI", e);
             }
         }
 
-        if (contextRootRemap != null) {
+        if (getContextRootRemap() != null) {
             try {
-                this._contextRootRemap = new JSONObject(contextRootRemap);
+                new JSONObject(getContextRootRemap());
             } catch (JSONException e) {
                 throw new ConfigurationException("Parameter \"contextRootRemap\" does not represent a valid JSON object", e);
             }
         }
     }
 
-    public URI getAppUri() {
-        return _baseURI;
-    }
-
-    public JSONObject getContextRootRemap() {
-        return _contextRootRemap;
-    }
 }

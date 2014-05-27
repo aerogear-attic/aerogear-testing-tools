@@ -17,5 +17,4 @@ TIP: Remapping can be used to modify deployment URI for archives that have diffe
 
 == TODO
 
-* 
-* Implement a ping for constructed URL - to check that application was indeed deployment at given location first
+1. Implement a ping for constructed URL - to check that application was indeed deployment at given location first
