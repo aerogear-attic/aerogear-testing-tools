@@ -26,10 +26,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+/**
+ * Starts and stops container.
+ * 
+ * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
+ *
+ */
 @RunWith(JUnit4.class)
 public class JBossSpaceliftTestCase {
 
-    private static final String JBOSS_HOME = "target/jboss-as-7.1.1.Final";
+    private static final String JBOSS_HOME = TestUtils.getJBossHome();
 
     @BeforeClass
     public static void setup() {

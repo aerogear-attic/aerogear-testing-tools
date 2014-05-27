@@ -53,3 +53,9 @@ You can omit +environment+ if you are satisfied with defaults. Just shown comman
 
 +JBossCLI+ is a wrapper around jboss-cli scripts. It is multiplatform. You can automatically use it at Linux, Macs and Windows.
 Please investigate its API to get to know how to use it. Setters for that tool just copy parameters you can add to command line version of it.
+
+In order to try other container from default located in +target/jboss+ in tests, you need to set system property "jboss.home" like
+
+----
+$ mvn clean test -Djboss.home=[path_to_jboss_home_of_my_interest]
+---- 
