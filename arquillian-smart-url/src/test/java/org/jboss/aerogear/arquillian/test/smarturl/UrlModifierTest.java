@@ -41,6 +41,18 @@ public class UrlModifierTest {
         Assert.assertThat(url.getFile(), is(modified.getFile()));
     }
 
+    @Test
+    public void notSpecifiedPortWithHTTP() throws Exception {
+        URL url = new URL("http://localhost/1234");
+        
+        URL modified = URIModifier.modify(url, create(SchemeName.HTTP, "user", "pass", -1));
+
+        Assert.assertThat(modified.getPort(), is(-1));
+        Assert.assertThat(modified.getHost(), is("localhost"));
+        Assert.assertThat(modified.getAuthority(), is("user:pass@localhost"));
+        Assert.assertThat(url.getFile(), is(modified.getFile()));
+    }    
+
     private static UriScheme create(final SchemeName scheme, final String user, final String password, final int port) {
         return new UriScheme() {
 

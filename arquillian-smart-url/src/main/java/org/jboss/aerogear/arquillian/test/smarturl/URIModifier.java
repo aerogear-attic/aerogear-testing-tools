@@ -57,13 +57,18 @@ public class URIModifier {
             if (user != null && !"".equals(user) && password != null && !"".equals(password)) {
                 sb.append(user).append(":").append(password).append("@");
             }
-            sb.append(host).append(":").append(port);
+            sb.append(host);
+
+            if (port != -1) {
+                sb.append(":").append(port);
+            }
+
             sb.append(locatedURL.getFile());
 
             return new URL(sb.toString());
         } catch (MalformedURLException e) {
             throw new RuntimeException("Unable to augment " + locatedURL.toExternalForm() + " with scheme '"
-                + scheme + "', port '" + port + "'" + ", user '" + user + "' and password '" + password + "'.");
+                + scheme + "'" + ((port != -1) ? ", port '" + port + "'" : "") + ", user '" + user + "' and password '" + password + "'.");
         }
     }
 }

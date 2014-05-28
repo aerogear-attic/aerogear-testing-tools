@@ -37,7 +37,7 @@ public @interface UriScheme {
 
     SchemeName name() default SchemeName.HTTP;
 
-    int port() default 8080;
+    int port() default -1;
 
     String user() default "";
 
