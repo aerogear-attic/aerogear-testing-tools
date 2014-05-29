@@ -29,9 +29,10 @@ class MavenExecutor extends Task<Object, Void>{
 
     MavenExecutor() {
         def project = GradleSpacelift.currentProject()
-        this.settingsXml = "${project.aerogearTestEnv.workspace}/settings.xml"
-        // add settings xml as property so SWR finds it as well
-        properties << "org.apache.maven.user-settings=${project.aerogearTestEnv.workspace}/settings.xml"
+        if (new File("${project.aerogearTestEnv.workspace}/settings.xml").exists()) {
+            this.settingsXml = "${project.aerogearTestEnv.workspace}/settings.xml"
+            properties << "org.apache.maven.user-settings=${project.aerogearTestEnv.workspace}/settings.xml"
+        }
     }
 
     @Override
@@ -44,10 +45,17 @@ class MavenExecutor extends Task<Object, Void>{
         }
 
         command.parameters(getProfiles())
-        command.parameter('-f')
-        command.parameter(projectPom)
-        command.parameter('-s')
-        command.parameter(settingsXml)
+
+        if (projectPom) {
+            command.parameter('-f')
+            command.parameter(projectPom)
+        }
+
+        if (settingsXml) {
+            command.parameter('-s')
+            command.parameter(settingsXml)
+        }
+
         command.parameters(goals)
         command.parameters(getProperties())
 

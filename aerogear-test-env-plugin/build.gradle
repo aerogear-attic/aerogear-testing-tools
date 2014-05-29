@@ -7,6 +7,7 @@ repositories {
         name 'jboss-staging-repository-group'
         url 'https://repository.jboss.org/nexus/content/groups/staging'
     }
+    mavenLocal()
 }
 
 dependencies {
@@ -18,6 +19,7 @@ dependencies {
 
     // Spacelift abstracts execution of external commands
     compile 'org.arquillian.spacelift:arquillian-spacelift:1.0.0.Alpha2'
+    compile 'org.jboss.aerogear.test:spacelift-jboss-manager:0.1.0-SNAPSHOT'
     
     testCompile 'junit:junit:4.11'
 }

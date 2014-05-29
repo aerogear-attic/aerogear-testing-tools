@@ -140,7 +140,7 @@ public class JBossCLI extends Tool<Object, Void> {
         }
 
         if (password != null) {
-            jbossCliTool.parameter("--password" + password);
+            jbossCliTool.parameter("--password=" + password);
         }
 
         jbossCliTool.execute().await();
