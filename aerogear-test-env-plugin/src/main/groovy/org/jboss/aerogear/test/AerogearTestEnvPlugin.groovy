@@ -118,7 +118,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
             project.aerogearTestEnv.tests.each { test ->
                 project.selectedProfile.tests.each { testInProfile ->
                     if (testInProfile == test.name) {
-                        test.executeTest(project.selectedProfile.name == "android", project.selectedProfile.name == "database")
+                        test.executeTest()
                     }
                 }
             }

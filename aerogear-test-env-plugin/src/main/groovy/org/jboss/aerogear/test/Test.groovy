@@ -1,5 +1,6 @@
 package org.jboss.aerogear.test
 
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.gradle.api.Project
 
 class Test {
@@ -11,6 +12,16 @@ class Test {
 
     def execute
 
+    def dataProvider
+
+    def beforeSuite
+
+    def beforeTest
+
+    def afterSuite
+
+    def afterTest
+
     private Project project
 
     Test(String testName, Project project) {
@@ -18,28 +29,77 @@ class Test {
         this.project = project
     }
 
-    def executeTest(boolean onAndroid, boolean onDatabase) {
+    def executeTest() {
+
+        if (beforeSuite) {
+            beforeSuite.delegate = this
+            beforeSuite.doCall()
+        }
+
         if (execute) {
-            if (onAndroid) {
-                project.androidTargets.each { androidTarget ->
-                    println "execution on Android target: ${androidTarget}"
+
+            if (dataProvider) {
+                dataProvider.delegate = this
+                dataProvider.doCall().each { data ->
+
+                    if (beforeTest) {
+                        beforeTest.delegate = this
+                        beforeTest.doCall()
+                    }
+
                     execute.delegate = this
-                    execute.doCall(androidTarget)
-                }
-            } else if (onDatabase) {
-                project.databases.each { database ->
-                    println "execution against database: ${database}"
-                    execute.delegate = this
-                    execute.doCall(database)
+                    execute.doCall(data)
+
+                    if (afterTest) {
+                        afterTest.delegate = this
+                        afterTest.doCall()
+                    }
                 }
             } else {
+
+                if (beforeTest) {
+                    beforeTest.delegate = this
+                    beforeTest.doCall()
+                }
+
                 execute.delegate = this
                 execute.doCall()
+
+                if (afterTest) {
+                    afterTest.delegate = this
+                    afterTest.doCall()
+                }
             }
+
+        }
+
+        if (afterSuite) {
+            afterSuite.delegate = this
+            afterSuite.doCall()
         }
     }
 
     def execute(Closure closure) {
         this.execute = closure
+    }
+
+    def dataProvider(Closure closure) {
+        this.dataProvider = closure
+    }
+
+    def beforeSuite(Closure closure) {
+        this.beforeSuite = closure
+    }
+
+    def beforeTest(Closure closure) {
+        this.beforeTest = closure
+    }
+
+    def afterSuite(Closure closure) {
+        this.afterSuite = closure
+    }
+
+    def afterTest(Closure closure) {
+        this.afterTest = closure
     }
 }
