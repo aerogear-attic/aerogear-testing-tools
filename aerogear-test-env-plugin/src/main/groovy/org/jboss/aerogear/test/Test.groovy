@@ -44,7 +44,7 @@ class Test {
 
                     if (beforeTest) {
                         beforeTest.delegate = this
-                        beforeTest.doCall()
+                        beforeTest.doCall(data)
                     }
 
                     execute.delegate = this
@@ -52,7 +52,7 @@ class Test {
 
                     if (afterTest) {
                         afterTest.delegate = this
-                        afterTest.doCall()
+                        afterTest.doCall(data)
                     }
                 }
             } else {

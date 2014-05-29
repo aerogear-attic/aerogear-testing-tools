@@ -23,14 +23,14 @@ class TestExecutionLifecycleTestCase {
                     beforeSuite {
                         println "beforeSuite"
                     }
-                    beforeTest {
-                        println "beforeTest"
+                    beforeTest { value ->
+                        println value + " in beforeTest"
                     }
                     execute { value ->
                         println value
                     }
-                    afterTest {
-                        println "after test"
+                    afterTest { value -> 
+                        println value + " in afterTest"
                     }
                     afterSuite {
                         println "after suite"
