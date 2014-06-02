@@ -11,7 +11,7 @@ import org.arquillian.spacelift.execution.Tasks
 
 class PostgreSQLDatabaseModule extends DatabaseModule {
 
-    //private static final String POSTGRESQL_VERSION = "9.2-1004"
+    private static final def POSTGRESQL_VERSION = "9.3-1100"
 
     PostgreSQLDatabaseModule(String name, String jbossHome, String destination) {
         super(name, jbossHome, destination)
@@ -24,10 +24,16 @@ class PostgreSQLDatabaseModule extends DatabaseModule {
     @Override
     def install() {
 
-        if (!new File("${destination}/postgresql-${version}-jdbc41.jar").exists()) {
+        def resolvedVersion = version
+        
+        if (!resolvedVersion) {
+            resolvedVersion = POSTGRESQL_VERSION
+        }
+        
+        if (!new File("${destination}/postgresql-${resolvedVersion}-jdbc41.jar").exists()) {
             Tasks.prepare(MavenExecutor)
                     .goal("dependency:copy")
-                    .property("artifact=org.postgresql:postgresql:${version}-jdbc41")
+                    .property("artifact=org.postgresql:postgresql:${resolvedVersion}-jdbc41")
                     .property("outputDirectory=${destination}")
                     .execute().await()
         }
@@ -35,11 +41,11 @@ class PostgreSQLDatabaseModule extends DatabaseModule {
         if (! new File(jbossHome + "/modules/org/postgresql").exists()) {
             
             startContainer()
-
+            
             Tasks.prepare(JBossCLI)
                     .environment("JBOSS_HOME", jbossHome)
                     .connect()
-                    .cliCommand("module add --name=org.postgresql --resources=${destination}/postgresql-${version}-jdbc41.jar --dependencies=javax.api,javax.transaction.api")
+                    .cliCommand("module add --name=org.postgresql --resources=${destination}/postgresql-${resolvedVersion}-jdbc41.jar --dependencies=javax.api,javax.transaction.api")
                     .execute().await()
 
             stopContainer()

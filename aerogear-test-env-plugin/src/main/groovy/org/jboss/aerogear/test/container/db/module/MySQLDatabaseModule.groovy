@@ -12,7 +12,7 @@ import org.arquillian.spacelift.execution.Tasks
 
 class MySQLDatabaseModule extends DatabaseModule {
 
-    //private static final String DEFAULT_VERSION = "5.1.18"
+    private static final def MYSQL_VERSION = "5.1.28"
 
     MySQLDatabaseModule(String name, String jbossHome, String destination) {
         super(name, jbossHome, destination)
@@ -25,10 +25,16 @@ class MySQLDatabaseModule extends DatabaseModule {
     @Override
     def install() {
 
-        if (! new File("${destination}/mysql-connector-java-${version}.jar").exists() ) {
+        def resolvedVersion = version
+        
+        if (!resolvedVersion) {
+            resolvedVersion = MYSQL_VERSION
+        }
+        
+        if (! new File("${destination}/mysql-connector-java-${resolvedVersion}.jar").exists() ) {
             Tasks.prepare(MavenExecutor)
                     .goal("dependency:copy")
-                    .property("artifact=mysql:mysql-connector-java:${version}")
+                    .property("artifact=mysql:mysql-connector-java:${resolvedVersion}")
                     .property("outputDirectory=${destination}")
                     .execute()
                     .await()
@@ -41,7 +47,7 @@ class MySQLDatabaseModule extends DatabaseModule {
             Tasks.prepare(JBossCLI)
                     .environment("JBOSS_HOME", jbossHome)
                     .connect()
-                    .cliCommand("module add --name=com.mysql --resources=${destination}/mysql-connector-java-${version}.jar --dependencies=javax.api,javax.transaction.api")
+                    .cliCommand("module add --name=com.mysql --resources=${destination}/mysql-connector-java-${resolvedVersion}.jar --dependencies=javax.api,javax.transaction.api")
                     .execute()
                     .await()
 

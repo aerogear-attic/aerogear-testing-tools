@@ -2,3 +2,5 @@ target
 .classpath
 .settings
 .project
+
+aerogear-test-env-plugin/src/main/groovy/com/redhat/jboss/mobile

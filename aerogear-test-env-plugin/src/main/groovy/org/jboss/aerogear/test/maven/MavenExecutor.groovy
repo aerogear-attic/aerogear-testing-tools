@@ -115,6 +115,11 @@ class MavenExecutor extends Task<Object, Void>{
         this
     }
 
+    def jbossHome(jbossHome) {
+        this.properties << "arq.container.main-server-group.configuration.jbossHome=${jbossHome}"
+        this
+    }
+    
     def surefireSuffix(suffix) {
         this.properties << "surefire.reportNameSuffix=${suffix}"
         this
