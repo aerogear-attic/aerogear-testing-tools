@@ -7,8 +7,12 @@ import org.gradle.api.Project
 import org.gradle.internal.reflect.Instantiator
 import org.jboss.aerogear.test.maven.SettingsXmlUpdater
 import org.jboss.aerogear.test.utils.KillJavas
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class AerogearTestEnvPlugin implements Plugin<Project> {
+
+    static final Logger log = LoggerFactory.getLogger('AerogearTestEnvPlugin')
 
     // this plugin prepares aerogear environment
     void apply(Project project) {
@@ -34,8 +38,17 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
             project.gradle.services.get(Instantiator).newInstance(Test, testName, project)
         }
 
+        // set default values if not specified from command line
+        setDefaultDataProviders(project);
+
+
         // set current project and initialize tools
-        project.task('init-tools') << { GradleSpacelift.currentProject(project) }
+        project.task('init-tools') << { 
+            logger.lifecycle(":init-tools:defaultValues")
+            // set default values if not specified from command line in case plugin is applied prior ext {} block
+            setDefaultDataProviders(project);
+            GradleSpacelift.currentProject(project) 
+        }
 
 
         // this task shows configuration of the plugin
@@ -51,6 +64,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
         // 1. Identifying activated profile
         // 2. Installing all installations
         project.task('prepare-env') << {
+            // task closure has access to "logger" object
 
             // check for -Pprofile, fallback to default if not defined
             def profileName = 'default'
@@ -92,14 +106,6 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
                 Tasks.prepare(SettingsXmlUpdater).repository("jboss-snapshots-repository", new URI("https://repository.jboss.org/nexus/content/repositories/snapshots"), true).execute().await()
             }
 
-            // parses android versions to run suite on
-            // they are specified as comma separated list like -PandroidTargets="10,17"
-            parseAndroidTargets(project)
-            
-            // parses databases to run suite on
-            // they are specified as comma separated list like -Pdatabases="mysql,db2"
-            parseDatabases(project)
-
             // execute only installations that were enabled in profile
             project.aerogearTestEnv.installations.each { installation ->
                 profile.enabledInstallations.each { installationName ->
@@ -135,24 +141,28 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
         project.tasks.getByName("test").dependsOn(project.tasks.getByName("executeTests"))
     }
 
+    private void setDefaultDataProviders(Project project) {
+        // parse both properties defined deprecated way and project.ext way. find the ones starting with default
+        def defaultValues = project.getProperties()
+                .findAll {key, value -> return (key.startsWith("default") && !key.startsWith("defaultTask")) } << project.ext.properties
+                .findAll {key, value -> return (key.startsWith("default"))}
 
-    private def parseAndroidTargets(Project project) {
-        if (project.hasProperty('androidTargets')) {
-            def versions = []
-            project.androidTargets = project.androidTargets.split(",")
-            println "Parsed Android targets from command line property -PandroidTargets: " + project.androidTargets
-        } else {
-            project.ext.set("androidTargets", project.defaultAndroidTargets)
+        defaultValues.each { key, value ->
+            def overrideKey = key.substring("default".length(), key.length())
+            overrideKey = overrideKey[0].toLowerCase() + overrideKey.substring(1)
+            if(project.hasProperty(overrideKey)) {
+                // get and parse new value to always return a collection
+                def newValue = project.property(overrideKey)
+                newValue = (newValue instanceof Object[] || newValue instanceof Collection) ? newValue : newValue.toString().split(",")
+                //project.setProperty(overrideKey, newValue)
+                project.ext.set(overrideKey, newValue)
+                log.info("Set ${overrideKey} from command line property -P${overrideKey}=${newValue}")
+            }
+            else {
+                //project.setProperty(overrideKey, value)
+                project.ext.set(overrideKey, value)
+                log.info("Set ${overrideKey} from default value ${key}=${value}")
+            }
         }
     }
-
-    private def parseDatabases(Project project) {
-        if (project.hasProperty('databases')) {
-            project.databases = project.databases.split(",")
-            println "Parsed databases from command line property -Pdatabases: " + project.databases
-        } else {
-            project.ext.set("databases", project.defaultDatabases)
-        }
-    }
-
 }

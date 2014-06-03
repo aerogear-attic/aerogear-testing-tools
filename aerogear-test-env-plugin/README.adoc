@@ -80,13 +80,13 @@ tools::
 [source,groovy]
 ----
 toolName {
-    command = string OR list of strings OR closure OR map of strings, list of strings or closures
+    command = string OR list of strings OR block OR map of strings, list of strings or block
 }
 ----
 +
 command::
     Command defines what will be executed. In case you provide _string_ or _list of strings_, it will be transformed to 
-    Spacelift +CommandTool+. In case you are using _closure_, you are supposed to return +CommandTool+. In case of
+    Spacelift +CommandTool+. In case you are using _block_, you are supposed to return +CommandTool+. In case of
     map, you can use *windows*, *linux* and *mac* keys that will match the platform. The block will register a +CommandTool+ 
     you can retrieve by +GradleSpacelift.tools('toolName')+ later on.
     Following tools are always expected to be present: _ant_ and _mvn_
@@ -118,7 +118,7 @@ installationName {
     home = string OR map of strings
     tool {
         name = 'toolName'
-        command = same as command for tool in tools closure
+        command = same as command for tool in tools block
     }
     postActions {
     }
@@ -135,21 +135,58 @@ installationName {
 * tool - allows to define +tool+ that will be available after installation is done
 + postActions - defines action to be performed after installation is extracted
 +
-    Note: Installation can bring multiple tools. You can provide more then one +tool+ closure.
+    Note: Installation can bring multiple tools. You can provide more then one +tool+ block.
 
 tests::
-    Tests define a block of commands to be executed in *test* Gradle task.
+    Tests define a block of commands to be executed in *test* Gradle task. If you provide +dataProvider+ block, test
+    execution (including before and after test phases) will iterate over data provided.
 +
 [source,groovy]
 ----
 testName {
-    execute {
+    dataProvider {
+        // return an array here, allows to parametrize tests
+    }
+    beforeSuite { 
+        // executed once prior all tests
+    }
+    beforeTest { value ->
+        // executed prior test
+    }
+    execute { value ->
         // your commands here
+    }
+    afterTest { value ->
+        // executed after test
+    }
+    afterSuite() {
+        // executed once prior all tests
     }
 }
 ----
 +
 
+== Default values
+
+Groovy allows user to specify additional project properties using +ext+ block:
+
+[source,groovy]
+----
+ext {
+    property = value
+}
+----
+
+This plugin additionally allows following goodies for property definitions:
+
+Default values::
+    If a property starts with +default+, it is used if user won't override it from command line. Example: +defaultAndroidVersion=[19]+ will 
+    become available as +androidVersion+ property in the project.
+Overriding default values::
+    User can override any default value by using +-PpropertyName=value+ from command line. Example: +-PandroidVersion=17,18+ will override
+    +defaultAndroidVersion+ value.
+Parsing of user supplied values::
+    User defined properties on command line are automatically split by +,+ character and converted into array.
 
 == Spacelift Tools and Task
 
