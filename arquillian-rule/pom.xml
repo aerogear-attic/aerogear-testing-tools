@@ -15,7 +15,7 @@
     <!-- Artifact Configuration -->
     <groupId>org.jboss.aerogear.test.arquillian</groupId>
     <artifactId>arquillian-rule</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <name>Arquillian JUnit Rule Runner</name>
     <description>Support for MethodRule injection by @ArquillianRule with extended capabilities</description>
 
