@@ -4,6 +4,7 @@ import io.airlift.command.Arguments;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -34,8 +35,8 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
     @Option(name = { "-f", "--force" }, title = "force", description = "Forces removal of the cartridge with the same name")
     public boolean force;
 
-    @Arguments(title = "cartridges", description = "Additional Cartridges to be instantiated together with the one defined by commit. By default: mysql-5.1, myphpadmin-4")
-    public List<String> additionalCartridges = Arrays.asList("mysql-5.1", "phpmyadmin-4");
+    @Arguments(title = "cartridges", description = "Additional Cartridges to be instantiated together with the one defined by commit. By default: mysql-5.5, myphpadmin-4")
+    public List<String> additionalCartridges = new ArrayList<String>();
 
     @Override
     public void run() {
@@ -55,6 +56,11 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
                 .programName("rhc").parameters("app", "delete", "--confirm", appName)
                 .interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut())
                 .execute().await();
+        }
+
+        // add default additional cartridges
+        if(additionalCartridges.isEmpty()) {
+            additionalCartridges.addAll(Arrays.asList("mysql-5.5", "phpmyadmin-4"));
         }
 
         Tasks.prepare(CommandTool.class)
