@@ -20,7 +20,7 @@ class AndroidSdkUpdater extends Task<Object, Void>{
     }
 
     @Override
-    protected Void process(Object input) throws Exception {
+    protected Void process(Object ignored) throws Exception {
 
         log.info("Checking installed Android target: ${target}")
 
@@ -52,12 +52,13 @@ class AndroidSdkUpdater extends Task<Object, Void>{
             "sdk",
             "--filter",
             //
-            // The version of build-tools is statically set to 19.1 - the latest one by 27/5/2014.
+            // The version of build-tools is statically set to 19.1.0 - the latest one by 27/5/2014.
             // Investigate, how to get the latest build-tools version programmatically.
             //
             // Backed by JIRA: https://issues.jboss.org/browse/MP-209
             //
-            "platform-tool,android-${androidVersion},sysimg-${androidVersion},addon-google_apis-google-${androidVersion},addon-google_apis_x86-google-${androidVersion},build-tools-19.1",
+            "platform-tools,build-tools-19.1.0,extra-google-google-play_services,extra-android-support," +
+            "android-${androidVersion},sysimg-${androidVersion},addon-google_apis-google-${androidVersion},addon-google_apis_x86-google-${androidVersion}",
             "--all",
             "--no-ui"]
         ).interaction(new ProcessInteractionBuilder()
