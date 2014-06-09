@@ -17,6 +17,10 @@ class MavenExecutor extends Task<Object, Void>{
 
     def batchMode = true
 
+    def nonRecursive = false
+
+    def debug = false
+
     def settingsXml
 
     def goals = []
@@ -24,6 +28,8 @@ class MavenExecutor extends Task<Object, Void>{
     def profiles = []
 
     def properties = []
+
+    def env = [:]
 
     private def command = []
 
@@ -44,6 +50,14 @@ class MavenExecutor extends Task<Object, Void>{
             command.parameter('-B')
         }
 
+        if(nonRecursive) {
+            command.parameter('-N')
+        }
+
+        if(debug) {
+            command.parameter('-X')
+        }
+
         command.parameters(getProfiles())
 
         if (projectPom) {
@@ -56,6 +70,8 @@ class MavenExecutor extends Task<Object, Void>{
             command.parameter(settingsXml)
         }
 
+        command.addEnvironment(env)
+
         command.parameters(goals)
         command.parameters(getProperties())
 
@@ -66,6 +82,11 @@ class MavenExecutor extends Task<Object, Void>{
 
     def pom(projectPom) {
         this.projectPom = projectPom
+        this
+    }
+
+    def withoutSubprojects() {
+        nonRecursive = true
         this
     }
 
@@ -106,6 +127,11 @@ class MavenExecutor extends Task<Object, Void>{
 
     def profiles(CharSequence...profiles) {
         this.profiles.addAll(profiles)
+        this
+    }
+
+    def androidHome(androidHome) {
+        this.env << [ANDROID_HOME:androidHome.toString()]
         this
     }
 
