@@ -3,10 +3,7 @@ package org.jboss.aerogear.test.container.db.module
 import java.io.File;
 
 import org.jboss.aerogear.test.container.db.DatabaseModule
-import org.jboss.aerogear.test.container.manager.ManagedContainerConfiguration
 import org.jboss.aerogear.test.container.spacelift.JBossCLI
-import org.jboss.aerogear.test.container.spacelift.JBossStarter;
-import org.jboss.aerogear.test.container.spacelift.JBossStopper;
 import org.jboss.aerogear.test.maven.*
 import org.arquillian.spacelift.execution.Tasks
 
