@@ -54,6 +54,7 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
         if (force) {
             Tasks.prepare(CommandTool.class)
                 .programName("rhc").parameters("app", "delete", "--confirm", appName)
+                .shouldExitWith(0, 101)
                 .interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut())
                 .execute().await();
         }
