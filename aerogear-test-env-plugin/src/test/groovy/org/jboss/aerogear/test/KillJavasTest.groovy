@@ -1,14 +1,13 @@
 package org.jboss.aerogear.test;
 
+import static org.hamcrest.CoreMatchers.*
+import static org.junit.Assert.assertThat
+
 import org.arquillian.spacelift.execution.Tasks
-import org.arquillian.spacelift.process.ProcessResult
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.jboss.aerogear.test.utils.KillJavas
 import org.junit.Test
-
-import static org.hamcrest.CoreMatchers.*
-import static org.junit.Assert.assertThat
 
 public class KillJavasTest {
 
@@ -33,7 +32,7 @@ public class KillJavasTest {
         GradleSpacelift.currentProject(project)
 
         // kill servers
-        ProcessResult result = Tasks.prepare(KillJavas).execute().await()
-        //assertThat result.exitValue(), is(0)
+        Tasks.prepare(KillJavas).execute().await()
+
     }
 }
