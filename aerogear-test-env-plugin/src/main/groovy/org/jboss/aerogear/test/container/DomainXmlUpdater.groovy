@@ -23,17 +23,19 @@ class DomainXmlUpdater extends Task<Object, File> {
     private def keystorePass
     private def truststoreFile
     private def protocol
+    private def profile
 
     def file(xmlFile) {
         this.domainXmlFile = xmlFile
         this
     }
 
-    def keystore(keystoreFile, keystorePass, truststoreFile, protocol) {
+    def keystore(keystoreFile, keystorePass, truststoreFile, protocol, profile) {
         this.keystoreFile = keystoreFile
         this.keystorePass = keystorePass
         this.truststoreFile = truststoreFile
         this.protocol = protocol
+        this.profile = profile
         this
     }
 
@@ -44,9 +46,9 @@ class DomainXmlUpdater extends Task<Object, File> {
         def sslConnectorElement = Tasks.chain(MessageFormat.format(SSL_CONNECTOR_TEMPLATE, keystorePass, keystoreFile.getAbsolutePath(), truststoreFile.getAbsolutePath(), protocol),
                 XmlTextLoader).execute().await()
 
-        domain.profiles.profile.find {p -> p.@name == "default"}.subsystem.find { s -> s.@xmlns.contains('jboss:domain:web:')}.connector.findAll{ c -> c.@name == "https" }.each { it.replaceNode { } }
+        domain.profiles.profile.find {p -> p.@name == profile}.subsystem.find { s -> s.@xmlns.contains('jboss:domain:web:')}.connector.findAll{ c -> c.@name == "https" }.each { it.replaceNode { } }
 
-        domain.profiles.profile.find {p -> p.@name == "default"}.subsystem.findAll { s -> s.@xmlns.contains('jboss:domain:web:')}.each {
+        domain.profiles.profile.find {p -> p.@name == profile}.subsystem.findAll { s -> s.@xmlns.contains('jboss:domain:web:')}.each {
             // add https connector right after http connector
             it.children().add(1, sslConnectorElement)
         }

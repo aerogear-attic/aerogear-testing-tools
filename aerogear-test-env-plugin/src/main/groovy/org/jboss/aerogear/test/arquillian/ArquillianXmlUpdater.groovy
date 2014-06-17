@@ -22,7 +22,7 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
 
         // get all arquillian.xml files in directory
         this.arquillianXmlFiles = project.fileTree("${dir}") {
-            include "**/arquillian.xml"
+            include "**/arquillian.xml", "**/arquillian-domain.xml"
             exclude "${project.aerogearTestEnv.localRepository}/**", "**/target/**"
         }
 

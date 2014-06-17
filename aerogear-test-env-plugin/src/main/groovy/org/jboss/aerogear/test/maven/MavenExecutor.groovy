@@ -143,6 +143,7 @@ class MavenExecutor extends Task<Object, Void>{
 
     def jbossHome(jbossHome) {
         this.properties << "arq.container.main-server-group.configuration.jbossHome=${jbossHome}"
+        this.properties << "arq.group.jboss.container.domain-controller.configuration.jbossHome=${jbossHome}"
         this
     }
     
