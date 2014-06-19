@@ -152,6 +152,11 @@ class MavenExecutor extends Task<Object, Void>{
         this
     }
 
+    def ignoreTestFailures() {
+        this.properties << "maven.test.failure.ignore=true"
+        this
+    }
+
     private def getProfiles() {
         def profs = []
         this.profiles.each { p ->
