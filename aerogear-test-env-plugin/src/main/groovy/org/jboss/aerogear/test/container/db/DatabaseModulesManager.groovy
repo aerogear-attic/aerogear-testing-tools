@@ -19,6 +19,14 @@ class DatabaseModulesManager {
         this
     }
 
+    def install(names) {
+        databaseModules.each { module ->
+            if (names.contains(module.name)) {
+                module.install()
+            }
+        }
+    }
+    
     def installAll() {
         databaseModules.each { module ->
             module.install()
