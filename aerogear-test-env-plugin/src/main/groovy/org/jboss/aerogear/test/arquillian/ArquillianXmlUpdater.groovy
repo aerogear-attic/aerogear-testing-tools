@@ -13,11 +13,15 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
 
     def arquillianXmlFiles
 
-    def container
+    def containers = []
 
-    def extension
+    def extensions = []
 
     ArquillianXmlUpdater dir(File dir) {
+        // skip if directory is invalid or non existing
+        if(dir==null || !dir.exists()) {
+            return
+        }
         def project = GradleSpacelift.currentProject()
 
         // get all arquillian.xml files in directory
@@ -30,13 +34,23 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
         this
     }
 
+    ArquillianXmlUpdater containers(CharSequence...containers) {
+        this.containers.addAll(containers)
+        this
+    }
+
     ArquillianXmlUpdater container(String container) {
-        this.container = container
+        this.containers << container
+        this
+    }
+
+    ArquillianXmlUpdater extensions(CharSequence...extensions) {
+        this.extensions.addAll(extensions)
         this
     }
 
     ArquillianXmlUpdater extension(String extension) {
-        this.extension = extension
+        this.extensions << extension
         this
     }
 
@@ -44,24 +58,29 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
     @Override
     protected Void process(Object properties) throws Exception {
 
-        if(container) {
-            configureContainer(container, properties);
+        if(!containers.isEmpty()) {
+            configureContainer(containers, properties);
         }
 
-        if(extension) {
-            configureExtension(extension, properties);
+        if(!extensions.isEmpty()) {
+            configureExtension(extensions, properties);
         }
 
         return null;
     }
 
-    def configureContainer(String container, def properties) {
-
+    def configureContainer(def containers, def properties) {
         arquillianXmlFiles.each { arquillianXml ->
+            configureContainer(containers, properties, arquillianXml)
+        }
+    }
 
-            log.info("Modifying container \"*${container}*\" configuration(s) in ${arquillianXml}")
+    def configureContainer(def containers, def properties, File arquillianXml) {
 
             def arquillian = Tasks.chain(arquillianXml, XmlFileLoader).execute().await()
+        
+        containers.each { container ->
+            log.debug("Modifying container \"*${container}*\" configuration(s) in ${arquillianXml}")
 
             // replace standalone <container>s
             arquillian.container.findAll {c -> c.@qualifier.contains(container)}.configuration.each { configuration ->
@@ -81,21 +100,22 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
                     configuration*.append(new Node(null, 'property', [name: "${key}"], "${value}"))
                 }
             }
-
+        }
             Tasks.chain(arquillian, XmlUpdater).file(arquillianXml).execute().await()
-        }
     }
 
-    def configureExtension(String extensionQualifier, def properties) {
+    def configureExtension(def extensions, def properties) {
         arquillianXmlFiles.each { arquillianXml ->
-            configureExtension(extensionQualifier, properties, arquillianXml)
+            configureExtension(extensions, properties, arquillianXml)
         }
     }
 
-    def configureExtension(String extensionQualifier, def properties, File arquillianXml) {
-        log.info("Modifying Arquillian extension \"${extensionQualifier}\" configuration(s) at ${arquillianXml}")
+    def configureExtension(def extensions, def properties, File arquillianXml) {
 
         def arquillian = Tasks.chain(arquillianXml, XmlFileLoader).execute().await()
+        extensions.each { extensionQualifier ->
+            log.debug("Modifying Arquillian extension \"${extensionQualifier}\" configuration(s) at ${arquillianXml}")
+            
         arquillian.extension.findAll {e -> e.@qualifier == "${extensionQualifier}"}.each { extension ->
             properties.each { key, value ->
                 // remove existing property
@@ -103,6 +123,7 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
                 // put new property
                 extension.append(new Node(null, 'property', [name: "${key}"], "${value}"))
             }
+        }
         }
         Tasks.chain(arquillian, XmlUpdater).file(arquillianXml).execute().await()
     }
