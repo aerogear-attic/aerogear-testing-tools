@@ -20,7 +20,7 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
     ArquillianXmlUpdater dir(File dir) {
         // skip if directory is invalid or non existing
         if(dir==null || !dir.exists()) {
-            return
+            return this
         }
         def project = GradleSpacelift.currentProject()
 
