@@ -97,19 +97,31 @@ class SettingsXmlUpdater extends Task<Object, Void> {
     protected Void process(Object input) throws Exception {
         def settings = Tasks.chain(settingsXmlFile, XmlFileLoader).execute().await()
 
+        // in case there is not any 'profiles' or 'activeProfiles' element, add them to settings.xml
+        if (settings.profiles.isEmpty()) {
+            settings.children().add(0, new Node(null, 'profiles'))
+        }
+
+        if (settings.activeProfiles.isEmpty()) {
+            settings.children().add(0, new Node(null, 'activeProfiles'))
+        }
+
         // update with defined repositories
         repositories.each { r ->
             def profileElement = Tasks.chain(MessageFormat.format(PROFILE_TEMPLATE, r.repositoryId, r.repositoryUri, r.snapshotsEnabled), XmlTextLoader).execute().await()
             def profileActivationElement = Tasks.chain(MessageFormat.format(PROFILE_ACTIVATION_TEMPLATE, r.repositoryId), XmlTextLoader).execute().await()
+
+            // profiles
 
             // remove previous profiles with the same id
             settings.profiles.profile.findAll { p -> p.id.text() == "${r.repositoryId}" }.each { it.replaceNode {} }
             // append profiles
             settings.profiles.each { it.append(profileElement) }
 
+            // activeProfiles
+
             // remove previous profile activations
             settings.activeProfiles.activeProfile.findAll { ap -> ap.text() == "${r.repositoryId}" }.each { it.replaceNode {} }
-
             // append profile activations
             settings.activeProfiles.each { it.append(profileActivationElement) }
         }

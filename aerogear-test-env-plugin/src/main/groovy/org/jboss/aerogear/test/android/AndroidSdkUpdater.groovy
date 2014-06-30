@@ -57,8 +57,15 @@ class AndroidSdkUpdater extends Task<Object, Void>{
             //
             // Backed by JIRA: https://issues.jboss.org/browse/MP-209
             //
-            "platform-tools,build-tools-19.1.0,extra-google-google-play_services,extra-android-support," +
-            "android-${androidVersion},sysimg-${androidVersion},addon-google_apis-google-${androidVersion},addon-google_apis_x86-google-${androidVersion}",
+            "platform-tools," +
+            "build-tools-19.1.0," +
+            "extra-google-google_play_services," +
+            "extra-android-support," +
+            "android-${androidVersion}," +
+            "sysimg-${androidVersion}," +
+            "addon-google_apis-google-${androidVersion}," +
+            "addon-google_apis_x86-google-${androidVersion}"
+            ,
             "--all",
             "--no-ui"]
         ).interaction(new ProcessInteractionBuilder()

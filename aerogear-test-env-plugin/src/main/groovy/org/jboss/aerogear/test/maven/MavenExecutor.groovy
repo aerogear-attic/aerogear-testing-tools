@@ -135,6 +135,11 @@ class MavenExecutor extends Task<Object, Void>{
         this
     }
 
+    def androidSdkHome(androidSdkHome) {
+        this.env << [ANDROID_SDK_HOME:androidSdkHome.toString()]
+        this
+    }
+
     def androidTarget(target) {
         // TODO identify all possible combinations for Android Target settings
         this.properties << "arq.group.containers.container.android.configuration.target=${target}"
