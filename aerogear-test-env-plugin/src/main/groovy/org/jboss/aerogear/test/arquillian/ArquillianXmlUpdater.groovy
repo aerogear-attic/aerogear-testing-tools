@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 class ArquillianXmlUpdater extends Task<Object, Void>{
     private static final Logger log = LoggerFactory.getLogger('ArquillianXml')
 
-    def arquillianXmlFiles
+    def arquillianXmlFiles = []
 
     def containers = []
 
@@ -22,15 +22,18 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
         if(dir==null || !dir.exists()) {
             return this
         }
+
         def project = GradleSpacelift.currentProject()
 
         // get all arquillian.xml files in directory
-        this.arquillianXmlFiles = project.fileTree("${dir}") {
+        project.fileTree("${dir}") {
             include "**/arquillian.xml", "**/arquillian-domain.xml"
             exclude "${project.aerogearTestEnv.localRepository}/**", "**/target/**"
+        }.each { file ->
+            this.arquillianXmlFiles.add(file)
         }
 
-        log.debug("There are ${arquillianXmlFiles.getFiles().size()} arquillian.xml files to be modified in ${dir}")
+        log.debug("There are ${arquillianXmlFiles.size()} arquillian.xml files to be modified in ${dir}")
         this
     }
 
@@ -77,8 +80,8 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
 
     def configureContainer(def containers, def properties, File arquillianXml) {
 
-            def arquillian = Tasks.chain(arquillianXml, XmlFileLoader).execute().await()
-        
+        def arquillian = Tasks.chain(arquillianXml, XmlFileLoader).execute().await()
+
         containers.each { container ->
             log.debug("Modifying container \"*${container}*\" configuration(s) in ${arquillianXml}")
 
@@ -101,7 +104,7 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
                 }
             }
         }
-            Tasks.chain(arquillian, XmlUpdater).file(arquillianXml).execute().await()
+        Tasks.chain(arquillian, XmlUpdater).file(arquillianXml).execute().await()
     }
 
     def configureExtension(def extensions, def properties) {
@@ -115,15 +118,15 @@ class ArquillianXmlUpdater extends Task<Object, Void>{
         def arquillian = Tasks.chain(arquillianXml, XmlFileLoader).execute().await()
         extensions.each { extensionQualifier ->
             log.debug("Modifying Arquillian extension \"${extensionQualifier}\" configuration(s) at ${arquillianXml}")
-            
-        arquillian.extension.findAll {e -> e.@qualifier == "${extensionQualifier}"}.each { extension ->
-            properties.each { key, value ->
-                // remove existing property
-                extension.property.findAll { p -> p.@name == "${key}"}.each { it.replaceNode {} }
-                // put new property
-                extension.append(new Node(null, 'property', [name: "${key}"], "${value}"))
+
+            arquillian.extension.findAll {e -> e.@qualifier == "${extensionQualifier}"}.each { extension ->
+                properties.each { key, value ->
+                    // remove existing property
+                    extension.property.findAll { p -> p.@name == "${key}"}.each { it.replaceNode {} }
+                    // put new property
+                    extension.append(new Node(null, 'property', [name: "${key}"], "${value}"))
+                }
             }
-        }
         }
         Tasks.chain(arquillian, XmlUpdater).file(arquillianXml).execute().await()
     }
