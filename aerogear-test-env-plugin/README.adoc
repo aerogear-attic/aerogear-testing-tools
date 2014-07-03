@@ -116,6 +116,7 @@ installationName {
     fileName = string OR map of strings
     remoteUrl = string OR map of strings
     home = string OR map of strings
+    autoExtract = true | false
     tool {
         name = 'toolName'
         command = same as command for tool in tools block
@@ -132,6 +133,7 @@ installationName {
 * fileName - name of file as downloaded in _workspace_. Can be map, same keys as for _tool_
 * remoteUrl - URL where to download from. Can be map, same keys as for _tool_
 * home - name of dir in _workspace_ where installation is extracted. Can be map, same keys as for _tool_
+* autoExtract - by default +true+, consider installation an archive and extract it to WORKSPACE directory
 * tool - allows to define +tool+ that will be available after installation is done
 + postActions - defines action to be performed after installation is extracted
 +

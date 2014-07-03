@@ -119,11 +119,11 @@ class Installation {
             ant.get(src: getRemoteUrl(), dest: getFsPath())
         }
 
-        if(getHome().exists()) {
-            log.info("Reusing existing installation ${getHome()}")
-        }
-        else {
-            if(autoExtract) {
+        if(autoExtract) {
+            if(getHome().exists()) {
+                log.info("Reusing existing installation ${getHome()}")
+            }
+            else {
                 log.info("Extracting installation to ${project.aerogearTestEnv.workspace}")
 
                 // based on installation type, we might want to unzip/untar/something else
@@ -142,9 +142,14 @@ class Installation {
                         throw new RuntimeException("Invalid file type for installation ${getFileName()}")
                 }
             }
+        }
+        else {
+            if(new File(getHome(), getFileName()).exists()) {
+                log.info("Reusing existing installation ${new File(getHome(),getFileName())}")
+            }
             else {
                 log.info("Copying installation to ${project.aerogearTestEnv.workspace}")
-                ant.copy(src: getFsPath(), dest: new File(getHome(), getFileName()))
+                ant.copy(file: getFsPath(), tofile: new File(getHome(), getFileName()))
             }
         }
 
