@@ -52,11 +52,11 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
         // * project.selectedProfile
         // * project.selectedInstallations
         // * project.selectedTests
-        project.task('init') << { 
+        project.task('init') << {
             logger.lifecycle(":init:defaultValues")
             // set default values if not specified from command line in case plugin is applied prior ext {} block
             setDefaultDataProviders(project);
-            GradleSpacelift.currentProject(project) 
+            GradleSpacelift.currentProject(project)
 
             // find default profile and propagate enabled installations and tests
             // check for -Pprofile, fallback to default if not defined
@@ -85,6 +85,9 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
             if(project.hasProperty('installations')) {
                 installationNames = project.installations.split(',')
             }
+            else if(profile.enabledInstallations==null) {
+                installationNames = []
+            }
             else if(profile.enabledInstallations.contains('*')) {
                 installationNames = project.aerogearTestEnv.installations.collect(new ArrayList()) {installation -> installation.name}
             }
@@ -101,7 +104,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
                 logger.warn("init: Selected installation ${installationName} does not exist and will be ignored")
                 return list
             }
-            
+
             // make selected installations global
             project.ext.set("selectedInstallations", installations)
 
@@ -110,6 +113,9 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
             def testNames = []
             if(project.hasProperty('tests')) {
                 testNames = project.tests.split(',')
+            }
+            else if(profile.tests==null) {
+                testNames = []
             }
             else if(profile.tests.contains('*')) {
                 testNames = project.aerogearTestEnv.tests.collect(new ArrayList()) {test -> test.name}
