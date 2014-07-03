@@ -220,7 +220,8 @@ You can benefit from following tools and tasks, either from Spacelift or provide
 * UnzipTool - extracts a zip file
 * CommandTool - executes external command
 * AntExecutor - executes Ant command. Requires _ant_ tool
-* MavenExecuter - executes Maven command. Requires _mvn_ tool
+* MavenExecutor - executes Maven command. Requires _mvn_ tool
+* JavaExecutor - executes Java command. Requires _java_ tool
 * XmlFileLoader - loads xml from file into +Node+
 * XmlTextLoader - loads xml from text into +Node+
 * XmlUpdater - stores +Node+ into file
