@@ -18,11 +18,8 @@ class Installation {
     // this is required in order to use project container abstraction
     final String name
 
-    // version of the installation
+    // version of the product installation belongs to
     def version
-
-    // zip file name
-    def fileName
 
     // product name
     def product
@@ -31,8 +28,14 @@ class Installation {
     def fsPath
     def remoteUrl
 
+    // zip file name
+    def fileName
+
     // represents directory where installation is extracted to
     def home
+
+    // automatically extract archive
+    def autoExtract = true
 
     // tools provided by this installation
     def tools = []
@@ -75,7 +78,7 @@ class Installation {
             }
         }
         // got a string value here
-        return mapClosureOrCollection;
+        return mapClosureOrCollection == null ? "" : mapClosureOrCollection;
     }
 
     def getFsPath() {
@@ -120,22 +123,28 @@ class Installation {
             log.info("Reusing existing installation ${getHome()}")
         }
         else {
-            log.info("Extracting installation to ${project.aerogearTestEnv.workspace}")
+            if(autoExtract) {
+                log.info("Extracting installation to ${project.aerogearTestEnv.workspace}")
 
-            // based on installation type, we might want to unzip/untar/something else
-            switch(getFileName()) {
-                case ~/.*jar/:
-                    ant.unzip(src:getFsPath(), dest: new File(project.aerogearTestEnv.workspace, getFileName()))
-                    break
-                case ~/.*zip/:
-                    ant.unzip(src: getFsPath(), dest: project.aerogearTestEnv.workspace)
-                    break
-                case ~/.*tgz/:
-                case ~/.*tar\.gz/:
-                    ant.untar(src: getFsPath(), dest: project.aerogearTestEnv.workspace, compression: 'gzip')
-                    break
-                default:
-                    throw new RuntimeException("Invalid file type for installation ${getFileName()}")
+                // based on installation type, we might want to unzip/untar/something else
+                switch(getFileName()) {
+                    case ~/.*jar/:
+                        ant.unzip(src:getFsPath(), dest: new File(project.aerogearTestEnv.workspace, getFileName()))
+                        break
+                    case ~/.*zip/:
+                        ant.unzip(src: getFsPath(), dest: project.aerogearTestEnv.workspace)
+                        break
+                    case ~/.*tgz/:
+                    case ~/.*tar\.gz/:
+                        ant.untar(src: getFsPath(), dest: project.aerogearTestEnv.workspace, compression: 'gzip')
+                        break
+                    default:
+                        throw new RuntimeException("Invalid file type for installation ${getFileName()}")
+                }
+            }
+            else {
+                log.info("Copying installation to ${project.aerogearTestEnv.workspace}")
+                ant.copy(src: getFsPath(), dest: new File(getHome(), getFileName()))
             }
         }
 
