@@ -81,27 +81,25 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
 
             // find installations that were specified by profile or enabled manually from command line
             def installations = []
+            def installationNames = []
             if(project.hasProperty('installations')) {
-                def installationNames = project.aerogearTestEnv.installations.collect(new ArrayList()) {installation -> installation.name}
-                installations = project.installations.split(',').findAll { installationName ->
-                    if(installationNames.contains(installationName)) {
-                        return true
-                    }
-                    logger.warn("init: Selected installation ${installationName} does not exist and will be ignored")
-                    return false
-                }.collect(new ArrayList()) { installationName -> 
-                    logger.info("init: Installation ${installationName} will be installed.")
-                    project.aerogearTestEnv.installations[installationName] 
-                }
+                installationNames = project.installations.split(',')
+            }
+            else if(profile.enabledInstallations.contains('*')) {
+                installationNames = project.aerogearTestEnv.installations.collect(new ArrayList()) {installation -> installation.name}
             }
             else {
-                installations = project.aerogearTestEnv.installations.findAll { installation ->
-                    if(profile.enabledInstallations.contains('*') || profile.enabledInstallations.contains(installation.name)) {
-                        logger.info("init: Installation ${installation.name} will be installed.")
-                        return true
-                    }
-                    return false
+                installationNames = profile.enabledInstallations
+            }
+            installations = installationNames.inject(new ArrayList()) { list, installationName ->
+                def installation = project.aerogearTestEnv.installations[installationName]
+                if(installation) {
+                    logger.info("init: Installation ${installationName} will be installed.")
+                    list << installation
+                    return list
                 }
+                logger.warn("init: Selected installation ${installationName} does not exist and will be ignored")
+                return list
             }
             
             // make selected installations global
@@ -109,27 +107,25 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
 
             // find tests that were specified by profile or enabled manually from command line
             def tests = []
+            def testNames = []
             if(project.hasProperty('tests')) {
-                def testNames = project.aerogearTestEnv.tests.collect(new ArrayList()) {test -> test.name}
-                tests = project.tests.split(',').findAll { testName ->
-                    if(testNames.contains(testName)) {
-                        return true
-                    }
-                    logger.warn("init: Selected test ${testName} does not exist and will be ignored")
-                    return false
-                }.collect(new ArrayList()) { testName -> 
-                    logger.info("init: Test ${testName} will be tested (if 'test' task is run).")
-                    project.aerogearTestEnv.tests[testName] 
-                }
+                testNames = project.tests.split(',')
+            }
+            else if(profile.tests.contains('*')) {
+                testNames = project.aerogearTestEnv.tests.collect(new ArrayList()) {test -> test.name}
             }
             else {
-                tests =  project.aerogearTestEnv.tests.findAll { test ->
-                    if(profile.tests.contains('*') || profile.tests.contains(test.name)) {
-                        logger.info("init: Test ${test.name} will be tested (if 'test' task is run).")
-                        return true
-                    }
-                    return false
+                testNames = profile.tests
+            }
+            tests = testNames.inject(new ArrayList()) { list, testName ->
+                def test = project.aerogearTestEnv.tests[testName]
+                if(test) {
+                    logger.info("init: Selected test ${testName} will be tested (if task 'test' is run).")
+                    list << test
+                    return list
                 }
+                logger.warn("init: Selected tests ${testName} does not exist and will be ignored")
+                return list
             }
 
             // make selected installations global
@@ -176,7 +172,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
                 logger.lifecycle(":prepare-env:install ${installation.name}")
                 installation.install()
             }
-        }            
+        }
 
         // this task executes tests
         // it used prepared environment created by previous task
@@ -185,7 +181,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
                 test.executeTest()
             }
         }
-        
+
         project.tasks.getByName("prepare-env").dependsOn(project.tasks.getByName("init"))
 
         project.tasks.getByName("test").dependsOn(project.tasks.getByName("prepare-env"))
