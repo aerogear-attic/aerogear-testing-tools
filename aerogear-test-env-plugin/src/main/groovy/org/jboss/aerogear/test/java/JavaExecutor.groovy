@@ -17,7 +17,7 @@ class JavaExecutor extends Task<Object, Void> {
     }
 
     JavaExecutor parameters(CharSequence...parameters) {
-        this.parameters << parameters
+        this.parameters.addAll(parameters)
         this
     }
 

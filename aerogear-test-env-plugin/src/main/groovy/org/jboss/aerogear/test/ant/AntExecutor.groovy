@@ -24,7 +24,7 @@ class AntExecutor extends Task<Object, Void>{
     }
 
     AntExecutor targets(CharSequence...targets) {
-        this.targets << targets
+        this.targets.addAll(targets)
         this
     }
 
