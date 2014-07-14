@@ -96,6 +96,9 @@ class GradleSpaceliftTool {
             else if(SystemUtils.IS_OS_LINUX) {
                 return getOsSpecificCommand(mapClosureOrCollection['linux'], delegate)
             }
+            else if(SystemUtils.IS_OS_SOLARIS || SystemUtils.IS_OS_SUN_OS) {
+                return getOsSpecificCommand(mapClosureOrCollection['solaris'], delegate)
+            }
             else {
                 throw new IllegalStateException("Unknown system ${System.getProperty('os.name')}")
             }
