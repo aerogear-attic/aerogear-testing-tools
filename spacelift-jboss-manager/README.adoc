@@ -58,4 +58,14 @@ In order to try other container from default located in +target/jboss+ in tests,
 
 ----
 $ mvn clean test -Djboss.home=[path_to_jboss_home_of_my_interest]
----- 
+----
+
+== Release new version
+
+Maven Release plugin does not work for projects that are not represented by Git repository.
+Follow this process to release new version
+
+1. Update version to release version in pom.xml
+2. Execute +mvn deploy -Pjboss-release+
+3. Tag current commit via +git tag+
+4. Bump version to next development version
