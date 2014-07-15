@@ -167,12 +167,10 @@ public class JBossCLI extends Tool<Object, Void> {
                 .command(new CommandBuilder("cmd.exe"))
                 .parameters("/C", new File(environment.get("JBOSS_HOME"), "/bin/jboss-cli.bat").getAbsolutePath())
                 .addEnvironment(environment);
-        } else if (SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC_OSX) {
+        } else {
             return Tasks.prepare(CommandTool.class)
                 .command(new CommandBuilder(new File(environment.get("JBOSS_HOME"), "/bin/jboss-cli.sh").getAbsolutePath()))
                 .addEnvironment(environment);
-        } else {
-            throw new IllegalStateException("Unrecognized operating system.");
         }
     }
 
