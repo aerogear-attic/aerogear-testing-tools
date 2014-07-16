@@ -31,7 +31,7 @@ class GradleSpacelift {
         ProjectHolder.tools = new ToolRegistryImpl()
         // register all default tools here
         project.aerogearTestEnv.tools.each { tool ->
-            tool.registerInSpacelift(ProjectHolder.tools, ProjectHolder.project)
+            tool.registerInSpacelift(ProjectHolder.tools)
         }
     }
 

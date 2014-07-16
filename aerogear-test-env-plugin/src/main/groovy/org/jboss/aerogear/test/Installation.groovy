@@ -73,6 +73,9 @@ class Installation {
             else if(SystemUtils.IS_OS_LINUX) {
                 return getOsSpecificValue(mapClosureOrCollection['linux'])
             }
+            else if(SystemUtils.IS_OS_SOLARIS || SystemUtils.IS_OS_SUN_OS) {
+                return getOsSpecificValue(mapClosureOrCollection['solaris'])
+            }
             else {
                 throw new IllegalStateException("Unknown system ${System.getProperty('os.name')}")
             }
@@ -155,7 +158,7 @@ class Installation {
 
         // registerd installed tools
         tools.each { tool ->
-            tool.registerInSpacelift(GradleSpacelift.toolRegistry(), this)
+            tool.registerInSpacelift(GradleSpacelift.toolRegistry())
         }
         // execute post actions
         if(postActions) {

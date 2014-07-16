@@ -34,7 +34,7 @@ class GradleSpaceliftTool {
     }
 
 
-    void registerInSpacelift(ToolRegistry registry, Object delegate) {
+    void registerInSpacelift(ToolRegistry registry) {
 
         // dynamically construct class that represent the tool
         def toolClass = """
@@ -58,6 +58,10 @@ class GradleSpaceliftTool {
                 protected java.util.Collection aliases() {
                     return ["${name}"]
                 }
+
+                public String toString() {
+                    return new StringBuilder("${name}: ").append(super.commandBuilder.toString()).toString()
+                }
             }
         """
 
@@ -66,7 +70,7 @@ class GradleSpaceliftTool {
         def instance = clazz.newInstance()
 
         // FIXME here we access static fields via instance as we don't have class object
-        instance.commandTool = getOsSpecificCommand(command, delegate)
+        instance.commandTool = getOsSpecificCommand(command)
 
         // register tool using dynamically constructed class
         registry.register(clazz)
@@ -75,11 +79,11 @@ class GradleSpaceliftTool {
     }
 
     // get command tool
-    CommandTool getOsSpecificCommand(mapClosureOrCollection, delegate) {
+    CommandTool getOsSpecificCommand(mapClosureOrCollection) {
 
         // if this is a closure, execute it
         if(mapClosureOrCollection instanceof Closure) {
-            mapClosureOrCollection.delegate = this
+            mapClosureOrCollection.setProperty('project', this.project)
             return mapClosureOrCollection.doCall()
         }
         // if this is a single value, just return it
@@ -88,16 +92,16 @@ class GradleSpaceliftTool {
 
             // try to figure out value given the family
             if(SystemUtils.IS_OS_WINDOWS) {
-                return getOsSpecificCommand(mapClosureOrCollection['windows'], delegate)
+                return getOsSpecificCommand(mapClosureOrCollection['windows'])
             }
             else if(SystemUtils.IS_OS_MAC_OSX) {
-                return getOsSpecificCommand(mapClosureOrCollection['mac'], delegate)
+                return getOsSpecificCommand(mapClosureOrCollection['mac'])
             }
             else if(SystemUtils.IS_OS_LINUX) {
-                return getOsSpecificCommand(mapClosureOrCollection['linux'], delegate)
+                return getOsSpecificCommand(mapClosureOrCollection['linux'])
             }
             else if(SystemUtils.IS_OS_SOLARIS || SystemUtils.IS_OS_SUN_OS) {
-                return getOsSpecificCommand(mapClosureOrCollection['solaris'], delegate)
+                return getOsSpecificCommand(mapClosureOrCollection['solaris'])
             }
             else {
                 throw new IllegalStateException("Unknown system ${System.getProperty('os.name')}")
@@ -121,6 +125,6 @@ class GradleSpaceliftTool {
 
     @Override
     public String toString() {
-        return "SpaceliftTool ${name}, commandTool: ${getOsSpecificCommand(commandTool)}"
+        return "SpaceliftTool ${name}, commandTool: ${getOsSpecificCommand(command)}"
     }
 }
