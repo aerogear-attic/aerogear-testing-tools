@@ -54,8 +54,12 @@
         <!-- Other -->
         <version.org.apache.commons.lang3>3.1</version.org.apache.commons.lang3>
 
-        <maven.compiler.target>1.6</maven.compiler.target>
-        <maven.compiler.source>1.6</maven.compiler.source>
+        <!--
+            Options to override the compiler arguments directly on the compiler arument line to separate between what
+            the IDE understands as the source level and what the Maven compiler actually use.  
+        -->
+        <maven.compiler.argument.target>1.6</maven.compiler.argument.target>
+        <maven.compiler.argument.source>1.6</maven.compiler.argument.source>
     </properties>
 
     <dependencyManagement>

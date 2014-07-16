@@ -22,8 +22,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <maven.compiler.argument.target>${maven.compiler.target}</maven.compiler.argument.target>
-        <maven.compiler.argument.source>${maven.compiler.source}</maven.compiler.argument.source>
+        <!--
+            Options to override the compiler arguments directly on the compiler arument line to separate between what
+            the IDE understands as the source level and what the Maven compiler actually use.  
+        -->
+        <maven.compiler.argument.target>1.6</maven.compiler.argument.target>
+        <maven.compiler.argument.source>1.6</maven.compiler.argument.source>
 
         <org.jboss.arquillian.version>1.1.4.Final</org.jboss.arquillian.version>
         <junit.version>4.11</junit.version>

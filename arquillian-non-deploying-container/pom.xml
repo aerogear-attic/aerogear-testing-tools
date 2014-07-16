@@ -52,8 +52,12 @@
         <version.json>20140107</version.json>
 
         <!-- Other -->
-        <maven.compiler.target>1.6</maven.compiler.target>
-        <maven.compiler.source>1.6</maven.compiler.source>
+        <!--
+            Options to override the compiler arguments directly on the compiler arument line to separate between what
+            the IDE understands as the source level and what the Maven compiler actually use.  
+        -->
+        <maven.compiler.argument.target>1.6</maven.compiler.argument.target>
+        <maven.compiler.argument.source>1.6</maven.compiler.argument.source>
     </properties>
 
     <!-- Dependency management -->
