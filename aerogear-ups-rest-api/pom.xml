@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<!--
+  JBoss, Home of Professional Open Source
+  Copyright Red Hat, Inc., and individual contributors
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jboss.aerogear</groupId>
+        <artifactId>aerogear-parent</artifactId>
+        <version>0.2.5</version>
+        <relativePath />
+    </parent>
+
+    <groupId>org.jboss.aerogear.test</groupId>
+    <artifactId>aerogear-ups-rest-api</artifactId>
+    <version>1.0.0.Beta1</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- we need REST API to be JDK6 compatible -->
+        <maven.compiler.argument.target>1.6</maven.compiler.argument.target>
+        <maven.compiler.argument.source>1.6</maven.compiler.argument.source>
+
+        <org.jboss.aerogear.bom.version>${project.parent.version}</org.jboss.aerogear.bom.version>
+
+        <keycloak.version>1.0-beta-3</keycloak.version>
+        <aerogear.unifiedpush-java-client.version>0.8.0</aerogear.unifiedpush-java-client.version>
+        <aerogear.unifiedpush-server-model.version>1.0.0.Beta1</aerogear.unifiedpush-server-model.version>
+
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.aerogear</groupId>
+                <artifactId>aerogear-test-bom</artifactId>
+                <version>${org.jboss.aerogear.bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+
+        <!-- UnifiedPush Server model API -->
+        <dependency>
+            <groupId>org.jboss.aerogear.unifiedpush</groupId>
+            <artifactId>unifiedpush-model-api</artifactId>
+            <version>${aerogear.unifiedpush-server-model.version}</version>
+        </dependency>
+
+        <!-- UnifiedPush Java Sender to send messages -->
+        <dependency>
+            <groupId>org.jboss.aerogear</groupId>
+            <artifactId>unifiedpush-java-client</artifactId>
+            <version>${aerogear.unifiedpush-java-client.version}</version>
+        </dependency>        
+        
+        <!-- Keycloak to handle Authentication -->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-core</artifactId>
+            <version>${keycloak.version}</version>
+        </dependency>        
+
+        <!-- REST Assured and awaitility is used to send requests -->
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>json-path</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jayway.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+        </dependency>
+        
+        <!-- FIXME this should be managed by test BOM -->
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+    </build>
+
+</project>
