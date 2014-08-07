@@ -27,7 +27,7 @@
 
     <groupId>org.jboss.aerogear.test</groupId>
     <artifactId>aerogear-ups-rest-api</artifactId>
-    <version>1.0.0.Beta1</version>
+    <version>1.0.0.Beta2-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
