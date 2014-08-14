@@ -18,7 +18,8 @@ import org.gradle.api.Project
  */
 class GradleSpacelift {
 
-    public static final ProcessInteraction ECHO_OUTPUT = new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut().build()
+    // FIXME enabling DOTALL pattern - https://issues.jboss.org/browse/ARQ-1822
+    public static final ProcessInteraction ECHO_OUTPUT = new ProcessInteractionBuilder().outputPrefix("").when("(?s).*").printToOut().build()
 
     private static final class ProjectHolder {
         private static Project project;
