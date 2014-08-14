@@ -15,6 +15,8 @@ class MavenExecutor extends Task<Object, Void>{
 
     def projectPom
 
+    def workingDir
+
     def batchMode = true
 
     def nonRecursive = false
@@ -75,6 +77,10 @@ class MavenExecutor extends Task<Object, Void>{
         command.parameters(goals)
         command.parameters(getProperties())
 
+        if(workingDir) {
+            command.workingDir(workingDir)
+        }
+
         command.interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
 
         return null;
@@ -86,12 +92,17 @@ class MavenExecutor extends Task<Object, Void>{
     }
 
     def withoutSubprojects() {
-        nonRecursive = true
+        this.nonRecursive = true
         this
     }
 
     def withoutBatchMode() {
-        batchMode = false
+        this.batchMode = false
+        this
+    }
+
+    def workingDir(dir) {
+        this.workingDir = (dir instanceof File) ? dir.getAbsolutePath() : dir;
         this
     }
 
