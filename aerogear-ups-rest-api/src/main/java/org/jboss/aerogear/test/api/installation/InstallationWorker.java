@@ -6,13 +6,11 @@ import org.apache.http.HttpStatus;
 import org.jboss.aerogear.test.Headers;
 import org.jboss.aerogear.test.UnexpectedResponseException;
 import org.jboss.aerogear.test.api.AbstractUPSWorker;
-import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.jboss.aerogear.unifiedpush.api.Installation;
+import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.net.URI;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -90,17 +88,11 @@ public abstract class InstallationWorker<
 
     public void unregister(CONTEXT context, Collection<? extends Installation> entities) {
         for (Installation entity : entities) {
-            String token = entity.getDeviceToken();
-            System.out.println("Installation token: " + token);
-            token = URLEncoder.encode(token);
-            System.out.println("Installation token encoded: " + token);
-            token = URLEncoder.encode(token);
-            //System.out.println("Installation token double-encoded: " + token);
-
             Response response = context.getSession().given().log().all()
                     .contentType(getContentType())
                     .auth().basic(context.getParent().getVariantID(), context.getParent().getSecret())
-                    .delete(URI.create("/rest/registry/device/" + token));
+                    .urlEncodingEnabled(false)
+                    .delete("/rest/registry/device/{token}", entity.getDeviceToken());
 
             UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_NO_CONTENT);
         }
