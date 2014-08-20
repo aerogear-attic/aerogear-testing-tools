@@ -35,6 +35,9 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
     @Option(name = { "-f", "--force" }, title = "force", description = "Forces removal of the cartridge with the same name")
     public boolean force;
 
+    @Option(name = { "-s", "--scalable" }, title = "scalable", description = "Created cartridge will be scalable")
+    public boolean scalable;
+
     @Arguments(title = "cartridges", description = "Additional Cartridges to be instantiated together with the one defined by commit. By default: mysql-5.5, myphpadmin-4")
     public List<String> additionalCartridges = new ArrayList<String>();
 
@@ -60,17 +63,25 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
         }
 
         // add default additional cartridges
-        if(additionalCartridges.isEmpty()) {
+        if (additionalCartridges.isEmpty()) {
             additionalCartridges.addAll(Arrays.asList("mysql-5.5", "phpmyadmin-4"));
         }
 
-        Tasks.prepare(CommandTool.class)
+        if (scalable) {  // scalable cartridge does not support phpmyadmin
+            additionalCartridges.remove("phpmyadmin-4");
+        }
+
+        CommandTool ct = Tasks.prepare(CommandTool.class)
             .programName("rhc")
             .parameters("app", "create", "-g", gearSize, "--no-git", appName)
             .parameter("http://cartreflect-claytondev.rhcloud.com/reflect?github=" + organization + "/" + repository
                 + "&commit=" + latestCommit)
-            .parameters(additionalCartridges)
-            .interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut())
-            .execute().await();
+            .parameters(additionalCartridges);
+
+        if (scalable) {
+            ct.parameter("-s");
+        }
+
+        ct.interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut()).execute().await();
     }
 }
