@@ -27,11 +27,15 @@ import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
-import org.jboss.aerogear.unifiedpush.model.PushApplication;
-import org.jboss.aerogear.unifiedpush.model.iOSVariant;
+import org.jboss.aerogear.test.ContentTypes;
+import org.jboss.aerogear.test.Headers;
+import org.jboss.aerogear.test.Session;
+import org.jboss.aerogear.test.UnexpectedResponseException;
+import org.jboss.aerogear.test.Validate;
+import org.jboss.aerogear.unifiedpush.api.PushApplication;
+import org.jboss.aerogear.unifiedpush.api.iOSVariant;
 import org.json.simple.JSONObject;
 
-import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 
@@ -102,8 +106,7 @@ public final class iOSVariantUtils {
     }
 
     public static List<iOSVariant> generateAndRegister(int count, String certificatePath, String passphrase,
-        boolean production, PushApplication pushApplication,
-        Session session) {
+        boolean production, PushApplication pushApplication, Session session) {
         return generateAndRegister(count, new File(certificatePath), passphrase, production, pushApplication, session);
     }
 
@@ -119,17 +122,15 @@ public final class iOSVariantUtils {
         return iOSVariants;
     }
 
-    public static void register(iOSVariant iOSVariant, PushApplication pushApplication,
-        Session session) {
+    public static void register(iOSVariant iOSVariant, PushApplication pushApplication, Session session) {
         register(iOSVariant, pushApplication, session, ContentTypes.multipartFormData());
     }
 
-    public static void register(iOSVariant iOSVariant, PushApplication pushApplication,
-        Session session, String contentType)
+    public static void register(iOSVariant iOSVariant, PushApplication pushApplication, Session session, String contentType)
         throws UnexpectedResponseException {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
             .multiPart("certificate", "certificate.p12", iOSVariant.getCertificate(), ContentTypes.octetStream())
@@ -137,7 +138,7 @@ public final class iOSVariantUtils {
             .multiPart("passphrase", iOSVariant.getPassphrase())
             .multiPart("name", iOSVariant.getName())
             .multiPart("description", iOSVariant.getDescription())
-            .post("/rest/applications/{pushApplicationID}/iOS",
+            .post("/rest/applications/{pushApplicationID}/ios",
                 pushApplication.getPushApplicationID());
 
         UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_CREATED);
@@ -148,10 +149,10 @@ public final class iOSVariantUtils {
     public static List<iOSVariant> listAll(PushApplication pushApplication, Session session) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
-            .get("/rest/applications/{pushApplicationID}/iOS",
+            .get("/rest/applications/{pushApplicationID}/ios",
                 pushApplication.getPushApplicationID());
 
         UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_OK);
@@ -173,18 +174,17 @@ public final class iOSVariantUtils {
         return iOSVariants;
     }
 
-    public static iOSVariant findById(String variantID, PushApplication pushApplication,
-        Session session) {
+    public static iOSVariant findById(String variantID, PushApplication pushApplication, Session session) {
         return findById(variantID, pushApplication.getPushApplicationID(), session);
     }
 
     public static iOSVariant findById(String variantID, String pushApplicationID, Session session) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
-            .get("/rest/applications/{pushApplicationID}/iOS/{variantID}",
+            .get("/rest/applications/{pushApplicationID}/ios/{variantID}",
                 pushApplicationID, variantID);
 
         UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_OK);
@@ -192,17 +192,14 @@ public final class iOSVariantUtils {
         return fromJsonPath(response.jsonPath());
     }
 
-    public static void update(iOSVariant iOSVariant, PushApplication pushApplication,
-        Session session) {
+    public static void update(iOSVariant iOSVariant, PushApplication pushApplication, Session session) {
         update(iOSVariant, pushApplication, session, ContentTypes.multipartFormData());
     }
 
-    public static void update(iOSVariant iOSVariant, PushApplication pushApplication,
-        Session session,
-        String contentType) {
+    public static void update(iOSVariant iOSVariant, PushApplication pushApplication, Session session, String contentType) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
             .multiPart("certificate", "certificate.p12", iOSVariant.getCertificate(), ContentTypes.octetStream())
@@ -210,39 +207,36 @@ public final class iOSVariantUtils {
             .multiPart("passphrase", iOSVariant.getPassphrase())
             .multiPart("name", iOSVariant.getName())
             .multiPart("description", iOSVariant.getDescription())
-            .put("/rest/applications/{pushApplicationID}/iOS/{variantID}",
+            .put("/rest/applications/{pushApplicationID}/ios/{variantID}",
                 pushApplication.getPushApplicationID(), iOSVariant.getVariantID());
 
         UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_NO_CONTENT);
     }
 
-    public static void updatePatch(iOSVariant iOSVariant, PushApplication pushApplication,
-        Session session) {
+    public static void updatePatch(iOSVariant iOSVariant, PushApplication pushApplication, Session session) {
         updatePatch(iOSVariant, pushApplication, session, ContentTypes.json());
     }
 
-    public static void updatePatch(iOSVariant iOSVariant, PushApplication pushApplication,
-        Session session, String contentType) {
+    public static void updatePatch(iOSVariant iOSVariant, PushApplication pushApplication, Session session, String contentType) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
             .body(toJSONString(iOSVariant))
-            .patch("/rest/applications/{pushApplicationID}/iOS/{variantID}",
+            .patch("/rest/applications/{pushApplicationID}/ios/{variantID}",
                 pushApplication.getPushApplicationID(), iOSVariant.getVariantID());
 
         UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_NO_CONTENT);
     }
 
-    public static void delete(iOSVariant iOSVariant, PushApplication pushApplication,
-        Session session) {
+    public static void delete(iOSVariant iOSVariant, PushApplication pushApplication, Session session) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
-            .delete("/rest/applications/{pushApplicationID}/iOS/{variantID}",
+            .delete("/rest/applications/{pushApplicationID}/ios/{variantID}",
                 pushApplication.getPushApplicationID(), iOSVariant.getVariantID());
 
         UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_NO_CONTENT);
@@ -278,16 +272,6 @@ public final class iOSVariantUtils {
         iOSVariant.setSecret(jsonPath.getString("secret"));
         iOSVariant.setProduction(jsonPath.getBoolean("production"));
     }
-
-    /*
-     * public static void checkEquality(iOSVariant expected, iOSVariant actual) {
-     * assertEquals(expected.getName(), actual.getName());
-     * assertEquals(expected.getDescription(), actual.getDescription());
-     * assertEquals(expected.getVariantID(), actual.getVariantID());
-     * assertEquals(expected.getSecret(), actual.getSecret());
-     * assertEquals(expected.getDeveloper(), actual.getDeveloper());
-     * }
-     */
 
     private static byte[] toByteArray(File file) {
         FileInputStream inputStream = null;

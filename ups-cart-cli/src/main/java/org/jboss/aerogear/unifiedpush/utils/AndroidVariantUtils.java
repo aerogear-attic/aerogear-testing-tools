@@ -22,19 +22,21 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.http.HttpStatus;
-import org.jboss.aerogear.unifiedpush.model.AndroidVariant;
-import org.jboss.aerogear.unifiedpush.model.PushApplication;
+import org.jboss.aerogear.test.ContentTypes;
+import org.jboss.aerogear.test.Headers;
+import org.jboss.aerogear.test.Session;
+import org.jboss.aerogear.test.UnexpectedResponseException;
+import org.jboss.aerogear.test.Validate;
+import org.jboss.aerogear.unifiedpush.api.AndroidVariant;
+import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.json.simple.JSONObject;
 
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 
-public final class AndroidVariantUtils {
+public class AndroidVariantUtils {
 
     private static final int SINGLE = 1;
-
-    private AndroidVariantUtils() {
-    }
 
     public static AndroidVariant create(String name, String description, String googleKey, String projectNumber) {
         AndroidVariant androidVariant = new AndroidVariant();
@@ -103,7 +105,7 @@ public final class AndroidVariantUtils {
 
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
             .body(toJSONString(androidVariant))
@@ -117,7 +119,7 @@ public final class AndroidVariantUtils {
     public static List<AndroidVariant> listAll(PushApplication pushApplication, Session session) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
             .get("/rest/applications/{pushApplicationID}/android", pushApplication.getPushApplicationID());
@@ -145,7 +147,7 @@ public final class AndroidVariantUtils {
         Session session) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
             .get("/rest/applications/{pushApplicationID}/android/{variantID}",
@@ -165,7 +167,7 @@ public final class AndroidVariantUtils {
         Session session, String contentType) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
             .body(toJSONString(androidVariant))
@@ -179,7 +181,7 @@ public final class AndroidVariantUtils {
         Session session) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
             .delete("/rest/applications/{pushApplicationID}/android/{variantID}",
@@ -221,18 +223,15 @@ public final class AndroidVariantUtils {
     }
 
     /*
-     * // TODO there should be "equals" method in the model!
-     * public static void checkEquality(AndroidVariant expected, AndroidVariant actual) {
-     * assertEquals("Name is not equal!", expected.getName(), actual.getName());
+     * // TODO there should be "equals" method in the model! public static void checkEquality(AndroidVariant expected,
+     * AndroidVariant actual) { assertEquals("Name is not equal!", expected.getName(), actual.getName());
      * assertEquals("Description is not equal!", expected.getDescription(), actual.getDescription());
      * assertEquals("VariantId is not equal!", expected.getVariantID(), actual.getVariantID());
-     * assertEquals("Secret is not equal!", expected.getSecret(), actual.getSecret());
-     * assertEquals("Developer is not equal!", expected.getDeveloper(), actual.getDeveloper());
+     * assertEquals("Secret is not equal!", expected.getSecret(), actual.getSecret()); assertEquals("Developer is not equal!",
+     * expected.getDeveloper(), actual.getDeveloper());
      *
-     * // TODO we can't do this check as none of variants has the equals method implemented
-     * // assertEquals(expected.getIOSVariants(), actual.getIOSVariants());
-     * // assertEquals(expected.getAndroidVariants(), actual.getAndroidVariants());
-     * // assertEquals(expected.getSimplePushVariants(), actual.getSimplePushVariants());
-     * }
+     * // TODO we can't do this check as none of variants has the equals method implemented //
+     * assertEquals(expected.getIOSVariants(), actual.getIOSVariants()); // assertEquals(expected.getAndroidVariants(),
+     * actual.getAndroidVariants()); // assertEquals(expected.getSimplePushVariants(), actual.getSimplePushVariants()); }
      */
 }

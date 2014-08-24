@@ -23,18 +23,20 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.jboss.aerogear.unifiedpush.model.PushApplication;
+import org.jboss.aerogear.test.ContentTypes;
+import org.jboss.aerogear.test.Headers;
+import org.jboss.aerogear.test.Session;
+import org.jboss.aerogear.test.UnexpectedResponseException;
+import org.jboss.aerogear.test.Validate;
+import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.json.simple.JSONObject;
 
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 
-public final class PushApplicationUtils {
+public class PushApplicationUtils {
 
     private static final int SINGLE = 1;
-
-    private PushApplicationUtils() {
-    }
 
     public static PushApplication create(String name, String description) {
         PushApplication pushApplication = new PushApplication();
@@ -45,8 +47,7 @@ public final class PushApplicationUtils {
         return pushApplication;
     }
 
-    public static PushApplication createAndRegister(String name, String description,
-        Session session) {
+    public static PushApplication createAndRegister(String name, String description, Session session) {
         PushApplication pushApplication = create(name, description);
 
         register(pushApplication, session);
@@ -73,8 +74,7 @@ public final class PushApplicationUtils {
         return pushApplications;
     }
 
-    public static PushApplication generateAndRegister(Session session) throws NullPointerException,
-        UnexpectedResponseException {
+    public static PushApplication generateAndRegister(Session session) throws NullPointerException, UnexpectedResponseException {
         return generateAndRegister(SINGLE, session).iterator().next();
     }
 
@@ -94,11 +94,11 @@ public final class PushApplicationUtils {
         return register(pushApplication, session, ContentTypes.json());
     }
 
-    public static Response register(PushApplication pushApplication, Session session,
-        String contentType) throws NullPointerException, UnexpectedResponseException {
+    public static Response register(PushApplication pushApplication, Session session, String contentType)
+        throws NullPointerException, UnexpectedResponseException {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
             .body(toJSONString(pushApplication))
@@ -114,7 +114,7 @@ public final class PushApplicationUtils {
     public static List<PushApplication> listAll(Session session) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
             .get("/rest/applications");
@@ -141,7 +141,7 @@ public final class PushApplicationUtils {
     public static PushApplication findById(String pushApplicationId, Session session) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
             .get("/rest/applications/{pushApplicationId}", pushApplicationId);
@@ -159,7 +159,7 @@ public final class PushApplicationUtils {
         String contentType) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
             .body(toJSONString(pushApplication))
@@ -174,7 +174,7 @@ public final class PushApplicationUtils {
     public static Response delete(PushApplication pushApplication, Session session) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .header(Headers.acceptJson())
             .delete("/rest/applications/{pushApplicationId}",
                 pushApplication.getPushApplicationID());
@@ -212,19 +212,16 @@ public final class PushApplicationUtils {
     }
 
     /*
-     * // TODO there should be "equals" method in the model!
-     * public static void checkEquality(PushApplication expected, PushApplication actual) {
-     * assertEquals("Name is not equal!", expected.getName(), actual.getName());
+     * // TODO there should be "equals" method in the model! public static void checkEquality(PushApplication expected,
+     * PushApplication actual) { assertEquals("Name is not equal!", expected.getName(), actual.getName());
      * assertEquals("Description is not equal!", expected.getDescription(), actual.getDescription());
      * assertEquals("PushApplicationId is not equal!", expected.getPushApplicationID(), actual.getPushApplicationID());
      * assertEquals("MasterSecret is not equal!", expected.getMasterSecret(), actual.getMasterSecret());
      * assertEquals("Developer is not equal!", expected.getDeveloper(), actual.getDeveloper());
      *
-     * // TODO we can't do this check as none of variants has the equals method implemented
-     * // assertEquals(expected.getIOSVariants(), actual.getIOSVariants());
-     * // assertEquals(expected.getAndroidVariants(), actual.getAndroidVariants());
-     * // assertEquals(expected.getSimplePushVariants(), actual.getSimplePushVariants());
-     * }
+     * // TODO we can't do this check as none of variants has the equals method implemented //
+     * assertEquals(expected.getIOSVariants(), actual.getIOSVariants()); // assertEquals(expected.getAndroidVariants(),
+     * actual.getAndroidVariants()); // assertEquals(expected.getSimplePushVariants(), actual.getSimplePushVariants()); }
      */
 
     public static boolean appIdExistsInList(String pushAppId, List<PushApplication> pushAppsList) {

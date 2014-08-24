@@ -22,8 +22,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.http.HttpStatus;
-import org.jboss.aerogear.unifiedpush.model.PushApplication;
-import org.jboss.aerogear.unifiedpush.model.SimplePushVariant;
+import org.jboss.aerogear.test.ContentTypes;
+import org.jboss.aerogear.test.Headers;
+import org.jboss.aerogear.test.Session;
+import org.jboss.aerogear.test.UnexpectedResponseException;
+import org.jboss.aerogear.test.Validate;
+import org.jboss.aerogear.unifiedpush.api.PushApplication;
+import org.jboss.aerogear.unifiedpush.api.SimplePushVariant;
 import org.json.simple.JSONObject;
 
 import com.jayway.restassured.path.json.JsonPath;
@@ -73,13 +78,11 @@ public final class SimplePushVariantUtils {
         return simplePushVariants;
     }
 
-    public static SimplePushVariant generateAndRegister(PushApplication pushApplication,
-        Session session) {
+    public static SimplePushVariant generateAndRegister(PushApplication pushApplication, Session session) {
         return generateAndRegister(SINGLE, pushApplication, session).iterator().next();
     }
 
-    public static List<SimplePushVariant> generateAndRegister(int count, PushApplication pushApplication,
-        Session session) {
+    public static List<SimplePushVariant> generateAndRegister(int count, PushApplication pushApplication, Session session) {
         List<SimplePushVariant> simplePushVariants = generate(count);
 
         for (SimplePushVariant simplePushVariant : simplePushVariants) {
@@ -89,15 +92,13 @@ public final class SimplePushVariantUtils {
         return simplePushVariants;
     }
 
-    public static void register(SimplePushVariant simplePushVariant, PushApplication pushApplication,
-        Session session) {
+    public static void register(SimplePushVariant simplePushVariant, PushApplication pushApplication, Session session) {
         register(simplePushVariant, pushApplication, session, ContentTypes.json());
     }
 
-    public static void register(SimplePushVariant simplePushVariant, PushApplication pushApplication,
-        Session session, String contentType) {
+    public static void register(SimplePushVariant simplePushVariant, PushApplication pushApplication, Session session, String contentType) {
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
             .body(toJSONString(simplePushVariant))
@@ -109,13 +110,12 @@ public final class SimplePushVariantUtils {
         setFromJsonPath(response.jsonPath(), simplePushVariant);
     }
 
-    public static List<SimplePushVariant> listAll(PushApplication pushApplication,
-        Session session) {
-        Response response = session.given()
+    public static List<SimplePushVariant> listAll(PushApplication pushApplication, Session session) {
+
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
-            .get("/rest/applications/{pushApplicationID}/simplePush",
-                pushApplication.getPushApplicationID());
+            .get("/rest/applications/{pushApplicationID}/simplePush", pushApplication.getPushApplicationID());
 
         UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_OK);
 
@@ -136,9 +136,9 @@ public final class SimplePushVariantUtils {
         return simplePushVariants;
     }
 
-    public static SimplePushVariant findById(String variantID, PushApplication pushApplication,
-        Session session) {
-        Response response = session.given()
+    public static SimplePushVariant findById(String variantID, PushApplication pushApplication, Session session) {
+
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
             .get("/rest/applications/{pushApplicationID}/android/{variantID}",
@@ -149,16 +149,14 @@ public final class SimplePushVariantUtils {
         return fromJsonPath(response.jsonPath());
     }
 
-    public static void update(SimplePushVariant simplePushVariant, PushApplication pushApplication,
-        Session session) {
+    public static void update(SimplePushVariant simplePushVariant, PushApplication pushApplication, Session session) {
         update(simplePushVariant, pushApplication, session, ContentTypes.json());
     }
 
-    public static void update(SimplePushVariant simplePushVariant, PushApplication pushApplication,
-        Session session, String contentType) {
+    public static void update(SimplePushVariant simplePushVariant, PushApplication pushApplication, Session session, String contentType) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
             .body(toJSONString(simplePushVariant))
@@ -168,11 +166,10 @@ public final class SimplePushVariantUtils {
         UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_NO_CONTENT);
     }
 
-    public static void delete(SimplePushVariant simplePushVariant, PushApplication pushApplication,
-        Session session) {
+    public static void delete(SimplePushVariant simplePushVariant, PushApplication pushApplication, Session session) {
         Validate.notNull(session);
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
             .delete("/rest/applications/{pushApplicationID}/simplePush/{variantID}",
@@ -224,13 +221,10 @@ public final class SimplePushVariantUtils {
     }
 
     /*
-     * public static void checkEquality(SimplePushVariant expected, SimplePushVariant actual) {
-     * assertEquals(expected.getName(), actual.getName());
-     * assertEquals(expected.getDescription(), actual.getDescription());
-     * assertEquals(expected.getVariantID(), actual.getVariantID());
-     * assertEquals(expected.getSecret(), actual.getSecret());
-     * assertEquals(expected.getDeveloper(), actual.getDeveloper());
-     * }
+     * public static void checkEquality(SimplePushVariant expected, SimplePushVariant actual) { assertEquals(expected.getName(),
+     * actual.getName()); assertEquals(expected.getDescription(), actual.getDescription());
+     * assertEquals(expected.getVariantID(), actual.getVariantID()); assertEquals(expected.getSecret(), actual.getSecret());
+     * assertEquals(expected.getDeveloper(), actual.getDeveloper()); }
      */
 
     @SuppressWarnings("unchecked")
@@ -240,7 +234,9 @@ public final class SimplePushVariantUtils {
         jsonObject.put("name", variant.getName());
         jsonObject.put("description", variant.getDescription());
 
-        Response response = session.given().contentType("application/json").header("Accept", "application/json")
+        Response response = session.givenAuthorized()
+            .contentType(ContentTypes.json())
+            .header(Headers.acceptJson())
             .body(jsonObject.toString())
             .post("/rest/applications/{pushAppId}/simplePush", pushAppId);
 
@@ -248,14 +244,15 @@ public final class SimplePushVariantUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static Response updateSimplePushVariant(String pushAppId, SimplePushVariant variant, String variantId,
-        Session session) {
+    public static Response updateSimplePushVariant(String pushAppId, SimplePushVariant variant, String variantId, Session session) {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", variant.getName());
         jsonObject.put("description", variant.getDescription());
 
-        Response response = session.given().contentType("application/json").header("Accept", "application/json")
+        Response response = session.givenAuthorized()
+            .contentType(ContentTypes.json())
+            .header(Headers.acceptJson())
             .body(jsonObject.toString())
             .put("/rest/applications/{pushAppId}/simplePush/{variantId}", pushAppId, variantId);
 
@@ -264,20 +261,19 @@ public final class SimplePushVariantUtils {
 
     public static Response listAllSimplePushVariants(String pushAppId, Session session) {
 
-        Response response = session.given()
-            .contentType("application/json")
-            .header("Accept", "application/json")
+        Response response = session.givenAuthorized()
+            .contentType(ContentTypes.json())
+            .header(Headers.acceptJson())
             .get("/rest/applications/{pushAppId}/simplePush", pushAppId);
 
         return response;
     }
 
-    public static Response findSimplePushVariantById(String pushAppId, String variantId,
-        Session session) {
+    public static Response findSimplePushVariantById(String pushAppId, String variantId, Session session) {
 
-        Response response = session.given()
-            .contentType("application/json")
-            .header("Accept", "application/json")
+        Response response = session.givenAuthorized()
+            .contentType(ContentTypes.json())
+            .header(Headers.acceptJson())
             .get("/rest/applications/{pushAppId}/simplePush/{variantId}", pushAppId, variantId);
 
         return response;
@@ -285,7 +281,7 @@ public final class SimplePushVariantUtils {
 
     public static Response deleteSimplePushVariant(String pushAppId, String variantId, Session session) {
 
-        Response response = session.given()
+        Response response = session.givenAuthorized()
             .delete("/rest/applications/{pushAppId}/simplePush/{variantId}", pushAppId, variantId);
 
         return response;

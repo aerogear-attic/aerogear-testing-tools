@@ -3,43 +3,58 @@ package org.jboss.aerogear.test;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.logging.impl.AvalonLogger;
-import org.jboss.aerogear.unifiedpush.model.AndroidVariant;
-import org.jboss.aerogear.unifiedpush.model.PushApplication;
-import org.jboss.aerogear.unifiedpush.model.SimplePushVariant;
-import org.jboss.aerogear.unifiedpush.model.iOSVariant;
+import org.jboss.aerogear.test.api.auth.LoginRequest;
+import org.jboss.aerogear.unifiedpush.api.AndroidVariant;
+import org.jboss.aerogear.unifiedpush.api.Installation;
+import org.jboss.aerogear.unifiedpush.api.PushApplication;
+import org.jboss.aerogear.unifiedpush.api.SimplePushVariant;
+import org.jboss.aerogear.unifiedpush.api.Variant;
+import org.jboss.aerogear.unifiedpush.api.iOSVariant;
 import org.jboss.aerogear.unifiedpush.utils.AndroidVariantUtils;
-import org.jboss.aerogear.unifiedpush.utils.AuthenticationUtils;
+import org.jboss.aerogear.unifiedpush.utils.InstallationUtils;
 import org.jboss.aerogear.unifiedpush.utils.PushApplicationUtils;
-import org.jboss.aerogear.unifiedpush.utils.Session;
 import org.jboss.aerogear.unifiedpush.utils.SimplePushVariantUtils;
 import org.jboss.aerogear.unifiedpush.utils.iOSVariantUtils;
 import org.json.simple.JSONObject;
 
 public class UnifiedPushServer {
+
     private static final Logger log = Logger.getLogger(UnifiedPushServer.class.getName());
 
-    private final String rootUrl;
+    private final URL unifiedPushServerUrl;
 
-    private Session session;
+    private final URL authServerUrl;
 
-    public UnifiedPushServer(String rootUrl) {
-        this.rootUrl = rootUrl;
-        this.session = Session.forceCreateValidWithEmptyCookies(rootUrl);
+    private String username;
+
+    private String password;
+
+    protected Session session;
+
+    public UnifiedPushServer(URL unifiedPushServerUrl, URL authServerUrl) {
+        this.unifiedPushServerUrl = unifiedPushServerUrl;
+        this.authServerUrl = authServerUrl;
+    }
+
+    public UnifiedPushServer(String unifiedPushServerUrl, String authServerUrl) throws MalformedURLException {
+        this(new URL(unifiedPushServerUrl), new URL(authServerUrl));
     }
 
     public void dump(File directory, boolean ignoreRedirects, String alias) throws IOException {
 
         // set default values
         Properties properties = new Properties();
-        properties.put("rootUrl", rootUrl);
-        properties.put("password", session.getPassword());
-        properties.put("username", session.getLoginName());
+        properties.put("rootUrl", unifiedPushServerUrl.toExternalForm());
+        properties.put("authUrl", authServerUrl.toExternalForm());
+        properties.put("password", password);
+        properties.put("username", username);
 
         // get registered applications
         List<PushApplication> apps = PushApplicationUtils.listAll(session);
@@ -54,8 +69,7 @@ public class UnifiedPushServer {
         properties.put("registeredAppIds", appIds.toString());
 
         /*
-         * certificatePath : src/main/resources/certs/qaAerogear.p12
-         * certificatePass : aerogear
+         * certificatePath : src/main/resources/certs/qaAerogear.p12 certificatePass : aerogear
          */
 
         FileWriter w = new FileWriter(new File(directory, "ups.properties"));
@@ -106,8 +120,17 @@ public class UnifiedPushServer {
 
     }
 
-    public void login(String loginName, String oldPassword, String newPassword) {
-        this.session = AuthenticationUtils.completeLogin(loginName, oldPassword, newPassword, rootUrl);
+    public void login(String username, String password) {
+        this.session = LoginRequest
+            .request()
+            .setUnifiedPushServerUrl(unifiedPushServerUrl)
+            .setAuthServerUrl(authServerUrl)
+            .username(username)
+            .password(password)
+            .login();
+
+        this.username = username;
+        this.password = password;
     }
 
     public List<PushApplication> deletePushApplications() {
@@ -150,6 +173,14 @@ public class UnifiedPushServer {
 
         iOSVariantUtils.register(iv, app, session);
         return iv;
+    }
+
+    public void registerInstallations(List<Installation> installations, Variant variant) {
+        InstallationUtils.registerAll(installations, variant, session);
+    }
+
+    public void registerInstallation(Installation installation, Variant variant) {
+        InstallationUtils.register(installation, variant, session);
     }
 
 }

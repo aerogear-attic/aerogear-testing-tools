@@ -14,31 +14,54 @@ import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.process.ProcessInteractionBuilder;
 import org.arquillian.spacelift.process.impl.CommandTool;
 import org.jboss.aerogear.test.GitHubRepository;
+import org.jboss.aerogear.test.cli.exception.GithubRepositoryException;
 
 @Command(name = "cart-create", description = "Create OpenShift Cartridge based on latest commit in given organization, repository and branch. Requires rhc tools installed")
 public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runnable {
 
     private static final Logger log = Logger.getLogger(AppCartridgeCreateCommand.class.getName());
 
-    @Option(name = { "-r", "--repository" }, title = "repository", description = "Repository to be used, default value: openshift-origin-cartridge-aerogear-push")
+    @Option(
+        name = { "-r", "--repository" },
+        title = "repository",
+        description = "Repository to be used, default value: openshift-origin-cartridge-aerogear-push")
     public String repository = "openshift-origin-cartridge-aerogear-push";
 
-    @Option(name = { "-o", "--organization" }, title = "organization", description = "Organization on GitHub, default value: aerogear")
+    @Option(
+        name = { "-o", "--organization" },
+        title = "organization",
+        description = "Organization on GitHub, default value: aerogear")
     public String organization = "aerogear";
 
-    @Option(name = { "-g", "--gear" }, title = "gear size", allowedValues = { "small", "medium" }, description = "Size of the gear to be used")
+    @Option(
+        name = { "-g", "--gear" },
+        title = "gear size",
+        allowedValues = { "small", "medium" },
+        description = "Size of the gear to be used")
     public String gearSize = "small";
 
-    @Option(name = { "-b", "--branch" }, title = "branch", description = "Branch to be used, default value: master")
+    @Option(
+        name = { "-b", "--branch" },
+        title = "branch",
+        description = "Branch to be used, default value: master")
     public String branch = "master";
 
-    @Option(name = { "-f", "--force" }, title = "force", description = "Forces removal of the cartridge with the same name")
+    @Option(
+        name = { "-f", "--force" },
+        title = "force",
+        description = "Forces removal of the cartridge with the same name")
     public boolean force;
 
-    @Option(name = { "-s", "--scalable" }, title = "scalable", description = "Created cartridge will be scalable")
+    @Option(
+        name = { "-s", "--scalable" },
+        title = "scalable",
+        description = "Created cartridge will be scalable")
     public boolean scalable;
 
-    @Arguments(title = "cartridges", description = "Additional Cartridges to be instantiated together with the one defined by commit. By default: mysql-5.5, myphpadmin-4")
+    @Arguments(
+        title = "cartridges",
+        description = "Additional Cartridges to be instantiated together with the one defined by commit. "
+            + "By default: mysql-5.5, myphpadmin-4")
     public List<String> additionalCartridges = new ArrayList<String>();
 
     @Override
@@ -46,7 +69,13 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
 
         GitHubRepository ghRepository = new GitHubRepository(organization, repository);
 
-        String latestCommit = ghRepository.getLastestCommit(branch);
+        String latestCommit = null;
+
+        try {
+            latestCommit = ghRepository.getLastestCommit(branch);
+        } catch (GithubRepositoryException ex) {
+            throw new RuntimeException(ex);
+        }
 
         log.log(Level.INFO, "Latest commit in {0}/{1} branch {2} was {3}", new Object[] {
             organization,
@@ -67,7 +96,7 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
             additionalCartridges.addAll(Arrays.asList("mysql-5.5", "phpmyadmin-4"));
         }
 
-        if (scalable) {  // scalable cartridge does not support phpmyadmin
+        if (scalable) { // scalable cartridge does not support phpmyadmin
             additionalCartridges.remove("phpmyadmin-4");
         }
 

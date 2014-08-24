@@ -1,7 +1,7 @@
 package org.jboss.aerogear.test;
 
 import org.apache.http.HttpStatus;
-import org.jboss.aerogear.unifiedpush.utils.Session;
+import org.jboss.aerogear.test.cli.exception.GithubRepositoryException;
 
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
@@ -16,7 +16,7 @@ public class GitHubRepository {
         this.repository = repository;
     }
 
-    public String getLastestCommit(String branch) {
+    public String getLastestCommit(String branch) throws GithubRepositoryException {
 
         Response response = Session.newSession("https://api.github.com")
             .given()
@@ -25,13 +25,28 @@ public class GitHubRepository {
                 repository,
                 branch);
 
-        // FIXME needs better handling
         if (response.statusCode() != HttpStatus.SC_OK) {
-            throw new RuntimeException(response.getStatusLine());
+            throw new GithubRepositoryException(response.getStatusLine());
         }
 
-        JsonPath json = response.jsonPath();
-        // FIXME needs better handling
-        return json.getString("object.sha");
+        String latestCommit = getLatestCommitSHA(response);
+
+        if (latestCommit == null) {
+            throw new GithubRepositoryException("Unable to get latest commit.");
+        }
+
+        return latestCommit;
+    }
+
+    private String getLatestCommitSHA(Response response) {
+
+        if (response != null) {
+            JsonPath json = response.jsonPath();
+            if (json != null) {
+                return json.getString("object.sha");
+            }
+        }
+
+        return null;
     }
 }
