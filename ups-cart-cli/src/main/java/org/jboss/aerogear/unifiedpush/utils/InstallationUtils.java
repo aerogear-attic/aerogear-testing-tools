@@ -154,7 +154,7 @@ public class InstallationUtils {
 
         Response response = session.given()
             .contentType(contentType)
-            .auth().basic(variant.getVariantID(), variant.getSecret())
+            .auth().preemptive().basic(variant.getVariantID(), variant.getSecret())
             .header(Headers.acceptJson())
             .body(toJSONString(installation))
             .post("/rest/registry/device");
