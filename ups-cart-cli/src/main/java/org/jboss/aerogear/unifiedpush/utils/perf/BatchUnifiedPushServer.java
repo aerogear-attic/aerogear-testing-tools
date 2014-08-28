@@ -42,4 +42,8 @@ public class BatchUnifiedPushServer extends UnifiedPushServer {
         BatchInstallationUtils.registerViaBatchEndpoint(variant, installations, session);
     }
 
+    public void registerInstallations(List<Installation> installations, String variantId) {
+        BatchInstallationUtils.registerViaBatchEndpoint(variantId, installations, session);
+    }
+
 }

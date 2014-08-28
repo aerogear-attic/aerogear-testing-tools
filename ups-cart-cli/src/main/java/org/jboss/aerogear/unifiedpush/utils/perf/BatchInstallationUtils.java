@@ -42,11 +42,7 @@ public class BatchInstallationUtils extends InstallationUtils {
 
     private static final int OFFSET = 20000;
 
-    public static void registerViaBatchEndpoint(Variant variant, List<Installation> installations, Session session) {
-
-        MassInstallation massiveInstallation = new MassInstallation();
-        massiveInstallation.setVariantId(variant.getVariantID());
-
+    private static void registerViaBatchEndpoint(MassInstallation massInstallation, List<Installation> installations, Session session) {
         int count = installations.size();
 
         for (int i = 0; i <= count - OFFSET; i = i + OFFSET) {
@@ -55,16 +51,31 @@ public class BatchInstallationUtils extends InstallationUtils {
 
             List<Installation> sublist = installations.subList(i, i + OFFSET);
 
-            massiveInstallation.setInstallations(sublist);
+            massInstallation.setInstallations(sublist);
 
             Response response = session.givenAuthorized()
                 .contentType(ContentTypes.json())
                 .header(Headers.acceptJson())
-                .body(massiveInstallation)
+                .body(massInstallation)
                 .post("/rest/mass/installations");
 
             UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_OK);
         }
+    }
 
+    public static void registerViaBatchEndpoint(Variant variant, List<Installation> installations, Session session) {
+
+        MassInstallation massiveInstallation = new MassInstallation();
+        massiveInstallation.setVariantId(variant.getVariantID());
+
+        registerViaBatchEndpoint(massiveInstallation, installations, session);
+    }
+
+    public static void registerViaBatchEndpoint(String variantId, List<Installation> installations, Session session) {
+
+        MassInstallation massiveInstallation = new MassInstallation();
+        massiveInstallation.setVariantId(variantId);
+
+        registerViaBatchEndpoint(massiveInstallation, installations, session);
     }
 }

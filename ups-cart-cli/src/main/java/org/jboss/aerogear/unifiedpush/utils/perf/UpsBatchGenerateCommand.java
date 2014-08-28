@@ -17,6 +17,8 @@
 package org.jboss.aerogear.unifiedpush.utils.perf;
 
 import io.airlift.command.Command;
+import io.airlift.command.Option;
+
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.logging.Level;
@@ -39,6 +41,12 @@ import org.jboss.aerogear.unifiedpush.utils.InstallationUtils;
 public class UpsBatchGenerateCommand extends UpsGenerateAppsCommand {
 
     private static final Logger log = Logger.getLogger(UpsBatchGenerateCommand.class.getName());
+
+    @Option(
+        name = { "--variant-id" },
+        title = "variant-id",
+        description = "Variant ID to use for batch installations.")
+    private String variantId;
 
     private BatchUnifiedPushServer server;
 
@@ -64,10 +72,10 @@ public class UpsBatchGenerateCommand extends UpsGenerateAppsCommand {
 
         int installationsCount = parseCountOfInstallations(numberOfInstallations);
 
-        PushApplication app = server.addPushApplication(pushAppName);
-        log.log(Level.INFO, "Added PushApplication named {0}", app.getName());
-
         if (googleKey != null && projectNumber != null) {
+            PushApplication app = server.addPushApplication(pushAppName);
+            log.log(Level.INFO, "Added PushApplication named {0}", app.getName());
+
             AndroidVariant av = server.addAndroidVariant(app, googleKey, projectNumber);
             log.log(Level.INFO, "Added Android Variant named {0}", av.getName());
 
@@ -77,6 +85,9 @@ public class UpsBatchGenerateCommand extends UpsGenerateAppsCommand {
         }
 
         if (simplePush) {
+            PushApplication app = server.addPushApplication(pushAppName);
+            log.log(Level.INFO, "Added PushApplication named {0}", app.getName());
+
             SimplePushVariant spv = server.addSimplePushVariant(app);
             log.log(Level.INFO, "Added SimplePush Variant named {0}", spv.getName());
 
@@ -86,12 +97,20 @@ public class UpsBatchGenerateCommand extends UpsGenerateAppsCommand {
         }
 
         if (certificatePath != null && certificatePass != null) {
+            PushApplication app = server.addPushApplication(pushAppName);
+            log.log(Level.INFO, "Added PushApplication named {0}", app.getName());
+
             iOSVariant iv = server.addiOSVariant(app, certificatePath, certificatePass, production);
             log.log(Level.INFO, "Added iOS Variant named {0}", iv.getName());
 
             List<Installation> installations = InstallationUtils.generateIos(installationsCount);
             server.registerInstallationsViaEndpoint(installations, iv);
             log.log(Level.INFO, "Added {0} iOS installations", installationsCount);
+        }
+
+        if (variantId != null && !variantId.isEmpty()) {
+            List<Installation> installations = InstallationUtils.generateAndroid(installationsCount);
+            server.registerInstallations(installations, variantId);
         }
     }
 
