@@ -83,7 +83,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
             def installations = []
             def installationNames = []
             if(project.hasProperty('installations')) {
-                installationNames = project.installations.split(',')
+                installationNames = project.installations.split(',').findAll { return !it.isEmpty() }
             }
             else if(profile.enabledInstallations==null) {
                 installationNames = []
@@ -112,7 +112,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
             def tests = []
             def testNames = []
             if(project.hasProperty('tests')) {
-                testNames = project.tests.split(',')
+                testNames = project.tests.split(',').findAll { return !it.isEmpty() }
             }
             else if(profile.tests==null) {
                 testNames = []
