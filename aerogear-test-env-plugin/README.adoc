@@ -21,6 +21,27 @@ test::
 show-configuration::
     Shows global configuration and available profiles
 
+=== Manual profile definitions
+
+In cases you want to execute only a subset of installations or tests, you can combine activated profile with manual
+override of installations and or tests.
+
+For instance, following call installs all installations from *default* profile but executes only *myTestName* test.
+
+[code,bash]
+----
+gradle -Pprofile=default -Ptests=myTestName test
+----
+
+Whereas this call completely ignores profile and installs *myTestNameRequirement* and then executes *myTestName*:
+
+[code,bash]
+----
+gradle -Pinstallations=myTestNameRequirement -Ptests=myTestName test
+----
+
+NOTE: If you want to skip tests or installations altogether, use following syntax +gradle -Pinstallations= test+
+
 == DSL
 
 Plugin uses following DSL structure:
