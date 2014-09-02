@@ -9,6 +9,10 @@ repositories {
     }
 }
 
+configurations {
+    junitreport
+}
+
 dependencies {
     compile gradleApi()
     compile localGroovy()
@@ -18,7 +22,17 @@ dependencies {
 
     // Spacelift abstracts execution of external commands
     compile 'org.arquillian.spacelift:arquillian-spacelift:1.0.0.Alpha2'
-    compile 'org.jboss.aerogear.test:spacelift-jboss-manager:0.1.0'
+    compile 'org.jboss.aerogear.test:spacelift-jboss-manager:0.2.0'
     
     testCompile 'junit:junit:4.11'
+
+    // junitreport classpath
+    junitreport 'org.apache.ant:ant-junit:1.9.4'  
 }
+
+// add junitreport task to Ant classpath
+ClassLoader antClassLoader = org.apache.tools.ant.Project.class.classLoader 
+configurations.junitreport.each { File f -> 
+    antClassLoader.addURL(f.toURI().toURL()) 
+} 
+

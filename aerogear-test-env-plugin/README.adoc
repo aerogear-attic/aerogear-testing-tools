@@ -18,6 +18,8 @@ prepare-env::
     Installs all installations defined by profile
 test::
     Executes tests defined in profile. Depends on +prepare-env+
+testreport::
+    Gathers all test results in JUnit format from workspace and creates a combined report.
 show-configuration::
     Shows global configuration and available profiles
 

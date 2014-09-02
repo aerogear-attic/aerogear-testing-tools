@@ -196,6 +196,23 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
         project.task('executeTests') << {
         }
 
+        project.task('testreport') << {
+            logger.lifecycle(":testreport:generating JUnit report for all tests in ${project.aerogearTestEnv.workspace}")
+
+            //ant.taskdef(name: 'junitreport', classname: 'org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator', classpath: project.configurations.junitreport.asPath)
+            ant.mkdir(dir: "${project.aerogearTestEnv.workspace}/test-reports") 
+            ant.mkdir(dir: "${project.aerogearTestEnv.workspace}/test-reports/html") 
+            ant.junitreport(todir: "${project.aerogearTestEnv.workspace}/test-reports") {
+                fileset(dir: "${project.aerogearTestEnv.workspace}") {
+                    include(name: "**/TEST*.xml")
+                    exclude(name: "test-reports/*.xml")
+                    exclude(name: "test-reports/html/*")
+                }
+                report(format: "noframes", todir: "${project.aerogearTestEnv.workspace}/test-reports/html")
+            }
+            logger.lifecycle(":testreport:test report available in ${project.aerogearTestEnv.workspace}/test-reports/html/junit-noframes.html")
+        }
+
         project.tasks.getByName("executeTests").dependsOn(project.tasks.getByName("test"))
     }
 
