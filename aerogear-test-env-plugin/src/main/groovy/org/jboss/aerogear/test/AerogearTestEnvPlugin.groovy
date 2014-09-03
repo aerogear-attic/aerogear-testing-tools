@@ -210,7 +210,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
                 }
                 report(format: "noframes", todir: "${project.aerogearTestEnv.workspace}/test-reports/html")
             }
-            logger.lifecycle(":testreport:test report available in ${project.aerogearTestEnv.workspace}/test-reports/html/junit-noframes.html")
+            logger.lifecycle(":testreport:test report available in file://${project.aerogearTestEnv.workspace}/test-reports/html/junit-noframes.html")
         }
 
         project.tasks.getByName("executeTests").dependsOn(project.tasks.getByName("test"))
