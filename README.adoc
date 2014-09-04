@@ -33,6 +33,7 @@ This is a command line tool that allows to create and control UPS. Is is able to
 * add sample data to UPS (Push Application, Variants, Installations)
 * delete all data on UPS
 * dump selected data, so they can be used for instance to configure mobile application
+* batch creation of push applications, variants and installations (in thousands) by one command via custom UPS endpoints
 
 == Spacelift JBoss instance manager
 
