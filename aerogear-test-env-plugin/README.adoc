@@ -165,7 +165,7 @@ installationName {
 tests::
     Tests define a block of commands to be executed in *test* Gradle task. If you provide +dataProvider+ block, test
     execution (including before and after test phases) will iterate over data provided.
-+
+
 [source,groovy]
 ----
 testName {
@@ -189,7 +189,6 @@ testName {
     }
 }
 ----
-+
 
 == Execution parameters
 
