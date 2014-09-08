@@ -37,6 +37,9 @@ class Installation {
     // automatically extract archive
     def autoExtract = true
 
+    // application of Ant mapper during extraction
+    def extractMapper = {}
+
     // tools provided by this installation
     def tools = []
 
@@ -132,14 +135,14 @@ class Installation {
                 // based on installation type, we might want to unzip/untar/something else
                 switch(getFileName()) {
                     case ~/.*jar/:
-                        ant.unzip(src:getFsPath(), dest: new File(project.aerogearTestEnv.workspace, getFileName()))
+                        ant.unzip (src: getFsPath(), dest: new File(project.aerogearTestEnv.workspace, getFileName()), extractMapper)
                         break
                     case ~/.*zip/:
-                        ant.unzip(src: getFsPath(), dest: project.aerogearTestEnv.workspace)
+                        ant.unzip (src: getFsPath(), dest: project.aerogearTestEnv.workspace, extractMapper)
                         break
                     case ~/.*tgz/:
                     case ~/.*tar\.gz/:
-                        ant.untar(src: getFsPath(), dest: project.aerogearTestEnv.workspace, compression: 'gzip')
+                        ant.untar(src: getFsPath(), dest: project.aerogearTestEnv.workspace, compression: 'gzip', extractMapper)
                         break
                     default:
                         throw new RuntimeException("Invalid file type for installation ${getFileName()}")
@@ -156,7 +159,7 @@ class Installation {
             }
         }
 
-        // registerd installed tools
+        // register installed tools
         tools.each { tool ->
             tool.registerInSpacelift(GradleSpacelift.toolRegistry())
         }
@@ -165,6 +168,11 @@ class Installation {
             postActions.delegate = this
             postActions.doCall()
         }
+    }
+
+    // we keep extraction mapper to be a part of ant extract command
+    def extractMapper(Closure closure) {
+        this.extractMapper = closure;
     }
 
     // we keep post actions to be executed after installation is done
