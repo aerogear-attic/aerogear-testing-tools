@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat
 
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
+import org.jboss.as.controller.operations.common.SystemPropertyAddHandler;
 import org.junit.Test
 
 /**
@@ -37,5 +38,40 @@ public class InstallationParsingTest {
             assertThat installation.home, is(notNullValue())
             assertThat installation.home.exists(), is(true)
         }
+    }
+    
+    @Test
+    public void preconditionTest() {
+        
+        Project project = ProjectBuilder.builder().build()
+        
+        project.apply plugin: 'aerogear-test-env'
+
+        project.aerogearTestEnv {
+            tools {
+            }
+            profiles {
+            }
+            tests {
+            }
+            installations {
+                didNotMeetPreconditionInstallation {
+                    preconditions {
+                        false
+                    }
+                    postActions {
+                        new File(System.getProperty("java.io.tmpdir"), "preconditionTestFile.tmp").createNewFile()
+                    }
+                }
+            }
+        }
+        
+        GradleSpacelift.currentProject(project)
+        
+        project.aerogearTestEnv.installations.each { installation -> 
+            installation.install()
+        }
+        
+        assertThat new File(System.getProperty("java.io.tmpdir"), "preconditionTestFile.tmp").exists(), is(false)
     }
 }

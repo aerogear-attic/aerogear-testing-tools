@@ -126,7 +126,7 @@ profileName {
     tests = ['test1', 'test3', 'test27']
 }
 ----
-
++
 installations::
     Installations provides a way how to bring additional tools to you test environment. Installation is automatically downloaded
     or fetched from local cache and extracted, based on current OS.
@@ -140,6 +140,9 @@ installationName {
     remoteUrl =  string | list of strings | block | map of strings or blocks
     home =  string | list of strings | block | map of strings or blocks
     autoExtract = true | false
+    preconditions {
+        // has to return true or false, false skips installation execution 
+    }
     extractMapper {
         any ant mapper
     }
@@ -152,8 +155,8 @@ installationName {
 }
 ----
 +
-    Following properties are used:
-+
+Following properties are used::
+
 * product - name of product, used for storing installation in _installationsDir_
 * version - version of product, used for storing installation in _installationsDir_
 * fileName - name of file as downloaded in _workspace_. Can be map, same keys as for _tool_
@@ -162,9 +165,10 @@ installationName {
 * autoExtract - by default +true+, consider installation an archive and extract it to WORKSPACE directory
 * extractMapper - optional Ant mapper to be applied while installation is extracted. For instance +globmapper(from: "foo/*", to: "bar/*")+
 * tool - allows to define +tool+ that will be available after installation is done
-+ postActions - defines action to be performed after installation is extracted
-+
-    Note: Installation can bring multiple tools. You can provide more then one +tool+ block.
+* postActions - defines actions to be performed after installation is extracted
+* preconditions - this closure is optional and when specified, it has to return boolean value. If it returns false, installation is skipped, if true, installation is executed.
+
+    Note: Installation can bring multiple tools. You can provide more then one tool block.
 
 tests::
     Tests define a block of commands to be executed in *test* Gradle task. If you provide +dataProvider+ block, test
@@ -188,7 +192,7 @@ testName {
     afterTest { value ->
         // executed after test
     }
-    afterSuite() {
+    afterSuite {
         // executed once prior all tests
     }
 }
@@ -261,5 +265,6 @@ You can benefit from following tools and tasks, either from Spacelift or provide
 * AndroidSdkOptForStats - allows to opt out for stats - you need to agree with Android SDK license first
 * AVDCreator - creates Android Virtual Devices
 * CordovaExecutor - executes Cordova commands
+* RHELVersion - determines version of RHEL system
 *
 

@@ -12,6 +12,10 @@ class EnvironmentUtils {
         SystemUtils.IS_OS_WINDOWS
     }
 
+    static def runsOnLinux() {
+        SystemUtils.IS_OS_LINUX
+    }
+    
     static runsOnHudson() {
         System.getProperty("user.name") ==~ /hudson/
     }

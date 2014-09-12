@@ -40,11 +40,17 @@ class Installation {
     // application of Ant mapper during extraction
     def extractMapper = {}
 
+    def forceReinstall = false
+
     // tools provided by this installation
     def tools = []
 
     // actions to be invoked after installation is done
     def postActions
+
+    // precondition closure returning boolean
+    // if true, installation will be installed, if false, skipped
+    def preconditions
 
     // internal access to project defined variables
     private Project project
@@ -110,10 +116,20 @@ class Installation {
     // get installation and perform steps defined in closure after it is extracted
     void install() {
 
+        if (preconditions) {
+            preconditions.delegate = this
+            // if closure returns false, we did not meet preconditions
+            // so we return from installation process
+            if (! preconditions.doCall()) {
+                log.info("Installation '" + name + "' did not meet preconditions - it will be excluded from execution.")
+                return
+            }
+        }
+
         def ant = project.ant
 
         File targetFile = getFsPath()
-        if(targetFile.exists()) {
+        if(forceReinstall == false && targetFile.exists()) {
             log.info("Grabbing ${getFileName()} from file system")
         }
         else {
@@ -122,14 +138,20 @@ class Installation {
 
             // dowload bits if they do not exists
             log.info("Downloading ${getFileName()} from URL ${getRemoteUrl()} to ${getFsPath()}")
-            ant.get(src: getRemoteUrl(), dest: getFsPath())
+            ant.get(src: getRemoteUrl(), dest: getFsPath(), usetimestamp: true)
         }
 
         if(autoExtract) {
-            if(getHome().exists()) {
+            if(forceReinstall == false && getHome().exists()) {
                 log.info("Reusing existing installation ${getHome()}")
             }
             else {
+
+                if(forceReinstall && getHome().exists()) {
+                    log.info("Deleting previous installation ${getHome()}")
+                    ant.delete(dir: getHome())
+                }
+
                 log.info("Extracting installation to ${project.aerogearTestEnv.workspace}")
 
                 // based on installation type, we might want to unzip/untar/something else
@@ -178,6 +200,10 @@ class Installation {
     // we keep post actions to be executed after installation is done
     def postActions(Closure closure) {
         this.postActions = closure;
+    }
+
+    def preconditions(Closure closure) {
+        this.preconditions = closure
     }
 
     def tool(Closure closure) {

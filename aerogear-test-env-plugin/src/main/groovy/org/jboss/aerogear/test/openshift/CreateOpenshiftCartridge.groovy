@@ -34,7 +34,7 @@ class CreateOpenshiftCartridge extends Tool<Object, Void> {
         // delete app if it exists
         if(force) {
             def command = GradleSpacelift.tools('rhc')
-                    .parameters("app", "delete", "--confirm", name)
+                    .parameters("app", "delete", "--confirm", name, "-n", namespace)
                     // if app is not present, it will fail with 101
                     .shouldExitWith(0, 101)
                     .interaction(GradleSpacelift.ECHO_OUTPUT)
