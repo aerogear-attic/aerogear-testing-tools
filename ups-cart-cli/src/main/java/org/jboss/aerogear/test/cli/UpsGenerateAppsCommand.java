@@ -3,7 +3,6 @@ package org.jboss.aerogear.test.cli;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
 
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,8 +13,12 @@ import org.jboss.aerogear.unifiedpush.api.Installation;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.api.SimplePushVariant;
 import org.jboss.aerogear.unifiedpush.api.iOSVariant;
-import org.jboss.aerogear.unifiedpush.utils.InstallationUtils;
+import org.jboss.aerogear.unifiedpush.utils.installation.InstallationUtils;
 
+/**
+ * Meant to be used with 'as-is' UPS installation (no custom batch endpoints added to it)
+ *
+ */
 @Command(name = "ups-generate", description = "Generates data for an UPS instance")
 public class UpsGenerateAppsCommand extends UnifiedPushServerCommand implements Runnable {
 
@@ -74,22 +77,17 @@ public class UpsGenerateAppsCommand extends UnifiedPushServerCommand implements 
         description = "Number of installations being installed along variant registration.")
     public String numberOfInstallations = "-1";
 
+    private UnifiedPushServer server = null;
+
     @Override
     public void run() {
 
-        int installationsCount = parseCountOfInstallations(numberOfInstallations);
+        int installationsCount = parseNumber(numberOfInstallations);
 
         log.log(Level.INFO, "Connecting to UPS running at {0}", upsRootUrl());
 
-        UnifiedPushServer server;
+        server = login(username, password);
 
-        try {
-            server = new UnifiedPushServer(unifiedPushServerUrl(), authServerUrl());
-        } catch (MalformedURLException ex) {
-            throw new RuntimeException("Server URL was malformed: " + ex.getMessage());
-        }
-
-        server.login(username, password);
         log.log(Level.INFO, "Logged as {0}", username);
 
         PushApplication app = server.addPushApplication(pushAppName);
@@ -124,29 +122,4 @@ public class UpsGenerateAppsCommand extends UnifiedPushServerCommand implements 
 
     }
 
-    /**
-     *
-     * @param number number to be parsed
-     * @throws NumberFormatException if {@code number <= 0} or {@code number} is not a number
-     * @return 0 if {@code number == -1}, else {@code number} as integer.
-     */
-    protected int parseCountOfInstallations(String number) {
-
-        int parsedNumber;
-
-        try {
-            parsedNumber = Integer.parseInt(number);
-            if (parsedNumber == -1) {
-                return 0;
-            }
-            if (parsedNumber <= 0) {
-                throw new NumberFormatException();
-            }
-        } catch (NumberFormatException ex) {
-            throw new NumberFormatException(
-                String.format("Parsed number '%s' is not a valid number or it is lower then 0", number));
-        }
-
-        return parsedNumber;
-    }
 }

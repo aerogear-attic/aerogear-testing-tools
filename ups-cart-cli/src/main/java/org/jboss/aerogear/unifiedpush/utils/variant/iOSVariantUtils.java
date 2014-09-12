@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.utils;
+package org.jboss.aerogear.unifiedpush.utils.variant;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -67,6 +67,7 @@ public final class iOSVariantUtils {
         iOSVariant.setCertificate(certificate);
         iOSVariant.setPassphrase(passphrase);
         iOSVariant.setProduction(production);
+        iOSVariant.setDeveloper("admin");
 
         return iOSVariant;
     }

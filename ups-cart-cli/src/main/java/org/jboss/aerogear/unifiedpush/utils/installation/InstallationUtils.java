@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.utils;
+package org.jboss.aerogear.unifiedpush.utils.installation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +33,9 @@ import org.jboss.aerogear.test.UnexpectedResponseException;
 import org.jboss.aerogear.test.Validate;
 import org.jboss.aerogear.unifiedpush.api.Installation;
 import org.jboss.aerogear.unifiedpush.api.Variant;
+import org.jboss.aerogear.unifiedpush.api.VariantType;
+import org.jboss.aerogear.unifiedpush.utils.Picker;
+import org.jboss.aerogear.unifiedpush.utils.StringPicker;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -57,6 +60,33 @@ public class InstallationUtils {
     private static final String SIMPLEPUSH_DEFAULT_OPERATING_SYSTEM_VERSION = "1";
     private static final String[] SIMPLEPUSH_DEFAULT_CATEGORIES = { "default_category" };
     private static final String SIMPLEPUSH_DEFAULT_ENDPOINT = "http://localhost:8081/endpoint/%s";
+
+    /**
+     * Generates installations for some variant type.
+     *
+     * @param variantType type of variant to generete installations of
+     * @param installationCount number of generated variants of some {@code variantType}
+     * @return list of installations of some {@code variantType}
+     */
+    public static List<Installation> generate(VariantType variantType, int installationCount) {
+        List<Installation> installations = new ArrayList<Installation>();
+
+        switch (variantType) {
+            case ANDROID:
+                installations = generateAndroid(installationCount);
+                break;
+            case IOS:
+                installations = generateIos(installationCount);
+                break;
+            case SIMPLE_PUSH:
+                installations = generateSimplePush(installationCount);
+                break;
+            default:
+                break;
+        }
+
+        return installations;
+    }
 
     public static Installation createAndroid(String deviceToken, String alias) {
         return create(deviceToken, alias, getAndroidDefaultDeviceType(), getAndroidDefaultOperatingSystem(),
@@ -110,6 +140,17 @@ public class InstallationUtils {
 
     public static Installation generateIos() {
         return generateIos(SINGLE).iterator().next();
+    }
+
+    public static List<Installation> setCategories(List<Installation> installations, Set<String> categories, int categoriesPerInstallation) {
+
+        Picker<String> picker = new StringPicker();
+
+        for (Installation installation : installations) {
+            installation.setCategories(picker.pick(categories, categoriesPerInstallation));
+        }
+
+        return installations;
     }
 
     public static List<Installation> generateIos(int count) {
@@ -303,6 +344,33 @@ public class InstallationUtils {
             }
         }
         installation.setCategories(categories);
+    }
+
+    public static void assignInstallationsToCategories(List<String> categories, List<Installation> installations,
+        int categoriesPerInstallation) {
+
+        for (Installation installation : installations) {
+            assignInstallationToCategories(categories, installation, categoriesPerInstallation);
+        }
+    }
+
+    public static void assignInstallationToCategories(List<String> categories, Installation installation,
+        int categoriesPerInstallation) {
+
+        Set<String> pickedCategories = getRandomCategories(categories, categoriesPerInstallation);
+
+        installation.setCategories(pickedCategories);
+    }
+
+    private static Set<String> getRandomCategories(List<String> categories, int categoriesPerInstallation) {
+
+        Set<String> picked = new HashSet<String>();
+
+        Collections.shuffle(categories);
+
+        picked.addAll(categories.subList(0, categoriesPerInstallation));
+
+        return picked;
     }
 
     public static String getAndroidDefaultDeviceType() {

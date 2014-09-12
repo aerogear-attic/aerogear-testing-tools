@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.utils;
+package org.jboss.aerogear.unifiedpush.utils.variant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,18 +41,19 @@ public final class SimplePushVariantUtils {
     private SimplePushVariantUtils() {
     }
 
-    public static SimplePushVariant create(String name, String description) {
+    public static SimplePushVariant create(String name, String description, String developer) {
         SimplePushVariant simplePushVariant = new SimplePushVariant();
 
         simplePushVariant.setName(name);
         simplePushVariant.setDescription(description);
+        simplePushVariant.setDeveloper(developer);
 
         return simplePushVariant;
     }
 
-    public static SimplePushVariant createAndRegister(String name, String description, PushApplication pushApplication,
+    public static SimplePushVariant createAndRegister(String name, String description, String developer, PushApplication pushApplication,
         Session session) {
-        SimplePushVariant simplePushVariant = create(name, description);
+        SimplePushVariant simplePushVariant = create(name, description, developer);
 
         register(simplePushVariant, pushApplication, session);
 
@@ -69,8 +70,9 @@ public final class SimplePushVariantUtils {
         for (int i = 0; i < count; i++) {
             String name = UUID.randomUUID().toString();
             String description = UUID.randomUUID().toString();
+            String developer = "admin";
 
-            SimplePushVariant simplePushVariant = create(name, description);
+            SimplePushVariant simplePushVariant = create(name, description, developer);
 
             simplePushVariants.add(simplePushVariant);
         }

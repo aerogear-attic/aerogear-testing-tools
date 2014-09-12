@@ -6,7 +6,6 @@ import io.airlift.command.Option;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,14 +35,9 @@ public class UpsDumpCommand extends UnifiedPushServerCommand {
     public void run() {
 
         log.log(Level.INFO, "Connecting to UPS running at {0}", upsRootUrl());
-        UnifiedPushServer server;
-        try {
-            server = new UnifiedPushServer(unifiedPushServerUrl(), authServerUrl());
-        } catch (MalformedURLException ex) {
-            throw new RuntimeException("Server URL was malformed: " + ex.getMessage());
-        }
 
-        server.login(username, password);
+        UnifiedPushServer server = login(username, password);
+
         log.log(Level.INFO, "Logged as {0}", username);
 
         try {

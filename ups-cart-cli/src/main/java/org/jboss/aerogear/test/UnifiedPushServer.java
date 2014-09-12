@@ -17,11 +17,11 @@ import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.api.SimplePushVariant;
 import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.jboss.aerogear.unifiedpush.api.iOSVariant;
-import org.jboss.aerogear.unifiedpush.utils.AndroidVariantUtils;
-import org.jboss.aerogear.unifiedpush.utils.InstallationUtils;
-import org.jboss.aerogear.unifiedpush.utils.PushApplicationUtils;
-import org.jboss.aerogear.unifiedpush.utils.SimplePushVariantUtils;
-import org.jboss.aerogear.unifiedpush.utils.iOSVariantUtils;
+import org.jboss.aerogear.unifiedpush.utils.application.PushApplicationUtils;
+import org.jboss.aerogear.unifiedpush.utils.installation.InstallationUtils;
+import org.jboss.aerogear.unifiedpush.utils.variant.AndroidVariantUtils;
+import org.jboss.aerogear.unifiedpush.utils.variant.SimplePushVariantUtils;
+import org.jboss.aerogear.unifiedpush.utils.variant.iOSVariantUtils;
 import org.json.simple.JSONObject;
 
 public class UnifiedPushServer {
@@ -71,7 +71,6 @@ public class UnifiedPushServer {
         /*
          * certificatePath : src/main/resources/certs/qaAerogear.p12 certificatePass : aerogear
          */
-
         FileWriter w = new FileWriter(new File(directory, "ups.properties"));
         properties.store(w, null);
         w.close();
@@ -82,6 +81,7 @@ public class UnifiedPushServer {
             // store Android Variants as JSONs
             List<AndroidVariant> avs = AndroidVariantUtils.listAll(app, session);
             for (AndroidVariant av : avs) {
+
                 JSONObject avJson = new JSONObject();
                 // NOTE, URL must be converted to String
                 avJson.put("url", session.getBaseUrl().toString());
@@ -142,7 +142,7 @@ public class UnifiedPushServer {
     }
 
     public PushApplication addPushApplication(String name) {
-        PushApplication app = PushApplicationUtils.create(name, name + "'s description");
+        PushApplication app = PushApplicationUtils.create(name, name + "'s description", "admin");
         PushApplicationUtils.register(app, session);
 
         return app;
@@ -159,7 +159,7 @@ public class UnifiedPushServer {
     }
 
     public SimplePushVariant addSimplePushVariant(PushApplication app) {
-        SimplePushVariant spv = SimplePushVariantUtils.create(app.getName() + " SP", app.getDescription() + " SP");
+        SimplePushVariant spv = SimplePushVariantUtils.create(app.getName() + " SP", app.getDescription() + " SP", "admin");
         SimplePushVariantUtils.register(spv, app, session);
         return spv;
     }

@@ -14,39 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.utils.perf;
+package org.jboss.aerogear.unifiedpush.utils.variant.generation;
 
-import java.io.Serializable;
 import java.util.List;
 
-import org.jboss.aerogear.unifiedpush.api.Installation;
+import org.jboss.aerogear.unifiedpush.api.Variant;
+import org.jboss.aerogear.unifiedpush.utils.variant.VariantMetadata;
 
 /**
+ * Generates list of variants according to some distribution strategy.
+ *
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
  *
  */
-public class MassInstallation implements Serializable {
+public interface VariantGenerationStrategy {
 
-    private static final long serialVersionUID = -6387683068231570357L;
-
-    private String variantId;
-
-    private List<Installation> installations;
-
-    public String getVariantId() {
-        return variantId;
-    }
-
-    public void setVariantId(String variantId) {
-        this.variantId = variantId;
-    }
-
-    public List<Installation> getInstallations() {
-        return installations;
-    }
-
-    public void setInstallations(List<Installation> installations) {
-        this.installations = installations;
-    }
-
+    /**
+     * Generates {@code count} of variants according to some strategy.
+     *
+     * @param count number of variants to create
+     * @param variantMetadata
+     * @return generated variants
+     */
+    List<Variant> generate(int count, VariantMetadata variantMetadata);
 }

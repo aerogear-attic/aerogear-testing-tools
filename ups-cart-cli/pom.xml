@@ -30,10 +30,28 @@
 		<maven.compiler.argument.source>${maven.compiler.source}</maven.compiler.argument.source>
 
 		<version.com.jayway.restassured>2.3.1</version.com.jayway.restassured>
-		<version.aerogear.unifiedpush-server-rest-api>1.0.0.Beta2</version.aerogear.unifiedpush-server-rest-api>
+		<version.aerogear.unifiedpush-server-rest-api>1.0.0.Final</version.aerogear.unifiedpush-server-rest-api>
 	</properties>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.3.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.3.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.3.3</version>
+		</dependency>
 
 		<dependency>
 			<groupId>io.airlift</groupId>
@@ -62,13 +80,19 @@
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.13</version>
+			<version>1.9.9</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>1.3.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.3</version>
 		</dependency>
 
 		<dependency>
@@ -83,11 +107,11 @@
 			<version>${version.aerogear.unifiedpush-server-rest-api}</version>
 		</dependency>
 
-        <dependency>
-            <groupId>org.jboss.aerogear.unifiedpush</groupId>
-            <artifactId>unifiedpush-model-api</artifactId>
-            <version>1.0.0.Beta2</version>
-        </dependency>
+		<dependency>
+			<groupId>org.jboss.aerogear.unifiedpush</groupId>
+			<artifactId>unifiedpush-model-api</artifactId>
+			<version>1.0.0.Final</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>

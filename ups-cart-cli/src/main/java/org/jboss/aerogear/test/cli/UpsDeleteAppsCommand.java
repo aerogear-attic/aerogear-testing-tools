@@ -3,7 +3,6 @@ package org.jboss.aerogear.test.cli;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
 
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,18 +21,15 @@ public class UpsDeleteAppsCommand extends UnifiedPushServerCommand implements Ru
         description = "Delete all Push applications")
     public boolean all;
 
+    private UnifiedPushServer server = null; 
+    
     @Override
     public void run() {
 
         log.log(Level.INFO, "Connecting to UPS running at {0}", upsRootUrl());
-        UnifiedPushServer server;
-        try {
-            server = new UnifiedPushServer(unifiedPushServerUrl(), authServerUrl());
-        } catch (MalformedURLException ex) {
-            throw new RuntimeException("Server URL was malformed: " + ex.getMessage());
-        }
 
-        server.login(username, password);
+        server = login(username, oldPassword);
+
         log.log(Level.INFO, "Logged as {0}", username);
 
         if (all) {
@@ -41,4 +37,5 @@ public class UpsDeleteAppsCommand extends UnifiedPushServerCommand implements Ru
             log.log(Level.INFO, "Deleted {0} PushApplications", apps.size());
         }
     }
+
 }

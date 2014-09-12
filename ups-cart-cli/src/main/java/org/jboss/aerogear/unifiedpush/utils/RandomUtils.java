@@ -14,47 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.utils.perf;
+package org.jboss.aerogear.unifiedpush.utils;
 
-import java.io.Serializable;
-import java.util.List;
+import java.util.Random;
 
 /**
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
  *
  */
-public class MassResponse implements Serializable {
+public class RandomUtils {
 
-    private static final long serialVersionUID = 4090661692812339499L;
+    private static final Random random = new Random();
 
-    private List<String> appsIds;
+    /**
+     * Chooses random number.
+     *
+     * @param min minimum number to choose
+     * @param max maximum number to choose
+     * @return random number in range from {@code min} to {@code max} inclusive
+     * @throws IllegalArgumentException if {@code max < min}
+     */
+    public static int randInt(int min, int max) {
 
-    private List<String> varsIds;
+        if (max < min) {
+            throw new IllegalArgumentException("max is lower then min");
+        }
 
-    private List<String> installationIds;
-
-    public List<String> getAppsIds() {
-        return appsIds;
+        return random.nextInt((max - min) + 1) + min;
     }
-
-    public void setAppsIds(List<String> appsIds) {
-        this.appsIds = appsIds;
-    }
-
-    public List<String> getVarsIds() {
-        return varsIds;
-    }
-
-    public void setVarsIds(List<String> varsIds) {
-        this.varsIds = varsIds;
-    }
-
-    public List<String> getInstallationIds() {
-        return installationIds;
-    }
-
-    public void setInstallationIds(List<String> installationIds) {
-        this.installationIds = installationIds;
-    }
-
 }

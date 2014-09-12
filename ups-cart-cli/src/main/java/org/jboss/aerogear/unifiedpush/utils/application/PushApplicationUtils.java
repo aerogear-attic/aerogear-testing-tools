@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.utils;
+package org.jboss.aerogear.unifiedpush.utils.application;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,17 +38,18 @@ public class PushApplicationUtils {
 
     private static final int SINGLE = 1;
 
-    public static PushApplication create(String name, String description) {
+    public static PushApplication create(String name, String description, String developer) {
         PushApplication pushApplication = new PushApplication();
 
         pushApplication.setName(name);
         pushApplication.setDescription(description);
+        pushApplication.setDeveloper(developer);
 
         return pushApplication;
     }
 
-    public static PushApplication createAndRegister(String name, String description, Session session) {
-        PushApplication pushApplication = create(name, description);
+    public static PushApplication createAndRegister(String name, String description, String developer, Session session) {
+        PushApplication pushApplication = create(name, description, developer);
 
         register(pushApplication, session);
 
@@ -65,8 +66,9 @@ public class PushApplicationUtils {
         for (int i = 0; i < count; i++) {
             String name = UUID.randomUUID().toString();
             String description = UUID.randomUUID().toString();
+            String developer = "admin";
 
-            PushApplication pushApplication = create(name, description);
+            PushApplication pushApplication = create(name, description, developer);
 
             pushApplications.add(pushApplication);
         }

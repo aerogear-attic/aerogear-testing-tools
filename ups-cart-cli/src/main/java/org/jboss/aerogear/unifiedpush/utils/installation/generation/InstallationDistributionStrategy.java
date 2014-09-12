@@ -14,37 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.utils.perf;
+package org.jboss.aerogear.unifiedpush.utils.installation.generation;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
-import org.jboss.aerogear.test.UnifiedPushServer;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.utils.perf.model.MassInstallation;
-import org.jboss.aerogear.unifiedpush.utils.perf.model.MassPushApplication;
 
 /**
+ *
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
  *
  */
-public class BatchUnifiedPushServer extends UnifiedPushServer {
+public interface InstallationDistributionStrategy {
 
-    public BatchUnifiedPushServer(String unifiedPushServerUrl, String authServerUrl) throws MalformedURLException {
-        super(unifiedPushServerUrl, authServerUrl);
-    }
-
-    public BatchUnifiedPushServer(URL unifiedPushServerUrl, URL authServerUrl) {
-        super(unifiedPushServerUrl, authServerUrl);
-    }
-
-    public void registerInstallationsViaEndPoint(MassInstallation massInstallation) {
-        BatchUtils.registerInstallationsViaBatchEndpoint(massInstallation, session);
-    }
-    
-    public MassPushApplication registerApplicationsViaEndPoint(List<PushApplication> applications) {
-        return BatchUtils.registerApplicationsViaBatchEndpoint(applications, session);
-    }
-
+    /**
+     *
+     * @param registeredApplications applications with variants for which there will be generated installations
+     * @param count number of installations to be generated
+     * @return
+     */
+    MassInstallation generate(List<PushApplication> registeredApplications, int count);
 }

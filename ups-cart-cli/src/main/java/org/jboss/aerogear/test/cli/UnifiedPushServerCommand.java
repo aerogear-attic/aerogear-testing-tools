@@ -2,7 +2,10 @@ package org.jboss.aerogear.test.cli;
 
 import io.airlift.command.Option;
 
+import java.net.MalformedURLException;
 import java.text.MessageFormat;
+
+import org.jboss.aerogear.test.UnifiedPushServer;
 
 public abstract class UnifiedPushServerCommand extends OpenShiftCommand {
 
@@ -52,5 +55,49 @@ public abstract class UnifiedPushServerCommand extends OpenShiftCommand {
 
     protected String authServerUrl() {
         return upsRootUrl() + "/auth";
+    }
+
+    /**
+     * Logs you into UPS with {@code username} and {@code password}.
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+    protected UnifiedPushServer login(String username, String password) {
+        UnifiedPushServer server = null;
+        try {
+            server = new UnifiedPushServer(unifiedPushServerUrl(), authServerUrl());
+            server.login(username, password);
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException("Server URL was malformed: " + ex.getMessage());
+        }
+        return server;
+    }
+
+    /**
+     *
+     * @param number number to be parsed
+     * @throws NumberFormatException if {@code number <= 0} or {@code number} is not a number
+     * @return 0 if {@code number == -1}, else {@code number} as integer.
+     */
+    protected int parseNumber(String number) {
+
+        int parsedNumber;
+
+        try {
+            parsedNumber = Integer.parseInt(number);
+            if (parsedNumber == -1) {
+                return 0;
+            }
+            if (parsedNumber < 0) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException ex) {
+            throw new NumberFormatException(
+                String.format("Parsed number '%s' is not a valid number or it is lower then 0", number));
+        }
+
+        return parsedNumber;
     }
 }

@@ -12,4 +12,82 @@ mvn clean package
 [source]
 target/ups-cart help
 
+== How to feed UPS with data?
 
+In order to feed UPS with data, you have to create OpenShift UPS instance from custom cartridge 
+which has batch endpoints and batch infrastructure added on top of UPS release.
+
+[source]
+$ mvn clean install
+$ cd target
+$ ./ups-cart cart-create \
+    -a perf100 \ -- name of application
+    -b perf-1.0.0.Final \ -- branch to get cartridge from
+    -o smiklosovic -- organization / user to get cartridge from
+    -g large \ -- instance size
+    -n mobileqa \ -- OpenShift domain
+    -f -- force to create it, delete it when it already exists
+
+Cartridge is taken from the last commit of https://github.com/smiklosovic/openshift-origin-cartridge-aerogear-push/tree/perf-1.0.0.Final[this] branch.
+
+It this case, you end up with UPS 1.0.0.Final prepared for batch operations on address https://perf100-mobileqa.rhcloud.com.
+
+For that purpose, there is +ups-generate-batch+ command.
+
+=== Batch scenario
+
+You want to add 10000 applications, for each application there will be 10 variants. You want 
+to simulate installation of 125000 devices. Each device will be in 50 categories and you 
+are choosing these categories randomly from 1000 categories totally (generated randomly).
+
+Command:
+
+[source]
+$ mvn clean install
+$ cd target
+$ ./ups-cart ups-generate-batch \
+    -a perf100 \    -- name of application on OpenShift
+    --applications 10000 \
+    --categories 1000
+    --categories-per-installation 50 \
+    --installation-distribution pareto \
+    --installations 125000 \
+    --variant-distribution equal \
+    --variant-type android \
+    --google-key your_google_key \ -- you get these from Google Cloud console
+    --project-no your_project_number \
+    --variants 10 \
+    -u admin \
+    -p <admin_password> \
+    -n mobileqa \ -- OpenShift domain
+    --no-https
+
+==== Installation distributions
+
+===== Pareto distribution
+
+For pareto distribution use +--installation-distribution pareto+
+
+This installation distribution will distribute installations among all variants for all applications 
+according to https://en.wikipedia.org/wiki/Pareto_distribution[Pareto distribution] in 80:20 ratio, 
+which means that 20% of variants (accross all applications)  will contain 80% of installations system-wide.
+
+===== Flat distribution
+
+For flat distribution use +--installation-distribution flat+
+
+This installation distribution will make +--installations+ for every variant.
+
+==== Variant distribution
+
+Supported variant types are iOS, Android and SimplePush.
+
+===== Random
+
+Type of variant is choosen randomly.
+
+===== Equal
+
+All variants will be of the same type (in this case android, which is default).
+
+_Please consult ups-cart help ups-generate-batch for all configuration details_.

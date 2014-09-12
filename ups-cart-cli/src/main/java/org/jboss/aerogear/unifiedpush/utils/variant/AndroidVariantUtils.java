@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.utils;
+package org.jboss.aerogear.unifiedpush.utils.variant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +45,7 @@ public class AndroidVariantUtils {
         androidVariant.setDescription(description);
         androidVariant.setGoogleKey(googleKey);
         androidVariant.setProjectNumber(projectNumber);
+        androidVariant.setDeveloper("admin");
 
         return androidVariant;
     }

@@ -36,7 +36,7 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
     @Option(
         name = { "-g", "--gear" },
         title = "gear size",
-        allowedValues = { "small", "medium" },
+        allowedValues = { "small", "medium", "large" },
         description = "Size of the gear to be used")
     public String gearSize = "small";
 
@@ -85,7 +85,7 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
 
         if (force) {
             Tasks.prepare(CommandTool.class)
-                .programName("rhc").parameters("app", "delete", "--confirm", appName)
+                .programName("rhc").parameters("app", "delete", "-n", namespace, "--confirm", appName)
                 .shouldExitWith(0, 101)
                 .interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut())
                 .execute().await();
@@ -102,7 +102,7 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
 
         CommandTool ct = Tasks.prepare(CommandTool.class)
             .programName("rhc")
-            .parameters("app", "create", "-g", gearSize, "--no-git", appName)
+            .parameters("app", "create", "-n", namespace, "-g", gearSize, "--no-git", appName)
             .parameter("http://cartreflect-claytondev.rhcloud.com/reflect?github=" + organization + "/" + repository
                 + "&commit=" + latestCommit)
             .parameters(additionalCartridges);
