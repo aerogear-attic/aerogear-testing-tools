@@ -17,6 +17,7 @@
 package org.jboss.aerogear.unifiedpush.utils.installation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -371,6 +372,16 @@ public class InstallationUtils {
         picked.addAll(categories.subList(0, categoriesPerInstallation));
 
         return picked;
+    }
+
+    public static List<String> getAllCategories(Session session) {
+
+        Response response = session.givenAuthorized()
+            .contentType(ContentTypes.json())
+            .header(Headers.acceptJson())
+            .get("/rest/categories/all");
+
+        return Arrays.asList(response.getBody().as(String[].class));
     }
 
     public static String getAndroidDefaultDeviceType() {

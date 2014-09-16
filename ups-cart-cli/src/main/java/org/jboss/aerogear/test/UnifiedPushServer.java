@@ -47,6 +47,23 @@ public class UnifiedPushServer {
         this(new URL(unifiedPushServerUrl), new URL(authServerUrl));
     }
 
+    public void dumpCategories(File directory) throws IOException {
+
+        File categoryFile = new File(directory, "categories.json");
+
+        log.log(Level.INFO, "Dumping categories to {0}.", new Object[] { categoryFile.getAbsoluteFile() });
+
+        List<String> categories = InstallationUtils.getAllCategories(session);
+
+        FileWriter w = new FileWriter(categoryFile);
+
+        for (String category : categories) {
+            w.append(category).append("\n");
+        }
+
+        w.close();
+    }
+
     public void dump(File directory, boolean ignoreRedirects, String alias) throws IOException {
 
         // set default values

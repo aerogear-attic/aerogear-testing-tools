@@ -25,6 +25,13 @@ public class UpsDumpCommand extends UnifiedPushServerCommand {
         description = "Alias to be used for variants, default value: mobile-qa-list@redhat.com")
     public String alias = "mobile-qa-list@redhat.com";
 
+    @Option(
+        name = { "--categories" },
+        description = "When specified, only installation categories will be dumped.",
+        arity = 0,
+        required = false)
+    public boolean categories;
+
     @Arguments(
         title = "location",
         required = true,
@@ -40,10 +47,15 @@ public class UpsDumpCommand extends UnifiedPushServerCommand {
 
         log.log(Level.INFO, "Logged as {0}", username);
 
+        File dir = new File(location);
+        dir.mkdirs();
+
         try {
-            File dir = new File(location);
-            dir.mkdirs();
-            server.dump(dir, ignoreRedirects, alias);
+            if (categories) {
+                server.dumpCategories(dir);
+            } else {
+                server.dump(dir, ignoreRedirects, alias);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
