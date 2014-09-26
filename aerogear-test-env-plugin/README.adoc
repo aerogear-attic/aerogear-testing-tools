@@ -266,5 +266,5 @@ You can benefit from following tools and tasks, either from Spacelift or provide
 * AVDCreator - creates Android Virtual Devices
 * CordovaExecutor - executes Cordova commands
 * RHELVersion - determines version of RHEL system
-*
+* SedTool - very basic wrapper around Unix sed program
 
