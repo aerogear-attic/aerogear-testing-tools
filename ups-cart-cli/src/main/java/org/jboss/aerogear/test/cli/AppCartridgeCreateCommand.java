@@ -15,6 +15,8 @@ import org.arquillian.spacelift.process.ProcessInteractionBuilder;
 import org.arquillian.spacelift.process.impl.CommandTool;
 import org.jboss.aerogear.test.GitHubRepository;
 import org.jboss.aerogear.test.cli.exception.GithubRepositoryException;
+import org.jboss.aerogear.unifiedpush.utils.AWS_REGION;
+import org.jboss.aerogear.unifiedpush.utils.GEAR_SIZE;
 
 @Command(name = "cart-create", description = "Create OpenShift Cartridge based on latest commit in given organization, repository and branch. Requires rhc tools installed")
 public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runnable {
@@ -34,11 +36,17 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
     public String organization = "aerogear";
 
     @Option(
+        name = { "--region" },
+        title = "region",
+        description = "Region where an application will be hosted, look at 'rhc region list' for options, defaults to 'aws-eu-west-1'")
+    public String region = AWS_REGION.AWS_US_EAST_1.toString();
+
+    @Option(
         name = { "-g", "--gear" },
         title = "gear size",
         allowedValues = { "small", "medium", "large" },
-        description = "Size of the gear to be used")
-    public String gearSize = "small";
+        description = "Size of the gear to be used, defauls to 'small'")
+    public String gearSize = GEAR_SIZE.SMALL.toString();
 
     @Option(
         name = { "-b", "--branch" },
@@ -66,6 +74,8 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
 
     @Override
     public void run() {
+
+        validate();
 
         GitHubRepository ghRepository = new GitHubRepository(organization, repository);
 
@@ -102,7 +112,7 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
 
         CommandTool ct = Tasks.prepare(CommandTool.class)
             .programName("rhc")
-            .parameters("app", "create", "-n", namespace, "-g", gearSize, "--no-git", appName)
+            .parameters("app", "create", "-n", namespace, "-g", gearSize, "--region", region, "--no-git", appName)
             .parameter("http://cartreflect-claytondev.rhcloud.com/reflect?github=" + organization + "/" + repository
                 + "&commit=" + latestCommit)
             .parameters(additionalCartridges);
@@ -112,5 +122,62 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
         }
 
         ct.interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut()).execute().await();
+    }
+
+    private void validate() {
+
+        AWS_REGION region = null;
+
+        GEAR_SIZE gearSize = null;
+
+        for (AWS_REGION r : AWS_REGION.values()) {
+            if (r.toString().equals(this.region)) {
+                region = r;
+                break;
+            }
+        }
+
+        for (GEAR_SIZE g : GEAR_SIZE.values()) {
+            if (g.toString().equals(this.gearSize)) {
+                gearSize = g;
+                break;
+            }
+        }
+
+        if (region == null) {
+            throw new IllegalArgumentException(String.format("You have specified region which does not exist: %s. All regions: %s", this.region, getAllRegions()));
+        }
+
+        if (gearSize == null) {
+            throw new IllegalArgumentException(String.format("You have specified gear size which does not exist: %s. All gear sizes: %s", this.gearSize, getAllGearSizes()));
+        }
+
+        if (region == AWS_REGION.AWS_EU_WEST_1 && gearSize == GEAR_SIZE.SMALL) {
+            throw new IllegalStateException("You can not place '" + GEAR_SIZE.SMALL + "' gear to '" + AWS_REGION.AWS_EU_WEST_1 + "' region.");
+        }
+    }
+
+    private Object getAllGearSizes() {
+
+        StringBuilder sb = new StringBuilder();
+
+        for (GEAR_SIZE gearSize : GEAR_SIZE.values()) {
+            sb.append(gearSize.toString());
+            sb.append(" ");
+        }
+
+        return sb.toString().trim();
+    }
+
+    private String getAllRegions() {
+
+        StringBuilder sb = new StringBuilder();
+
+        for (AWS_REGION region : AWS_REGION.values()) {
+            sb.append(region.toString());
+            sb.append(" ");
+        }
+
+        return sb.toString().trim();
     }
 }
