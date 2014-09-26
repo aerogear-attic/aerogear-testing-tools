@@ -59,7 +59,7 @@ class SedTool extends Task<File, Void> {
      * @param replaceWith replacement string
      * @return
      */
-    public SedTool replaceWith(String replaceWith) {
+    def SedTool replaceWith(String replaceWith) {
         this.replaceWith = replaceWith
         this
     }
@@ -82,8 +82,6 @@ class SedTool extends Task<File, Void> {
         validate(file)
 
         Command sedCommand = getSedCommand()
-
-        println sedCommand.toString()
         
         Tasks.prepare(CommandTool).command(sedCommand).execute().await()
 
@@ -101,7 +99,6 @@ class SedTool extends Task<File, Void> {
         }
 
         // -i for inplace replacement (in the same file)
-        // -n for silence
         def sedBuilder = new CommandBuilder("sed").parameter("-i").parameter(sb.toString()).parameter(file.getAbsolutePath())
 
         sedBuilder.build()

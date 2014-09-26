@@ -39,12 +39,12 @@ This is the third rOw in it.
 
     @BeforeClass
     public static void setup() {
-        Tasks.setDefaultExecutionServiceFactory(new DefaultExecutionServiceFactory());
+        Tasks.setDefaultExecutionServiceFactory(new DefaultExecutionServiceFactory())
     }
 
     @Before
     void before() {
-        tempFile = File.createTempFile("sed-test", ".tmp");
+        tempFile = File.createTempFile("sed-test", ".tmp")
     }
 
     @After
