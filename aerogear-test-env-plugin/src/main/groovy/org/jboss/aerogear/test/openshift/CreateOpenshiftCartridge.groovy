@@ -16,6 +16,7 @@ class CreateOpenshiftCartridge extends Tool<Object, Void> {
     def isScaling = false
     def noGit = true
     def force = false
+    def ignoreIfExists = false
     def cartridges = []
 
     // credentials
@@ -80,12 +81,20 @@ class CreateOpenshiftCartridge extends Tool<Object, Void> {
         if(token) {
             command.parameters("--token", token)
         }
+        if(ignoreIfExists) {
+            command.shouldExitWith(0,1)
+        }
 
         command.parameters(cartridges)
 
         command.interaction(GradleSpacelift.ECHO_OUTPUT).execute().await()
 
         return null
+    }
+
+    def ignoreIfExists() {
+        this.ignoreIfExists = true
+        this
     }
 
     def force() {
