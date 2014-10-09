@@ -184,6 +184,7 @@ class AerogearTestEnvPlugin implements Plugin<Project> {
         // it used prepared environment created by previous task
         project.task('test') << {
             project.selectedTests.each { test ->
+                logger.lifecycle("test:test ${test.name}")
                 test.executeTest()
             }
         }
