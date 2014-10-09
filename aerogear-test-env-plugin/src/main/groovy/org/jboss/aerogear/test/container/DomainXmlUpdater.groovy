@@ -53,12 +53,27 @@ class DomainXmlUpdater extends Task<Object, File> {
             it.children().add(1, sslConnectorElement)
         }
 
+        // define JVM parameters after <extensions>
+        
+        // if there is no system-properties section, create one
+        if (domain."system-properties".isEmpty()) {
+            domain.children().add(1, new Node(null, "system-properties"))
+        }
+        
+        // remove truststore properties
+        domain."system-properties".property.findAll { s ->
+            s.@name == "javax.net.ssl.trustStore" || s.@name == "javax.net.ssl.trustStorePassword"
+        }.each {
+            it.replaceNode { }
+        }
+        
+        // add new truststore properties
+        def systemProperties = domain."system-properties"[0]
+        systemProperties.appendNode("property", [name: "javax.net.ssl.trustStore", value: truststoreFile.getAbsolutePath()])
+        systemProperties.appendNode("property", [name: "javax.net.ssl.trustStorePassword", value: keystorePass])
+        
         Tasks.chain(domain, XmlUpdater).file(domainXmlFile).execute().await()
 
         return domainXmlFile
     }
-
-
-
-
 }
