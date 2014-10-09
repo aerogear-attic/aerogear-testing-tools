@@ -18,18 +18,20 @@ class RHELVersionTest {
         if (version.equals("no RHEL")) {
             assertTrue (!rhelVersionFile.exists() || !contains("Red Hat", rhelVersionFile))
         } else {
-            assertTrue contains("Red Hat", rhelVersionFile)
+            assertTrue contains(version, rhelVersionFile)
         }
     }
 
     def boolean contains(release, file) {
 
+        def found = false
+
         file.eachLine {
-            if (it.contains("Red Hat")) {
-                return true
+            if (it.contains(release)) {
+                found = true
             }
         }
 
-        false
+        found
     }
 }
