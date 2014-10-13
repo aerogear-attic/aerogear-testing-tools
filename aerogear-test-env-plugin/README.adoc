@@ -1,4 +1,4 @@
-= Aerogear Test Environment Plugin
+= Arquillian Spacelift Gradle Plugin
 
 This Gradle plugin is able to prepare test environment and execute tests.
 Plugin is using Arquillian Spacelift project to execute external commands.
@@ -7,7 +7,7 @@ In order to enable the plugin, define:
 
 [source,groovy]
 ----
-apply plugin: 'aerogear-test-env'
+apply plugin: 'spacelift'
 ----
 
 == Gradle Tasks
@@ -50,7 +50,7 @@ Plugin uses following DSL structure:
 
 [code,groovy]
 ----
-aerogearTestEnv {
+spacelift {
 
     workspace
     installationsDir
@@ -244,7 +244,7 @@ Parsing of user supplied values::
 
 == Spacelift Tools and Task
 
-You can benefit from following tools and tasks, either from Spacelift or provided by this plugin:
+You can benefit from following tools and tasks, either from Spacelift itself or provided by this plugin:
 
 * DownloadTool - downloads a file
 * UnzipTool - extracts a zip file
