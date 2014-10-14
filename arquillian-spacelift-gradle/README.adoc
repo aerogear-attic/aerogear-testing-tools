@@ -268,3 +268,12 @@ You can benefit from following tools and tasks, either from Spacelift itself or 
 * RHELVersion - determines version of RHEL system
 * SedTool - very basic wrapper around Unix sed program
 
+== Release new version
+
+Follow this process to release new version
+
+1. Update version to release version in _build.gradle_
+2. Execute +gradle publish -Dmaven.settings=/path/to/settings.xml+. Note that your settings.xml need to contain JBoss Nexus repository configuration, according to
+    *Deploy to the JBoss Repository* section at https://developer.jboss.org/wiki/MavenGettingStarted-Developers
+3. Tag current commit via +git tag+
+4. Bump version to next development version
