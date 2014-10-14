@@ -263,11 +263,11 @@ ext {
 This plugin additionally allows following goodies for property definitions:
 
 Default values::
-    If a property starts with +default+, it is used if user won't override it from command line. Example: +defaultAndroidVersion=[19]+ will 
+    If a property starts with +default+, it is used if user won't override it from command line. Example: +defaultAndroidVersion=19+ will 
     become available as +androidVersion+ property in the project.
 Overriding default values::
     User can override any default value by using +-PpropertyName=value+ from command line. Example: +-PandroidVersion=17,18+ will override
-    +defaultAndroidVersion+ value.
+    +defaultAndroidVersion+ value with +[18,19]+.
 Parsing of user supplied values::
     User defined properties on command line are automatically split by +,+ character and converted into array.
 

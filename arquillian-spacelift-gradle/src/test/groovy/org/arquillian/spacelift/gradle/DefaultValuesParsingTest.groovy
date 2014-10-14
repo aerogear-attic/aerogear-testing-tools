@@ -30,6 +30,21 @@ class DefaultValuesParsingTest {
     }
 
     @Test
+    public void parseDefaultValue() {
+
+        Project project = ProjectBuilder.builder().build()
+
+        project.ext.set("defaultMyVersion", "1.2.3")
+
+        project.apply plugin: 'spacelift'
+
+        // find default value if not an array
+        def myVersion = project.myVersion
+        assertThat myVersion, is(notNullValue())
+        assertThat myVersion, is("1.2.3")
+    }
+
+    @Test
     public void overrideDefaultValues() {
 
         Project project = ProjectBuilder.builder().build()
