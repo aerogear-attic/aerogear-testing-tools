@@ -40,11 +40,11 @@ class EnvironmentUtils {
 
     /**
     * Get a bindable address for IPv4/v6.
-    * First, try searching environment variables in ``ip_envs``, 
+    * First, try searching environment variables in ``ip_envs``,
     * then try if at least loopback is working,
     * if there is no relevant env-var set, and lo is inot working, return null
     */
-    static def getIp = {IP v ->
+    static def getIp (IP v) {
         def preset_ips = ip_envs[v].collect({System.getenv(it)}).findAll()
         if(preset_ips){
             return preset_ips.first()
@@ -56,11 +56,14 @@ class EnvironmentUtils {
     }
 
     /**
-    * Returns the list of first adress for IPv6 and IPv4
+    * Returns a list of tuples (represented by list, because groovy)
+    *  of first adress for IPv6 and IPv4
     * It will return either both IPv4 and IPv6 adresses
     * or either of those, or none, id none works
     */
     static def ipVersionsToTest() {
-        [IP.v4,IP.v6].collect(getIp).findAll()
-    }   
+        [IP.v4,IP.v6]
+            .collect({[it, getIp(it)]})
+            .findAll({k,v -> v!=null})
+    }
 }
