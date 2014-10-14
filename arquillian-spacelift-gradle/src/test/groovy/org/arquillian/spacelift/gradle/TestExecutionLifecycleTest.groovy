@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 
-class TestExecutionLifecycleTestCase {
+class TestExecutionLifecycleTest {
 
     @Test
     public void dataProviderTest() {
