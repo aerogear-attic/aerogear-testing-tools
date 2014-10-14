@@ -8,6 +8,34 @@ In order to enable the plugin, define:
 [source,groovy]
 ----
 apply plugin: 'spacelift'
+
+// build dependencies
+buildscript {
+    repositories {
+        mavenCentral()
+        // you need this only if you plan to use SNAPSHOT version of this plugin
+        maven {
+            name 'jboss-staging-repository-group'
+            url 'https://repository.jboss.org/nexus/content/groups/staging'
+        }
+    }
+    dependencies {
+        classpath 'org.arquillian.spacelift.gradle:arquillian-spacelift-gradle:1.0.0-alpha-1'
+    }
+}
+
+// these elements are needed only if you are willing to use _testreport_ task
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    junitreport
+}
+
+dependencies {
+    junitreport 'org.apache.ant:ant-junit:1.9.4'
+}
 ----
 
 == Gradle Tasks
@@ -19,7 +47,8 @@ prepare-env::
 test::
     Executes tests defined in profile. Depends on +prepare-env+
 testreport::
-    Gathers all test results in JUnit format from workspace and creates a combined report.
+    Gathers all test results in JUnit format from workspace and creates a combined report. Requires additional configuration
+    in _build.gradle_ file
 show-configuration::
     Shows global configuration and available profiles
 
