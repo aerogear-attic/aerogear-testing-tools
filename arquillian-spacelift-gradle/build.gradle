@@ -120,11 +120,13 @@ publishing {
     }
 }
 
+/*
 // add junitreport task to Ant classpath
 ClassLoader antClassLoader = org.apache.tools.ant.Project.class.classLoader                                                                                                                                   
 configurations.junitreport.each { File f ->
     antClassLoader.addURL(f.toURI().toURL())
 } 
+*/
 
 // construct package with sources
 task sourcesJar(type: Jar, dependsOn: compileGroovy) {
