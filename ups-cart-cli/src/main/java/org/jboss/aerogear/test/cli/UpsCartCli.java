@@ -17,6 +17,7 @@ public class UpsCartCli {
             .withDefaultCommand(Help.class)
             .withCommands(Help.class,
                 AppCartridgeCreateCommand.class,
+                AppCartridgeDeleteCommand.class,
                 UpsGenerateAppsCommand.class,
                 UpsDeleteAppsCommand.class,
                 UpsDumpCommand.class,
