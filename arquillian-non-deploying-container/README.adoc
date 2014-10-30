@@ -16,7 +16,3 @@ Its purpose is to allow Arquillian to inject URI/URL into @Deployment for tests 
     * +checkTimeout+ integer value bigger then 0, maximum time for which check will be performed. When check is not satisfied until that time, test fails. By default 300 seconds.
 
 TIP: Remapping can be used to modify deployment URI for archives that have different context path on local container and on remote container
-
-== TODO
-
-1. Implement a ping for constructed URL - to check that application was indeed deployment at given location first
