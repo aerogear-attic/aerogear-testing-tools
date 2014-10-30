@@ -20,9 +20,15 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arquillian.spacelift.execution.CountDownWatch;
+import org.arquillian.spacelift.execution.ExecutionException;
+import org.arquillian.spacelift.execution.Tasks;
+import org.jboss.aerogear.test.arquillian.container.check.StatusCheck;
+import org.jboss.aerogear.test.arquillian.container.check.StatusCheckTask;
 import org.jboss.arquillian.container.spi.ConfigurationException;
 import org.jboss.arquillian.container.spi.client.container.DeployableContainer;
 import org.jboss.arquillian.container.spi.client.container.DeploymentException;
@@ -43,14 +49,14 @@ import org.json.JSONObject;
 /**
  * Arquillian non-deploying container. With this container you can run your Arquillian tests against already deployed
  * application.
- *
+ * 
  * <p>
  * See {@link NonDeployingConfiguration} for required configuration.
  * </p>
- *
+ * 
  * @author <a href="mailto:kpiwko@redhat.com">Karel Piwko</a>
  * @author <a href="mailto:ecervena@redhat.com">Emil Cervenan</a>
- *
+ * 
  */
 public class NonDeployingContainer implements DeployableContainer<NonDeployingConfiguration> {
 
@@ -58,10 +64,13 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
 
     @Inject
     @ApplicationScoped
-    private InstanceProducer<NonDeployingConfiguration> configuration;
+    private InstanceProducer<NonDeployingConfiguration> configurationProducer;
 
     @Inject
     private Instance<ServiceLoader> serviceLoader;
+
+    @Inject
+    private Instance<NonDeployingConfiguration> configuration;
 
     @Override
     public ProtocolDescription getDefaultProtocol() {
@@ -75,7 +84,7 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
 
     @Override
     public void setup(NonDeployingConfiguration configuration) {
-        this.configuration.set(configuration);
+        this.configurationProducer.set(configuration);
     }
 
     @Override
@@ -129,7 +138,31 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
         ProtocolMetaData metaData = new ProtocolMetaData();
         metaData.addContext(context);
 
+        log.info("Performing status check");
+
+        StatusCheck statusCheck = getStatusCheck();
+        statusCheck.target(contextURI);
+
+        CountDownWatch countDownWatch = new CountDownWatch(configuration.get().getCheckTimeout(), TimeUnit.SECONDS);
+
+        try {
+            Tasks.prepare(StatusCheckTask.class)
+                .check(statusCheck)
+                .execute().until(countDownWatch, StatusCheckTask.statusCheckCondition);
+        } catch (ExecutionException ex) {
+            throw new RuntimeException(String.format("Unable to satisfy status of '%s' until '%s' seconds.",
+                contextURI.toString(), configuration.get().getCheckTimeout()), ex.getCause());
+        }
+
         return metaData;
+    }
+
+    private StatusCheck getStatusCheck() {
+        String checkClassName = configuration.get().getCheck();
+
+        StatusCheck statusCheck = SecurityActions.newInstance(checkClassName, new Class<?>[] {}, new Object[] {}, StatusCheck.class);
+
+        return statusCheck;
     }
 
     @Override
@@ -180,10 +213,10 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
      * @return context root remap from configuration as a JSON object
      */
     private JSONObject getContextRootRemapAsJSON() {
-        if (configuration.get().getContextRootRemap() == null) {
+        if (configurationProducer.get().getContextRootRemap() == null) {
             return null;
         }
-        return new JSONObject(configuration.get().getContextRootRemap());
+        return new JSONObject(configurationProducer.get().getContextRootRemap());
     }
 
     /**
@@ -193,7 +226,7 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
     private URI getAppURI() {
         URI uri = null;
         try {
-            uri = new URI(configuration.get().getBaseURI());
+            uri = new URI(configurationProducer.get().getBaseURI());
         } catch (URISyntaxException e) {
             throw new ConfigurationException("Parameter \"baseURI\" does not represent a valid URI", e);
         }
