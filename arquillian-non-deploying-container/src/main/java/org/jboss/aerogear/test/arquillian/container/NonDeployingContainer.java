@@ -143,13 +143,15 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
         StatusCheck statusCheck = getStatusCheck();
         statusCheck.target(contextURI);
 
+        CountDownWatch countDownWatch = new CountDownWatch(configuration.get().getCheckTimeout(), TimeUnit.SECONDS);
+
         try {
             Tasks.prepare(StatusCheckTask.class)
                 .check(statusCheck)
-                .execute().until(new CountDownWatch(300, TimeUnit.SECONDS), StatusCheckTask.statusCheckCondition);
+                .execute().until(countDownWatch, StatusCheckTask.statusCheckCondition);
         } catch (ExecutionException ex) {
-            throw new RuntimeException(String.format("Unable to satisfy status of '%s' until 300 seconds.",
-                contextURI.toString()), ex.getCause());
+            throw new RuntimeException(String.format("Unable to satisfy status of '%s' until '%s' seconds.",
+                contextURI.toString(), configuration.get().getCheckTimeout()), ex.getCause());
         }
 
         return metaData;

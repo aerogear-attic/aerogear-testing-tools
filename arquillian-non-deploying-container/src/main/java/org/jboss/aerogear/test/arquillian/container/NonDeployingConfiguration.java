@@ -43,6 +43,8 @@ public class NonDeployingConfiguration implements ContainerConfiguration {
 
     private String check = DEFAULT_STATUS_CHECK_CLASS_NAME;
 
+    private String checkTimeout = "300";
+
     public String getBaseURI() {
         return baseURI;
     }
@@ -65,6 +67,14 @@ public class NonDeployingConfiguration implements ContainerConfiguration {
 
     public String getCheck() {
         return check;
+    }
+
+    public int getCheckTimeout() {
+        return Integer.parseInt(checkTimeout);
+    }
+
+    public void setCheckTimeout(String checkTimeout) {
+        this.checkTimeout = checkTimeout;
     }
 
     @Override
@@ -93,6 +103,15 @@ public class NonDeployingConfiguration implements ContainerConfiguration {
             throw new ConfigurationException("Unable to use check which class name is null object or an empty string!");
         }
 
+        try {
+            int timeout = getCheckTimeout();
+            if (timeout <= 0) {
+                throw new ConfigurationException("Timeout check can not be lower then 0.");
+            }
+        } catch (NumberFormatException ex) {
+            throw new ConfigurationException(String.format("Check timeout value you set is not a number: '%s'.", checkTimeout));
+        }
+
         logger.info(this.toString());
     }
 
@@ -100,9 +119,10 @@ public class NonDeployingConfiguration implements ContainerConfiguration {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("\nbaseURI:\t\t").append(getBaseURI()).
-            append("\ncontextRootRemap:\t").append(getContextRootRemap()).
-            append("\ncheck:\t\t\t").append(getCheck());
+        sb.append("\nbaseURI:\t\t").append(getBaseURI())
+            .append("\ncontextRootRemap:\t").append(getContextRootRemap())
+            .append("\ncheck:\t\t\t").append(getCheck())
+            .append("\ncheck timeout:\t\t").append(getCheckTimeout());
 
         return sb.toString();
     }

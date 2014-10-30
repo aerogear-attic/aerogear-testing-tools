@@ -12,6 +12,8 @@ Its purpose is to allow Arquillian to inject URI/URL into @Deployment for tests 
     
     * +baseURI+ base URI of the deployment, this is *required* 
     * +contextRootRemap+ a JSON map to remap context root given by deployment to different path
+    * +check+ fully qualified class name of a status check to perform, when not set, by default it equals to +org.jboss.aerogear.test.arquillian.container.check.impl.HTTPCodeStatusCheck+
+    * +checkTimeout+ integer value bigger then 0, maximum time for which check will be performed. When check is not satisfied until that time, test fails. By default 300 seconds.
 
 TIP: Remapping can be used to modify deployment URI for archives that have different context path on local container and on remote container
 
