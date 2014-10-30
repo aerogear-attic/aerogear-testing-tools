@@ -6,6 +6,7 @@ import org.apache.http.HttpStatus;
 import org.jboss.aerogear.test.Headers;
 import org.jboss.aerogear.test.UnexpectedResponseException;
 import org.jboss.aerogear.test.api.AbstractUPSWorker;
+import org.jboss.aerogear.unifiedpush.api.Category;
 import org.jboss.aerogear.unifiedpush.api.Installation;
 import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.json.simple.JSONArray;
@@ -38,8 +39,10 @@ public abstract class InstallationWorker<
         if (entity.getCategories() != null) {
             // JSONObject doesn't understand Set<String>
             JSONArray categories = new JSONArray();
-            for (String category : entity.getCategories()) {
-                categories.add(category);
+            for (Category category : entity.getCategories()) {
+                JSONObject categoryJson = new JSONObject();
+                categoryJson.put("name", category.getName());
+                categories.add(categoryJson);
             }
             jsonObject.put("categories", categories);
         }
@@ -57,11 +60,13 @@ public abstract class InstallationWorker<
         editor.setAlias(jsonPath.getString("alias"));
         editor.setDeviceType(jsonPath.getString("deviceType"));
         editor.setDeviceToken(jsonPath.getString("deviceToken"));
-        HashSet<String> categories = new HashSet<String>();
-        List<String> jsonCategories = jsonPath.getList("categories");
+        HashSet<Category> categories = new HashSet<Category>();
+        List<? extends Map<String, Object>> jsonCategories = jsonPath.getList("categories");
         if (jsonCategories != null) {
-            for (String jsonCategory : jsonCategories) {
-                categories.add(jsonCategory);
+            for (Map<String, Object> jsonCategory : jsonCategories) {
+                String categoryName = (String) jsonCategory.get("name");
+                Category category = new Category(categoryName);
+                categories.add(category);
             }
         }
         editor.setCategories(categories);

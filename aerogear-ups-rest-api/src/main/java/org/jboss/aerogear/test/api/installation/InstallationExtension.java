@@ -16,12 +16,13 @@
  */
 package org.jboss.aerogear.test.api.installation;
 
+import org.jboss.aerogear.unifiedpush.api.Category;
+import org.jboss.aerogear.unifiedpush.api.Installation;
+import org.jboss.aerogear.unifiedpush.api.Variant;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.jboss.aerogear.unifiedpush.api.Installation;
-import org.jboss.aerogear.unifiedpush.api.Variant;
 
 public abstract class InstallationExtension<
         BLUEPRINT extends InstallationBlueprint<BLUEPRINT, EDITOR, PARENT, WORKER, CONTEXT>,
@@ -56,7 +57,7 @@ public abstract class InstallationExtension<
     }
 
     public EXTENSION invalidateToken() {
-        if(!isTokenInvalid()) {
+        if (!isTokenInvalid()) {
             setDeviceToken(Tokens.TOKEN_INVALIDATION_PREFIX + getDeviceToken());
         }
         return castInstance();
@@ -82,8 +83,16 @@ public abstract class InstallationExtension<
         return castInstance();
     }
 
-    public EXTENSION categories(String... categories) {
-        Set<String> categorySet = new HashSet<String>(Arrays.asList(categories));
+    public EXTENSION categories(String... categoryNames) {
+        Category[] categories = new Category[categoryNames.length];
+        for (int i = 0; i < categoryNames.length; i++) {
+            categories[i] = new Category(categoryNames[i]);
+        }
+        return categories(categories);
+    }
+
+    public EXTENSION categories(Category... categories) {
+        Set<Category> categorySet = new HashSet<Category>(Arrays.asList(categories));
         setCategories(categorySet);
         return castInstance();
     }

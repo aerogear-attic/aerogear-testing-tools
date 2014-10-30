@@ -20,7 +20,7 @@
 
 	<groupId>org.jboss.aerogear.test</groupId>
 	<artifactId>aerogear-ups-rest-api</artifactId>
-	<version>1.0.0.Final</version>
+	<version>1.0.2.Alpha</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -33,7 +33,7 @@
 
 		<keycloak.version>1.0-rc-1</keycloak.version>
 		<aerogear.unifiedpush-java-client.version>0.8.0</aerogear.unifiedpush-java-client.version>
-		<aerogear.unifiedpush-server-model.version>1.0.0.Final</aerogear.unifiedpush-server-model.version>
+		<aerogear.unifiedpush-server-model.version>1.0.1</aerogear.unifiedpush-server-model.version>
 
 	</properties>
 

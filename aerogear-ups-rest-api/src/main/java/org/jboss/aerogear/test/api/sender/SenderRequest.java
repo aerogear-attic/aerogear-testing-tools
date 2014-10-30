@@ -20,6 +20,7 @@ import org.apache.http.HttpStatus;
 import org.jboss.aerogear.test.UnexpectedResponseException;
 import org.jboss.aerogear.test.api.AbstractSessionRequest;
 import org.jboss.aerogear.unifiedpush.SenderClient;
+import org.jboss.aerogear.unifiedpush.api.Category;
 import org.jboss.aerogear.unifiedpush.api.Installation;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.api.Variant;
@@ -166,7 +167,9 @@ public class SenderRequest extends AbstractSessionRequest<SenderRequest> {
         public UnifiedMessageBlueprint categoriesOf(List<? extends Installation> installations) {
             Set<String> categories = new HashSet<String>();
             for (Installation installation : installations) {
-                categories.addAll(installation.getCategories());
+                for (Category category : installation.getCategories()) {
+                    categories.add(category.getName());
+                }
             }
             return categories(categories);
         }

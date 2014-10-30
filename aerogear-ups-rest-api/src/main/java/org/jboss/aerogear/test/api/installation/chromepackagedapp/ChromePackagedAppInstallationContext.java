@@ -47,7 +47,6 @@ public class ChromePackagedAppInstallationContext extends InstallationContext<Ch
     @Override
     public ChromePackagedAppInstallationBlueprint generate() {
         return create()
-                .deviceToken(randomString())
                 .alias(randomString());
     }
 }
