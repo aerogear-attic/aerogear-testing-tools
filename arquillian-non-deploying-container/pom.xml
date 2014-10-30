@@ -50,6 +50,8 @@
         <version.junit>4.11</version.junit>
         <version.mockito>1.9.5</version.mockito>
         <version.json>20140107</version.json>
+        <version.spacelift>1.0.0.Alpha2</version.spacelift>
+        <version.com.jayway.restassured>2.3.1</version.com.jayway.restassured>
 
         <!-- Other -->
         <!--
@@ -86,6 +88,16 @@
                 <groupId>org.json</groupId>
                 <artifactId>json</artifactId>
                 <version>${version.json}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.arquillian.spacelift</groupId>
+                <artifactId>arquillian-spacelift</artifactId>
+                <version>${version.spacelift}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jayway.restassured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>${version.com.jayway.restassured}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -128,6 +140,18 @@
             <scope>compile</scope>
         </dependency>
         
+        <!-- Spacelift -->
+        <dependency>
+            <groupId>org.arquillian.spacelift</groupId>
+            <artifactId>arquillian-spacelift</artifactId>
+        </dependency>
+        
+        <!-- Rest Assured -->
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+        </dependency>
+
         <!-- json for map parsing -->
         <dependency>
             <groupId>org.json</groupId>

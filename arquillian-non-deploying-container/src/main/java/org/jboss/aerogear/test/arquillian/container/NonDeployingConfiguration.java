@@ -18,6 +18,7 @@ package org.jboss.aerogear.test.arquillian.container;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.Logger;
 
 import org.jboss.arquillian.container.spi.ConfigurationException;
 import org.jboss.arquillian.container.spi.client.container.ContainerConfiguration;
@@ -26,15 +27,21 @@ import org.json.JSONObject;
 
 /**
  * Configuration of a non deploying container.
- *
+ * 
  * @author <a href="kpiwko@redhat.com">Karel Piwko</a>
- *
+ * 
  */
 public class NonDeployingConfiguration implements ContainerConfiguration {
+
+    private static final Logger logger = Logger.getLogger(NonDeployingConfiguration.class.getName());
+
+    private static final String DEFAULT_STATUS_CHECK_CLASS_NAME = "org.jboss.aerogear.test.arquillian.container.check.impl.HTTPCodeStatusCheck";
 
     private String baseURI;
 
     private String contextRootRemap;
+
+    private String check = DEFAULT_STATUS_CHECK_CLASS_NAME;
 
     public String getBaseURI() {
         return baseURI;
@@ -50,6 +57,14 @@ public class NonDeployingConfiguration implements ContainerConfiguration {
 
     public String getContextRootRemap() {
         return contextRootRemap;
+    }
+
+    public void setCheck(String check) {
+        this.check = check;
+    }
+
+    public String getCheck() {
+        return check;
     }
 
     @Override
@@ -73,6 +88,23 @@ public class NonDeployingConfiguration implements ContainerConfiguration {
                 throw new ConfigurationException("Parameter \"contextRootRemap\" does not represent a valid JSON object", e);
             }
         }
+
+        if (getCheck() == null || getCheck().isEmpty()) {
+            throw new ConfigurationException("Unable to use check which class name is null object or an empty string!");
+        }
+
+        logger.info(this.toString());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("\nbaseURI:\t\t").append(getBaseURI()).
+            append("\ncontextRootRemap:\t").append(getContextRootRemap()).
+            append("\ncheck:\t\t\t").append(getCheck());
+
+        return sb.toString();
     }
 
 }
