@@ -121,8 +121,8 @@ public class NonDeployingConfiguration implements ContainerConfiguration {
 
         sb.append("\nbaseURI:\t\t").append(getBaseURI())
             .append("\ncontextRootRemap:\t").append(getContextRootRemap())
-            .append("\ncheck:\t\t\t").append(getCheck())
-            .append("\ncheck timeout:\t\t").append(getCheckTimeout());
+            .append("\ncheck:\t\t").append(getCheck())
+            .append("\ncheck timeout:\t").append(getCheckTimeout());
 
         return sb.toString();
     }
