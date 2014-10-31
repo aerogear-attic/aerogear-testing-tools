@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.jboss.aerogear</groupId>
 		<artifactId>aerogear-parent</artifactId>
-		<version>0.2.6</version>
+		<version>0.2.9</version>
 		<relativePath />
 	</parent>
 
@@ -31,8 +31,8 @@
 
 		<org.jboss.aerogear.bom.version>${project.parent.version}</org.jboss.aerogear.bom.version>
 
-		<keycloak.version>1.0-rc-1</keycloak.version>
-		<aerogear.unifiedpush-java-client.version>0.8.0</aerogear.unifiedpush-java-client.version>
+        <keycloak.version>1.0.4.Final</keycloak.version>
+		<aerogear.unifiedpush-java-client.version>1.0.0</aerogear.unifiedpush-java-client.version>
 		<aerogear.unifiedpush-server-model.version>1.0.1</aerogear.unifiedpush-server-model.version>
 
 	</properties>
