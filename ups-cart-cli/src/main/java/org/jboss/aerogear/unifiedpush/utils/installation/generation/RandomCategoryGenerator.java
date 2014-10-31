@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.jboss.aerogear.unifiedpush.api.Category;
+
 /**
  * Categories are random UUID strings.
  *
@@ -37,15 +39,15 @@ public class RandomCategoryGenerator implements CategoryGenerator {
      * @return empty list if {@code count < 1}
      */
     @Override
-    public List<String> generateCategories(int count) {
-        List<String> categories = new ArrayList<String>();
+    public List<Category> generateCategories(int count) {
+        List<Category> categories = new ArrayList<Category>();
 
         if (count < 1) {
             return categories;
         }
 
         for (int i = 0; i < count; i++) {
-            categories.add(UUID.randomUUID().toString());
+            categories.add(new Category(UUID.randomUUID().toString()));
         }
 
         return categories;

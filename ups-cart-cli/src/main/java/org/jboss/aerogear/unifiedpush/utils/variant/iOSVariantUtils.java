@@ -36,11 +36,19 @@ import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.api.iOSVariant;
 import org.json.simple.JSONObject;
 
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.config.ObjectMapperConfig;
+import com.jayway.restassured.config.RestAssuredConfig;
+import com.jayway.restassured.internal.mapper.ObjectMapperType;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 
 public final class iOSVariantUtils {
 
+    static {
+        RestAssured.config = RestAssuredConfig.config().objectMapperConfig(new ObjectMapperConfig(ObjectMapperType.JACKSON_1));
+    }
+    
     private static final int SINGLE = 1;
 
     private iOSVariantUtils() {

@@ -32,34 +32,45 @@ import org.jboss.aerogear.test.Helper;
 import org.jboss.aerogear.test.Session;
 import org.jboss.aerogear.test.UnexpectedResponseException;
 import org.jboss.aerogear.test.Validate;
+import org.jboss.aerogear.unifiedpush.api.Category;
 import org.jboss.aerogear.unifiedpush.api.Installation;
 import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.jboss.aerogear.unifiedpush.api.VariantType;
+import org.jboss.aerogear.unifiedpush.utils.CategoryPicker;
 import org.jboss.aerogear.unifiedpush.utils.Picker;
 import org.jboss.aerogear.unifiedpush.utils.StringPicker;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.config.ObjectMapperConfig;
+import com.jayway.restassured.config.RestAssuredConfig;
+import com.jayway.restassured.internal.mapper.ObjectMapperType;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 
 public class InstallationUtils {
+    
+    static {
+        RestAssured.config = RestAssuredConfig.config().objectMapperConfig(new ObjectMapperConfig(ObjectMapperType.JACKSON_1));
+    }
+    
     private static final int SINGLE = 1;
 
     private static final String ANDROID_DEFAULT_DEVICE_TYPE = "AndroidPhone";
     private static final String ANDROID_DEFAULT_OPERATING_SYSTEM = "ANDROID";
     private static final String ANDROID_DEFAULT_OPERATING_SYSTEM_VERSION = "4.2.2";
-    private static final String[] ANDROID_DEFAULT_CATEGORIES = {};
+    private static final Category[] ANDROID_DEFAULT_CATEGORIES = {};
 
     private static final String IOS_DEFAULT_DEVICE_TYPE = "IOSPhone";
     private static final String IOS_DEFAULT_OPERATING_SYSTEM = "IOS";
     private static final String IOS_DEFAULT_OPERATING_SYSTEM_VERSION = "6.0";
-    private static final String[] IOS_DEFAULT_CATEGORIES = {};
+    private static final Category[] IOS_DEFAULT_CATEGORIES = {};
 
     private static final String SIMPLEPUSH_DEFAULT_DEVICE_TYPE = "web";
     private static final String SIMPLEPUSH_DEFAULT_OPERATING_SYSTEM = "MozillaOS";
     private static final String SIMPLEPUSH_DEFAULT_OPERATING_SYSTEM_VERSION = "1";
-    private static final String[] SIMPLEPUSH_DEFAULT_CATEGORIES = { "default_category" };
+    private static final Category[] SIMPLEPUSH_DEFAULT_CATEGORIES = { new Category("default_category") };
     private static final String SIMPLEPUSH_DEFAULT_ENDPOINT = "http://localhost:8081/endpoint/%s";
 
     /**
@@ -107,7 +118,7 @@ public class InstallationUtils {
 
     public static Installation create(String deviceToken, String alias, String deviceType,
         String operatingSystem, String operatingSystemVersion,
-        Set<String> categories, String simplePushEndpoint) {
+        Set<Category> categories, String simplePushEndpoint) {
         Installation installation = new Installation();
 
         installation.setDeviceToken(deviceToken);
@@ -143,9 +154,9 @@ public class InstallationUtils {
         return generateIos(SINGLE).iterator().next();
     }
 
-    public static List<Installation> setCategories(List<Installation> installations, Set<String> categories, int categoriesPerInstallation) {
+    public static List<Installation> setCategories(List<Installation> installations, Set<Category> categories, int categoriesPerInstallation) {
 
-        Picker<String> picker = new StringPicker();
+        Picker<Category> picker = new CategoryPicker();
 
         for (Installation installation : installations) {
             installation.setCategories(picker.pick(categories, categoriesPerInstallation));
@@ -308,7 +319,7 @@ public class InstallationUtils {
         if (installation.getCategories() != null) {
             // JSONObject doesn't understand Set<String>
             JSONArray categories = new JSONArray();
-            for (String category : installation.getCategories()) {
+            for (Category category : installation.getCategories()) {
                 categories.add(category);
             }
             jsonObject.put("categories", categories);
@@ -337,17 +348,19 @@ public class InstallationUtils {
         installation.setAlias(jsonPath.getString("alias"));
         installation.setDeviceType(jsonPath.getString("deviceType"));
         installation.setDeviceToken(jsonPath.getString("deviceToken"));
-        HashSet<String> categories = new HashSet<String>();
-        List<String> jsonCategories = jsonPath.getList("categories");
+        HashSet<Category> categories = new HashSet<Category>();
+        List<Category> jsonCategories = jsonPath.getList("categories");
+
         if (jsonCategories != null) {
-            for (String category : jsonCategories) {
+            for (Category category : jsonCategories) {
                 categories.add(category);
             }
         }
+
         installation.setCategories(categories);
     }
 
-    public static void assignInstallationsToCategories(List<String> categories, List<Installation> installations,
+    public static void assignInstallationsToCategories(List<Category> categories, List<Installation> installations,
         int categoriesPerInstallation) {
 
         for (Installation installation : installations) {
@@ -355,33 +368,24 @@ public class InstallationUtils {
         }
     }
 
-    public static void assignInstallationToCategories(List<String> categories, Installation installation,
+    public static void assignInstallationToCategories(List<Category> categories, Installation installation,
         int categoriesPerInstallation) {
 
-        Set<String> pickedCategories = getRandomCategories(categories, categoriesPerInstallation);
+        Picker<Category> picker = new CategoryPicker();
+        
+        Set<Category> pickedCategories = picker.pick(new HashSet<Category>(categories), categoriesPerInstallation);
 
         installation.setCategories(pickedCategories);
     }
 
-    private static Set<String> getRandomCategories(List<String> categories, int categoriesPerInstallation) {
-
-        Set<String> picked = new HashSet<String>();
-
-        Collections.shuffle(categories);
-
-        picked.addAll(categories.subList(0, categoriesPerInstallation));
-
-        return picked;
-    }
-
-    public static List<String> getAllCategories(Session session) {
+    public static List<Category> getAllCategories(Session session) {
 
         Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
             .get("/rest/categories/all");
 
-        return Arrays.asList(response.getBody().as(String[].class));
+        return Arrays.asList(response.getBody().as(Category[].class));
     }
 
     public static String getAndroidDefaultDeviceType() {
@@ -396,8 +400,8 @@ public class InstallationUtils {
         return ANDROID_DEFAULT_OPERATING_SYSTEM_VERSION;
     }
 
-    public static Set<String> getAndroidDefaultCategories() {
-        HashSet<String> categories = new HashSet<String>();
+    public static Set<Category> getAndroidDefaultCategories() {
+        HashSet<Category> categories = new HashSet<Category>();
         Collections.addAll(categories, ANDROID_DEFAULT_CATEGORIES);
         return categories;
     }
@@ -414,8 +418,8 @@ public class InstallationUtils {
         return IOS_DEFAULT_OPERATING_SYSTEM_VERSION;
     }
 
-    public static Set<String> getIosDefaultCategories() {
-        HashSet<String> categories = new HashSet<String>();
+    public static Set<Category> getIosDefaultCategories() {
+        HashSet<Category> categories = new HashSet<Category>();
         Collections.addAll(categories, IOS_DEFAULT_CATEGORIES);
         return categories;
     }
@@ -432,8 +436,8 @@ public class InstallationUtils {
         return SIMPLEPUSH_DEFAULT_OPERATING_SYSTEM_VERSION;
     }
 
-    public static Set<String> getSimplepushDefaultCategories() {
-        HashSet<String> categories = new HashSet<String>();
+    public static Set<Category> getSimplepushDefaultCategories() {
+        HashSet<Category> categories = new HashSet<Category>();
         Collections.addAll(categories, SIMPLEPUSH_DEFAULT_CATEGORIES);
         return categories;
     }

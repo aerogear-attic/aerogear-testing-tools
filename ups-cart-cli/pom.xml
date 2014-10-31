@@ -27,7 +27,7 @@
         <maven.compiler.argument.source>${maven.compiler.source}</maven.compiler.argument.source>
 
         <version.com.jayway.restassured>2.3.1</version.com.jayway.restassured>
-        <version.aerogear.unifiedpush-server-rest-api>1.0.0.Final</version.aerogear.unifiedpush-server-rest-api>
+        <version.aerogear.unifiedpush-server-rest-api>1.0.2-alpha-1</version.aerogear.unifiedpush-server-rest-api>
     </properties>
 
     <dependencies>
@@ -102,12 +102,6 @@
             <groupId>org.jboss.aerogear.test</groupId>
             <artifactId>aerogear-ups-rest-api</artifactId>
             <version>${version.aerogear.unifiedpush-server-rest-api}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.aerogear.unifiedpush</groupId>
-            <artifactId>unifiedpush-model-api</artifactId>
-            <version>1.0.0.Final</version>
         </dependency>
 
         <dependency>

@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jboss.aerogear.test.cli.UnifiedPushServerCommand;
+import org.jboss.aerogear.unifiedpush.api.Category;
 import org.jboss.aerogear.unifiedpush.api.Installation;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.api.Variant;
@@ -199,7 +200,7 @@ public class UpsBatchGenerateCommand extends UnifiedPushServerCommand {
             log.log(Level.INFO, "Putting installations to categories.");
 
             // put these installations to categories
-            List<String> categories = new RandomCategoryGenerator().generateCategories(registrationCounts[3]);
+            List<Category> categories = new RandomCategoryGenerator().generateCategories(registrationCounts[3]);
 
             for (Map.Entry<String, List<Installation>> entry : installations.map.entrySet()) {
                 InstallationUtils.assignInstallationsToCategories(categories, entry.getValue(), registrationCounts[4]);

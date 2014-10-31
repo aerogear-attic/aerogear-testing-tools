@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import org.jboss.aerogear.test.api.auth.LoginRequest;
 import org.jboss.aerogear.unifiedpush.api.AndroidVariant;
+import org.jboss.aerogear.unifiedpush.api.Category;
 import org.jboss.aerogear.unifiedpush.api.Installation;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.api.SimplePushVariant;
@@ -53,12 +54,12 @@ public class UnifiedPushServer {
 
         log.log(Level.INFO, "Dumping categories to {0}.", new Object[] { categoryFile.getAbsoluteFile() });
 
-        List<String> categories = InstallationUtils.getAllCategories(session);
+        List<Category> categories = InstallationUtils.getAllCategories(session);
 
         FileWriter w = new FileWriter(categoryFile);
 
-        for (String category : categories) {
-            w.append(category).append("\n");
+        for (Category category : categories) {
+            w.append(category.getName()).append("\n");
         }
 
         w.close();

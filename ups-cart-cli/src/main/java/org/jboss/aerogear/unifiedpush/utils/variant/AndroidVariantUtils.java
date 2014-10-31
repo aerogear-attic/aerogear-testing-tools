@@ -31,11 +31,19 @@ import org.jboss.aerogear.unifiedpush.api.AndroidVariant;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.json.simple.JSONObject;
 
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.config.ObjectMapperConfig;
+import com.jayway.restassured.config.RestAssuredConfig;
+import com.jayway.restassured.internal.mapper.ObjectMapperType;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 
 public class AndroidVariantUtils {
 
+    static {
+        RestAssured.config = RestAssuredConfig.config().objectMapperConfig(new ObjectMapperConfig(ObjectMapperType.JACKSON_1));
+    }
+    
     private static final int SINGLE = 1;
 
     public static AndroidVariant create(String name, String description, String googleKey, String projectNumber) {
@@ -109,7 +117,7 @@ public class AndroidVariantUtils {
         Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
-            .body(toJSONString(androidVariant))
+            .body(androidVariant)
             .post("/rest/applications/{pushApplicationID}/android", pushApplication.getPushApplicationID());
 
         UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_CREATED);
@@ -171,7 +179,7 @@ public class AndroidVariantUtils {
         Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
-            .body(toJSONString(androidVariant))
+            .body(androidVariant)
             .put("/rest/applications/{pushApplicationID}/android/{variantID}",
                 pushApplication.getPushApplicationID(), androidVariant.getVariantID());
 

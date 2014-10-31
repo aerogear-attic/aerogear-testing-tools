@@ -113,8 +113,7 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
         CommandTool ct = Tasks.prepare(CommandTool.class)
             .programName("rhc")
             .parameters("app", "create", "-n", namespace, "-g", gearSize, "--region", region, "--no-git", appName)
-            .parameter("http://cartreflect-claytondev.rhcloud.com/reflect?github=" + organization + "/" + repository
-                + "&commit=" + latestCommit)
+            .parameter("https://cartreflect-claytondev.rhcloud.com/github/" + organization + "/" + repository + "?commit=" + latestCommit)
             .parameters(additionalCartridges);
 
         if (scalable) {
