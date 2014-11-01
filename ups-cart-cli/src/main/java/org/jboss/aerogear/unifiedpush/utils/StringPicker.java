@@ -30,7 +30,7 @@ public class StringPicker implements Picker<String> {
 
     public Set<String> pick(Set<String> elements, int count) throws IllegalArgumentException {
 
-        if (elements.size() > count) {
+        if (elements.size() < count) {
             throw new IllegalArgumentException("count of elements to choose is bigger then the size of the set to choose from");
         }
 

@@ -103,7 +103,7 @@ public final class SimplePushVariantUtils {
         Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
-            .body(toJSONString(simplePushVariant))
+            .body(simplePushVariant)
             .post("/rest/applications/{pushApplicationID}/simplePush",
                 pushApplication.getPushApplicationID());
 
@@ -143,7 +143,7 @@ public final class SimplePushVariantUtils {
         Response response = session.givenAuthorized()
             .contentType(ContentTypes.json())
             .header(Headers.acceptJson())
-            .get("/rest/applications/{pushApplicationID}/android/{variantID}",
+            .get("/rest/applications/{pushApplicationID}/simplePush/{variantID}",
                 pushApplication.getPushApplicationID(), variantID);
 
         UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_OK);
@@ -161,7 +161,7 @@ public final class SimplePushVariantUtils {
         Response response = session.givenAuthorized()
             .contentType(contentType)
             .header(Headers.acceptJson())
-            .body(toJSONString(simplePushVariant))
+            .body(simplePushVariant)
             .put("/rest/applications/{pushApplicationID}/simplePush/{variantID}",
                 pushApplication.getPushApplicationID(), simplePushVariant.getVariantID());
 

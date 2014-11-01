@@ -44,7 +44,7 @@ import com.jayway.restassured.response.Response;
  */
 public class BatchUtils extends InstallationUtils {
 
-    private static final int INSTALLATION_PAGING = 1000;
+    private static final int INSTALLATION_PAGING = 500;
 
     private static final int APPLICATION_PAGING = 1000;
 

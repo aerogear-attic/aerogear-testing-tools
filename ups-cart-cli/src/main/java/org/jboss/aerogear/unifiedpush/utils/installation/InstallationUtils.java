@@ -19,6 +19,7 @@ package org.jboss.aerogear.unifiedpush.utils.installation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,6 @@ import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.jboss.aerogear.unifiedpush.api.VariantType;
 import org.jboss.aerogear.unifiedpush.utils.CategoryPicker;
 import org.jboss.aerogear.unifiedpush.utils.Picker;
-import org.jboss.aerogear.unifiedpush.utils.StringPicker;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -60,17 +60,17 @@ public class InstallationUtils {
     private static final String ANDROID_DEFAULT_DEVICE_TYPE = "AndroidPhone";
     private static final String ANDROID_DEFAULT_OPERATING_SYSTEM = "ANDROID";
     private static final String ANDROID_DEFAULT_OPERATING_SYSTEM_VERSION = "4.2.2";
-    private static final Category[] ANDROID_DEFAULT_CATEGORIES = {};
+    private static final Category[] ANDROID_DEFAULT_CATEGORIES = { new Category("default_android_category") };
 
     private static final String IOS_DEFAULT_DEVICE_TYPE = "IOSPhone";
     private static final String IOS_DEFAULT_OPERATING_SYSTEM = "IOS";
     private static final String IOS_DEFAULT_OPERATING_SYSTEM_VERSION = "6.0";
-    private static final Category[] IOS_DEFAULT_CATEGORIES = {};
+    private static final Category[] IOS_DEFAULT_CATEGORIES = { new Category("default_ios_category") };
 
     private static final String SIMPLEPUSH_DEFAULT_DEVICE_TYPE = "web";
     private static final String SIMPLEPUSH_DEFAULT_OPERATING_SYSTEM = "MozillaOS";
     private static final String SIMPLEPUSH_DEFAULT_OPERATING_SYSTEM_VERSION = "1";
-    private static final Category[] SIMPLEPUSH_DEFAULT_CATEGORIES = { new Category("default_category") };
+    private static final Category[] SIMPLEPUSH_DEFAULT_CATEGORIES = { new Category("default_simplepush_category"), new Category("default_simplepush_category2") };
     private static final String SIMPLEPUSH_DEFAULT_ENDPOINT = "http://localhost:8081/endpoint/%s";
 
     /**
@@ -188,7 +188,7 @@ public class InstallationUtils {
         List<Installation> installations = new ArrayList<Installation>();
 
         for (int i = 0; i < count; i++) {
-            String deviceToken = UUID.randomUUID().toString();
+            String deviceToken = getSimplepushDefaultEndpoint(UUID.randomUUID().toString());
             String alias = UUID.randomUUID().toString();
 
             Installation installation = createSimplePush(deviceToken, alias);
@@ -320,7 +320,7 @@ public class InstallationUtils {
             // JSONObject doesn't understand Set<String>
             JSONArray categories = new JSONArray();
             for (Category category : installation.getCategories()) {
-                categories.add(category);
+                categories.add(category.getName());
             }
             jsonObject.put("categories", categories);
         }
@@ -349,14 +349,18 @@ public class InstallationUtils {
         installation.setDeviceType(jsonPath.getString("deviceType"));
         installation.setDeviceToken(jsonPath.getString("deviceToken"));
         HashSet<Category> categories = new HashSet<Category>();
-        List<Category> jsonCategories = jsonPath.getList("categories");
+        List<HashMap<String, String>> jsonCategories = jsonPath.getList("categories");
 
         if (jsonCategories != null) {
-            for (Category category : jsonCategories) {
-                categories.add(category);
+            for (HashMap<String, String> category : jsonCategories) {
+                for (Map.Entry<String, String> entry : category.entrySet()) {
+                    if (entry.getKey().equals("name")) {
+                        categories.add(new Category(entry.getValue()));
+                    }
+                }
             }
         }
-
+        
         installation.setCategories(categories);
     }
 
