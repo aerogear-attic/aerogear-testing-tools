@@ -1,5 +1,3 @@
-package org.jboss.aerogear.test.container.manager;
-
 /*
  * JBoss, Home of Professional Open Source
  * Copyright 2011 Red Hat Inc. and/or its affiliates and other contributors
@@ -17,11 +15,12 @@ package org.jboss.aerogear.test.container.manager;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jboss.aerogear.test.container.manager;
 
 import java.io.File;
 
 /**
- * JBossAsManagedConfiguration
+ *
  *
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
  * @version $Revision: $
@@ -36,14 +35,6 @@ public class ManagedContainerConfiguration {
 
     private String javaVmArguments = System.getProperty("jboss.options", "-Xmx512m -XX:MaxPermSize=128m");
 
-    private String managementAddress;
-
-    private int managementPort;
-
-    private String username;
-
-    private String password;
-
     private int startupTimeoutInSeconds = 60;
 
     private boolean outputToConsole = true;
@@ -52,20 +43,17 @@ public class ManagedContainerConfiguration {
 
     private boolean allowConnectingToRunningServer = false;
 
-    private boolean enableAssertions = true;
+    private boolean enableAssertions = false;
 
     public ManagedContainerConfiguration() {
         // if no javaHome is set use java.home of already running jvm
         if (javaHome == null || javaHome.isEmpty()) {
             javaHome = System.getProperty("java.home");
         }
-
-        managementAddress = "127.0.0.1";
-        managementPort = 9999;
     }
 
     /**
-     * 
+     *
      * @throws IllegalStateException if {@code jbossHome} or {@code javaHome} are not valid directories or if {@code username}
      *         is not null and password is null
      */
@@ -82,28 +70,6 @@ public class ManagedContainerConfiguration {
         if (!javaHome.exists() || !jbossHome.isDirectory()) {
             throw new IllegalStateException("javaHome '" + javaHome.getAbsolutePath() + "' must exist!");
         }
-
-        if (username != null && password == null) {
-            throw new IllegalStateException("username has been set, but no password given");
-        }
-    }
-
-    public String getManagementAddress() {
-        return managementAddress;
-    }
-
-    public ManagedContainerConfiguration setManagementAddress(String host) {
-        this.managementAddress = host;
-        return this;
-    }
-
-    public int getManagementPort() {
-        return managementPort;
-    }
-
-    public ManagedContainerConfiguration setManagementPort(int managementPort) {
-        this.managementPort = managementPort;
-        return this;
     }
 
     /**
@@ -222,40 +188,8 @@ public class ManagedContainerConfiguration {
         return enableAssertions;
     }
 
-    public ManagedContainerConfiguration setEnableAssertions(boolean enableAssertions) {
+    public void setEnableAssertions(boolean enableAssertions) {
         this.enableAssertions = enableAssertions;
-        return this;
     }
 
-    public String getUsername() {
-        return this.username;
-    }
-
-    /**
-     * 
-     * @param username can not be a null object or an empty string
-     * @return
-     */
-    public ManagedContainerConfiguration setUsername(String username) {
-        if (username != null && username.length() > 0) {
-            this.username = username;
-        }
-        return this;
-    }
-
-    public String getPassword() {
-        return this.password;
-    }
-
-    /**
-     * 
-     * @param password can not be a null object nor an empty string
-     * @return
-     */
-    public ManagedContainerConfiguration setPassword(String password) {
-        if (password != null && password.length() > 0) {
-            this.password = password;
-        }
-        return this;
-    }
 }

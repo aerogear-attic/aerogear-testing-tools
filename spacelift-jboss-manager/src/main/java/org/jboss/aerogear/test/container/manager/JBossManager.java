@@ -21,23 +21,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.sasl.RealmCallback;
-
+import org.arquillian.spacelift.execution.CountDownWatch;
+import org.arquillian.spacelift.execution.Tasks;
 import org.jboss.aerogear.test.container.manager.api.ContainerManager;
 import org.jboss.aerogear.test.container.manager.api.ContainerManagerException;
-import org.jboss.as.controller.client.ModelControllerClient;
 
 /**
  * Code taken and refactored from
@@ -50,20 +42,14 @@ import org.jboss.as.controller.client.ModelControllerClient;
  */
 public class JBossManager implements ContainerManager {
 
-    private static final Logger log = Logger.getLogger(JBossManager.class.getName());
+    private static final Logger logger = Logger.getLogger(JBossManager.class.getName());
 
-    static final String TEMP_CONTAINER_DIRECTORY = "arquillian-temp-container";
-
-    private static final String CONFIG_PATH = "/standalone/configuration/";
-
-    static final String CONFIG_DIR = "configuration";
-    static final String SERVER_BASE_DIR = "standalone";
-    static final String LOG_DIR = "log";
-    static final String DATA_DIR = "data";
+    private static final String SERVER_BASE_PATH = "/standalone/";
+    private static final String CONFIG_PATH = SERVER_BASE_PATH + "configuration/";
+    private static final String LOG_PATH = SERVER_BASE_PATH + "log/";
 
     private Thread shutdownThread;
     private Process process;
-    private ManagementClient client;
     private final ManagedContainerConfiguration configuration;
 
     public JBossManager() {
@@ -76,43 +62,23 @@ public class JBossManager implements ContainerManager {
 
     @Override
     public void start() throws ContainerManagerException {
-        if (configuration.getUsername() != null) {
-            Authentication.username = configuration.getUsername();
-            Authentication.password = configuration.getPassword();
-        }
-
-        ModelControllerClient modelControllerClient = null;
-        try {
-            modelControllerClient = ModelControllerClient.Factory.create(
-                configuration.getManagementAddress(),
-                configuration.getManagementPort(),
-                Authentication.getCallbackHandler());
-        } catch (UnknownHostException e) {
-            throw new ContainerManagerException(e);
-        }
-
-        client = new ManagementClient(modelControllerClient, configuration.getManagementAddress(), configuration.getManagementPort());
-
         try {
             startInternal();
         } catch (RuntimeException e) {
-            safeCloseClient();
             throw new ContainerManagerException(e);
         }
     }
 
     @Override
     public void stop() throws ContainerManagerException {
-        try {
-            stopInternal();
-        } finally {
-            safeCloseClient();
-        }
+        stopInternal();
     }
 
     private void startInternal() {
 
-        if (isServerRunning()) {
+        boolean isServerRunning = Tasks.prepare(JBossStartChecker.class).execute().await();
+
+        if (isServerRunning) {
             if (configuration.isAllowConnectingToRunningServer()) {
                 return;
             } else {
@@ -158,7 +124,7 @@ public class JBossManager implements ContainerManager {
             }
 
             cmd.add("-Djboss.home.dir=" + jbossHomeDir);
-            cmd.add("-Dorg.jboss.boot.log.file=" + jbossHomeDir + "/standalone/log/boot.log");
+            cmd.add("-Dorg.jboss.boot.log.file=" + jbossHomeDir + LOG_PATH + "boot.log");
             cmd.add("-Dlogging.configuration=file:" + jbossHomeDir + CONFIG_PATH + "logging.properties");
             cmd.add("-Djboss.modules.dir=" + modulesDir.getCanonicalPath());
             cmd.add("-Djboss.bundles.dir=" + bundlesDir.getCanonicalPath());
@@ -172,12 +138,15 @@ public class JBossManager implements ContainerManager {
             cmd.add("-server-config");
             cmd.add(configuration.getServerConfig());
 
-            log.info("Starting container with: " + cmd.toString());
+            logger.info("Starting container with: " + cmd.toString());
+
             ProcessBuilder processBuilder = new ProcessBuilder(cmd);
             processBuilder.redirectErrorStream(true);
             process = processBuilder.start();
+
             new Thread(new ConsoleConsumer()).start();
             final Process proc = process;
+
             shutdownThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -191,26 +160,12 @@ public class JBossManager implements ContainerManager {
                     }
                 }
             });
+
             Runtime.getRuntime().addShutdownHook(shutdownThread);
 
-            long startupTimeout = configuration.getStartupTimeoutInSeconds();
-            long timeout = startupTimeout * 1000;
-            boolean serverAvailable = false;
-            long sleep = 1000;
-            while (timeout > 0 && serverAvailable == false) {
-                serverAvailable = getManagementClient().isServerInRunningState();
-                if (!serverAvailable) {
-                    if (processHasDied(proc))
-                        break;
-                    Thread.sleep(sleep);
-                    timeout -= sleep;
-                    sleep = Math.max(sleep / 2, 100);
-                }
-            }
-            if (!serverAvailable) {
-                destroyProcess();
-                throw new TimeoutException(String.format("Managed server was not started within [%d] s", configuration.getStartupTimeoutInSeconds()));
-            }
+            Tasks.prepare(JBossStartChecker.class)
+                .execute()
+                .until(new CountDownWatch(configuration.getStartupTimeoutInSeconds(), TimeUnit.SECONDS), JBossStartChecker.jbossStartedCondition);
 
         } catch (Exception e) {
             throw new RuntimeException("Could not start container", e);
@@ -219,15 +174,12 @@ public class JBossManager implements ContainerManager {
 
     // helpers
 
-    private ManagementClient getManagementClient() {
-        return this.client;
-    }
-
     private void stopInternal() throws ContainerManagerException {
         if (shutdownThread != null) {
             Runtime.getRuntime().removeShutdownHook(shutdownThread);
             shutdownThread = null;
         }
+
         try {
             if (process != null) {
                 process.destroy();
@@ -239,61 +191,12 @@ public class JBossManager implements ContainerManager {
         }
     }
 
-    private static boolean processHasDied(final Process process) {
-        try {
-            process.exitValue();
-            return true;
-        } catch (IllegalThreadStateException e) {
-            // good
-            return false;
-        }
-    }
-
-    private void safeCloseClient() {
-        try {
-            client.close();
-        } catch (Exception e) {
-            log.log(Level.WARNING, "Caught exception closing ModelControllerClient", e);
-        }
-    }
-
-    private boolean isServerRunning() {
-        Socket socket = null;
-        try {
-            socket = new Socket(
-                configuration.getManagementAddress(),
-                configuration.getManagementPort());
-        } catch (Exception ignored) { // nothing is running on defined ports
-            return false;
-        } finally {
-            if (socket != null) {
-                try {
-                    socket.close();
-                } catch (Exception e) {
-                    throw new RuntimeException("Could not close isServerStarted socket", e);
-                }
-            }
-        }
-        return true;
-    }
-
     private void failDueToRunning() {
         throw new RuntimeException(
             "The server is already running! " +
                 "Managed containers does not support connecting to running server instances due to the " +
                 "possible harmful effect of connecting to the wrong server. Please stop server before running or " +
                 "change to another type of container.\n");
-    }
-
-    private int destroyProcess() {
-        if (process == null)
-            return 0;
-        process.destroy();
-        try {
-            return process.waitFor();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -310,6 +213,7 @@ public class JBossManager implements ContainerManager {
             final boolean writeOutput = configuration.isOutputToConsole();
 
             String line = null;
+
             try {
                 while ((line = reader.readLine()) != null) {
                     if (writeOutput) {
@@ -320,36 +224,6 @@ public class JBossManager implements ContainerManager {
             }
         }
 
-    }
-
-    private static class Authentication {
-
-        public static String username = "";
-        public static String password = "";
-
-        public static CallbackHandler getCallbackHandler() {
-            return new CallbackHandler();
-        }
-
-        public static class CallbackHandler implements javax.security.auth.callback.CallbackHandler {
-
-            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                for (Callback current : callbacks) {
-                    if (current instanceof NameCallback) {
-                        NameCallback ncb = (NameCallback) current;
-                        ncb.setName(username);
-                    } else if (current instanceof PasswordCallback) {
-                        PasswordCallback pcb = (PasswordCallback) current;
-                        pcb.setPassword(password.toCharArray());
-                    } else if (current instanceof RealmCallback) {
-                        RealmCallback rcb = (RealmCallback) current;
-                        rcb.setText(rcb.getDefaultText());
-                    } else {
-                        throw new UnsupportedCallbackException(current);
-                    }
-                }
-            }
-        }
     }
 
 }

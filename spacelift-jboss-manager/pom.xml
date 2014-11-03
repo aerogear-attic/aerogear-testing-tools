@@ -42,8 +42,6 @@
         <version.org.arquillian.spacelift>1.0.0.Alpha2</version.org.arquillian.spacelift>
 
         <!-- JBoss related -->
-        <version.org.jboss.as.controller.client>7.2.0.Final</version.org.jboss.as.controller.client>
-        <version.org.jboss.as.controller>7.2.0.Final</version.org.jboss.as.controller>
         <version.org.jboss.as>7.1.1.Final</version.org.jboss.as>
         
         <!-- Test related -->
@@ -69,18 +67,6 @@
                 <version>${version.org.arquillian.spacelift}</version>
             </dependency>
         
-            <!-- JBoss related -->
-            <dependency>
-                <groupId>org.jboss.as</groupId>
-                <artifactId>jboss-as-controller-client</artifactId>
-                <version>${version.org.jboss.as.controller.client}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.as</groupId>
-                <artifactId>jboss-as-controller</artifactId>
-                <version>${version.org.jboss.as.controller}</version>
-            </dependency>
-            
             <!-- Test related -->
             <dependency>
                 <groupId>junit</groupId>
@@ -104,16 +90,6 @@
             <artifactId>arquillian-spacelift</artifactId>
         </dependency>
     
-        <!-- JBoss related -->
-        <dependency>
-            <groupId>org.jboss.as</groupId>
-            <artifactId>jboss-as-controller-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.as</groupId>
-            <artifactId>jboss-as-controller</artifactId>
-        </dependency>
-        
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -244,7 +220,7 @@
                         </goals>
                         <configuration>
                             <target>
-                                <move file="${project.build.directory}/jboss-as-${version.org.jboss.as}" tofile="${project.build.directory}/jboss" />
+                                <move file="${project.build.directory}/jboss-as-${version.org.jboss.as}" tofile="${project.build.directory}/jboss" failonerror="false" />
                             </target>
                         </configuration>
                     </execution>
