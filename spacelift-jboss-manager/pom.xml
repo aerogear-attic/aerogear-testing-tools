@@ -42,10 +42,8 @@
         <version.org.arquillian.spacelift>1.0.0.Alpha2</version.org.arquillian.spacelift>
 
         <!-- JBoss related -->
-        <version.org.jboss.dmr>1.1.1.Final</version.org.jboss.dmr>
-        <version.org.jboss.xnio.api>3.0.3.GA</version.org.jboss.xnio.api>
-        <version.org.jboss.as.controller.client>7.1.1.Final</version.org.jboss.as.controller.client>
-        <version.org.jboss.as.controller>7.1.1.Final</version.org.jboss.as.controller>
+        <version.org.jboss.as.controller.client>7.2.0.Final</version.org.jboss.as.controller.client>
+        <version.org.jboss.as.controller>7.2.0.Final</version.org.jboss.as.controller>
         <version.org.jboss.as>7.1.1.Final</version.org.jboss.as>
         
         <!-- Test related -->
@@ -72,16 +70,6 @@
             </dependency>
         
             <!-- JBoss related -->
-            <dependency>
-                <groupId>org.jboss</groupId>
-                <artifactId>jboss-dmr</artifactId>
-                <version>${version.org.jboss.dmr}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.xnio</groupId>
-                <artifactId>xnio-api</artifactId>
-                <version>${version.org.jboss.xnio.api}</version>
-            </dependency>
             <dependency>
                 <groupId>org.jboss.as</groupId>
                 <artifactId>jboss-as-controller-client</artifactId>
@@ -117,14 +105,6 @@
         </dependency>
     
         <!-- JBoss related -->
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jboss-dmr</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.xnio</groupId>
-            <artifactId>xnio-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.jboss.as</groupId>
             <artifactId>jboss-as-controller-client</artifactId>
