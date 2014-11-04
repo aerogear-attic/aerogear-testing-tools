@@ -139,7 +139,7 @@
                             <filesets>
                                 <fileset>
                                     <directory>
-                                        target/openshift-unifiedpush-proxy.war/WEB-INF/lib/keycloak-connections-jpa-${keycloak.version}.jar/META-INF
+                                        target/unifiedpush-test-extension.war/WEB-INF/lib/keycloak-connections-jpa-${keycloak.version}.jar/META-INF
                                     </directory>
                                     <includes>
                                         <include>persistence.xml</include>
