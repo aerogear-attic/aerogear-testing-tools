@@ -134,7 +134,7 @@ public class ProxySetup {
         for (String propertyName : POSSIBLE_BIND_IP_PROPERTIES) {
             String propertyValue = System.getenv(propertyName);
             // TODO it might be a good idea to add additional validation
-            if (propertyName != null && ip.length() != 0) {
+            if (propertyValue != null && propertyValue.length() != 0) {
                 ip = propertyValue;
                 break;
             }
