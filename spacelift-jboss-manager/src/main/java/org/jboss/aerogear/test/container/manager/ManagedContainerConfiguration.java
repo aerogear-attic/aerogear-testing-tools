@@ -46,9 +46,20 @@ public class ManagedContainerConfiguration {
     private boolean enableAssertions = false;
 
     public ManagedContainerConfiguration() {
-        // if no javaHome is set use java.home of already running jvm
         if (javaHome == null || javaHome.isEmpty()) {
             javaHome = System.getProperty("java.home");
+        }
+
+        if (javaHome != null) {
+            javaHome.trim();
+        }
+
+        if (jbossHome == null || jbossHome.isEmpty()) {
+            jbossHome = System.getProperty("jboss.home");
+        }
+
+        if (jbossHome != null) {
+            jbossHome.trim();
         }
     }
 
@@ -59,16 +70,20 @@ public class ManagedContainerConfiguration {
      */
     public void validate() throws IllegalStateException {
 
-        File jbossHome = new File(this.jbossHome);
+        if (jbossHome != null) {
+            File jbossHome = new File(this.jbossHome);
 
-        if (!jbossHome.exists() || !jbossHome.isDirectory()) {
-            throw new IllegalStateException("jbossHome '" + jbossHome.getAbsolutePath() + "' must exist!");
+            if (!jbossHome.exists() || !jbossHome.isDirectory()) {
+                throw new IllegalStateException("jbossHome '" + jbossHome.getAbsolutePath() + "' must exist!");
+            }
         }
 
-        File javaHome = new File(this.javaHome);
+        if (javaHome != null) {
+            File javaHome = new File(this.javaHome);
 
-        if (!javaHome.exists() || !jbossHome.isDirectory()) {
-            throw new IllegalStateException("javaHome '" + javaHome.getAbsolutePath() + "' must exist!");
+            if (!javaHome.exists() || !javaHome.isDirectory()) {
+                throw new IllegalStateException("javaHome '" + javaHome.getAbsolutePath() + "' must exist!");
+            }
         }
     }
 
@@ -83,7 +98,9 @@ public class ManagedContainerConfiguration {
      * @param jbossHome the jbossHome to set
      */
     public ManagedContainerConfiguration setJbossHome(String jbossHome) {
-        this.jbossHome = jbossHome;
+        if (jbossHome != null) {
+            this.jbossHome = jbossHome.trim();
+        }
         return this;
     }
 
@@ -98,7 +115,9 @@ public class ManagedContainerConfiguration {
      * @param javaHome the javaHome to set
      */
     public ManagedContainerConfiguration setJavaHome(String javaHome) {
-        this.javaHome = javaHome;
+        if (javaHome != null) {
+            this.javaHome = javaHome;
+        }
         return this;
     }
 

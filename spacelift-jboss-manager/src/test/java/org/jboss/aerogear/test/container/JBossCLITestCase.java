@@ -34,7 +34,7 @@ import org.junit.runners.JUnit4;
  * Starts container, connects and quits from CLI, stops container.
  * 
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
- *
+ * 
  */
 @RunWith(JUnit4.class)
 public class JBossCLITestCase {

@@ -76,7 +76,11 @@ public class JBossManager implements ContainerManager {
 
     private void startInternal() {
 
-        boolean isServerRunning = Tasks.prepare(JBossStartChecker.class).execute().await();
+        if (configuration.getJbossHome() == null) {
+            throw new IllegalStateException("JBOSS_HOME is set to null for JBossManager");
+        }
+
+        boolean isServerRunning = Tasks.prepare(JBossStartChecker.class).configuration(configuration).execute().await();
 
         if (isServerRunning) {
             if (configuration.isAllowConnectingToRunningServer()) {
@@ -84,6 +88,10 @@ public class JBossManager implements ContainerManager {
             } else {
                 failDueToRunning();
             }
+        }
+
+        if (configuration.getJavaHome() == null) {
+            throw new IllegalStateException("JAVA_HOME is set to null for JBossManager");
         }
 
         try {
@@ -164,6 +172,7 @@ public class JBossManager implements ContainerManager {
             Runtime.getRuntime().addShutdownHook(shutdownThread);
 
             Tasks.prepare(JBossStartChecker.class)
+                .configuration(configuration)
                 .execute()
                 .until(new CountDownWatch(configuration.getStartupTimeoutInSeconds(), TimeUnit.SECONDS), JBossStartChecker.jbossStartedCondition);
 

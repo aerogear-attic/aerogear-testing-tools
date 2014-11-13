@@ -38,7 +38,7 @@ import org.arquillian.spacelift.tool.Tool;
  */
 public class JBossCLI extends Tool<Object, ProcessResult> {
 
-    private Map<String, String> environment;
+    private final Map<String, String> environment = new HashMap<String, String>();
 
     String user;
 
@@ -52,13 +52,8 @@ public class JBossCLI extends Tool<Object, ProcessResult> {
 
     List<String> command = new ArrayList<String>();
 
-    public JBossCLI() {
-        environment = new HashMap<String, String>();
-        environment.put("JBOSS_HOME", System.getenv("JBOSS_HOME"));
-    }
-
     public JBossCLI environment(String key, String value) {
-        if (key != null) {
+        if (key != null && value != null) {
             environment.put(key, value);
         }
         return this;
@@ -66,7 +61,11 @@ public class JBossCLI extends Tool<Object, ProcessResult> {
 
     public JBossCLI environment(Map<String, String> environment) {
         if (environment != null) {
-            environment.putAll(environment);
+            for (Map.Entry<String, String> entry : environment.entrySet()) {
+                if (entry != null) {
+                    environment(entry.getKey(), entry.getValue());
+                }
+            }
         }
         return this;
     }

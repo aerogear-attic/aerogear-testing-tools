@@ -22,7 +22,10 @@ import org.jboss.aerogear.test.container.manager.ManagedContainerConfiguration;
 import org.jboss.aerogear.test.container.spacelift.JBossStarter;
 import org.jboss.aerogear.test.container.spacelift.JBossStopper;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -30,12 +33,13 @@ import org.junit.runners.JUnit4;
  * Starts and stops container.
  * 
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
- *
+ * 
  */
 @RunWith(JUnit4.class)
 public class JBossSpaceliftTestCase {
 
-    private static final String JBOSS_HOME = TestUtils.getJBossHome();
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @BeforeClass
     public static void setup() {
@@ -45,10 +49,21 @@ public class JBossSpaceliftTestCase {
     @Test
     public void startAndStopJBossContainer() {
 
+        String JBOSS_HOME = TestUtils.getJBossHome();
+
         Tasks.prepare(JBossStarter.class)
             .configuration(new ManagedContainerConfiguration().setJbossHome(JBOSS_HOME))
             .then(JBossStopper.class)
             .execute()
             .await();
+    }
+
+    @Test
+    @Ignore("run this only if getEnv on JBOSS_HOME is null and jboss.home system property is null as well")
+    public void startAndStopJBossContainerWithoutJBossHome() {
+
+        expectedException.expect(Exception.class);
+
+        Tasks.prepare(JBossStarter.class).then(JBossStopper.class).execute().await();
     }
 }

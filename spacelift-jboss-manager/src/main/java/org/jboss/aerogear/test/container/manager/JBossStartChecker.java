@@ -32,6 +32,16 @@ class JBossStartChecker extends Task<Object, Boolean> {
 
     public static final ExecutionCondition<Boolean> jbossStartedCondition = new JBossStartChecker.JBossStartedCondition();
 
+    private ManagedContainerConfiguration configuration = new ManagedContainerConfiguration();
+
+    public JBossStartChecker configuration(ManagedContainerConfiguration configuration) {
+        if (configuration != null) {
+            configuration.validate();
+            this.configuration = configuration;
+        }
+        return this;
+    }
+
     @Override
     protected Boolean process(Object input) throws Exception {
 
@@ -39,6 +49,7 @@ class JBossStartChecker extends Task<Object, Boolean> {
 
         try {
             processResult = Tasks.prepare(JBossCLI.class)
+                .environment("JBOSS_HOME", configuration.getJbossHome())
                 .connect()
                 .cliCommand(":read-attribute(name=server-state)")
                 .execute().await();
