@@ -32,6 +32,7 @@ import org.arquillian.spacelift.process.impl.CommandTool;
 import org.arquillian.spacelift.tool.Tool;
 
 /**
+ * Wrapper around {@code jboss-cli.sh} script.
  *
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
  *
@@ -40,15 +41,15 @@ public class JBossCLI extends Tool<Object, ProcessResult> {
 
     private final Map<String, String> environment = new HashMap<String, String>();
 
-    String user;
+    private String user;
 
-    String password;
+    private String password;
 
-    File file;
+    private File file;
 
-    String controller;
+    private String controller;
 
-    boolean connect = false;
+    private boolean connect = false;
 
     List<String> command = new ArrayList<String>();
 

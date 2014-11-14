@@ -62,42 +62,19 @@ public class JBossManager implements ContainerManager {
 
     @Override
     public void start() throws ContainerManagerException {
-        try {
-            startInternal();
-        } catch (RuntimeException e) {
-            throw new ContainerManagerException(e);
-        }
-    }
-
-    @Override
-    public void stop() throws ContainerManagerException {
-        stopInternal();
-    }
-
-    private void startInternal() {
 
         if (configuration.getJbossHome() == null) {
             throw new IllegalStateException("JBOSS_HOME is set to null for JBossManager");
         }
 
-        boolean isServerRunning = Tasks.prepare(JBossStartChecker.class).configuration(configuration).execute().await();
-
-        if (isServerRunning) {
-            if (configuration.isAllowConnectingToRunningServer()) {
-                return;
-            } else {
-                failDueToRunning();
-            }
-        }
-
-        if (configuration.getJavaHome() == null) {
-            throw new IllegalStateException("JAVA_HOME is set to null for JBossManager");
-        }
-
         try {
-            final String jbossHomeDir = configuration.getJbossHome();
+            String jbossHomeDir = configuration.getJbossHome();
+            if (configuration.getJbossHome().contains(" ")) {
+                jbossHomeDir = "\"" + jbossHomeDir + "\"";
+            }
+
             String modulesPath = configuration.getModulePath();
-            if (modulesPath == null || modulesPath.isEmpty()) {
+            if (modulesPath == null || modulesPath.length() == 0) {
                 modulesPath = jbossHomeDir + File.separatorChar + "modules";
             }
             File modulesDir = new File(modulesPath);
@@ -116,10 +93,18 @@ public class JBossManager implements ContainerManager {
                 throw new IllegalStateException("Cannot find: " + modulesJar);
 
             List<String> cmd = new ArrayList<String>();
-            String javaExec = configuration.getJavaHome() + File.separatorChar + "bin" + File.separatorChar + "java";
-            if (configuration.getJavaHome().contains(" ")) {
-                javaExec = "\"" + javaExec + "\"";
+
+            String javaExec = null;
+
+            if (configuration.getJavaHome() != null) {
+                javaExec = configuration.getJavaHome() + File.separatorChar + "bin" + File.separatorChar + "java";
+                if (configuration.getJavaHome().contains(" ")) {
+                    javaExec = "\"" + javaExec + "\"";
+                }
+            } else {
+                javaExec = "java";
             }
+
             cmd.add(javaExec);
             if (additionalJavaOpts != null) {
                 for (String opt : additionalJavaOpts.split("\\s+")) {
@@ -177,13 +162,12 @@ public class JBossManager implements ContainerManager {
                 .until(new CountDownWatch(configuration.getStartupTimeoutInSeconds(), TimeUnit.SECONDS), JBossStartChecker.jbossStartedCondition);
 
         } catch (Exception e) {
-            throw new RuntimeException("Could not start container", e);
+            throw new ContainerManagerException("Could not start container", e);
         }
     }
 
-    // helpers
-
-    private void stopInternal() throws ContainerManagerException {
+    @Override
+    public void stop() throws ContainerManagerException {
         if (shutdownThread != null) {
             Runtime.getRuntime().removeShutdownHook(shutdownThread);
             shutdownThread = null;
@@ -200,13 +184,7 @@ public class JBossManager implements ContainerManager {
         }
     }
 
-    private void failDueToRunning() {
-        throw new RuntimeException(
-            "The server is already running! " +
-                "Managed containers does not support connecting to running server instances due to the " +
-                "possible harmful effect of connecting to the wrong server. Please stop server before running or " +
-                "change to another type of container.\n");
-    }
+    // helpers
 
     /**
      * Runnable that consumes the output of the process. If nothing consumes the output the AS will hang on some platforms

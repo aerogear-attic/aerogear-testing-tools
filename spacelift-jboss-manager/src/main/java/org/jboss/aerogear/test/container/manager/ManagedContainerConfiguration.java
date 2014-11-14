@@ -27,13 +27,13 @@ import java.io.File;
  */
 public class ManagedContainerConfiguration {
 
-    private String jbossHome = System.getenv("JBOSS_HOME");
+    private String jbossHome = System.getProperty("jboss.home");
 
-    private String javaHome = System.getenv("JAVA_HOME");
+    private String javaHome = System.getProperty("java.home");
 
     private String modulePath = System.getProperty("module.path");
 
-    private String javaVmArguments = System.getProperty("jboss.options", "-Xmx512m -XX:MaxPermSize=128m");
+    private String javaVmArguments = System.getProperty("jboss.options", "-Xmx512m");
 
     private int startupTimeoutInSeconds = 60;
 
@@ -41,21 +41,19 @@ public class ManagedContainerConfiguration {
 
     private String serverConfig = System.getProperty("jboss.server.config.file.name", "standalone.xml");
 
-    private boolean allowConnectingToRunningServer = false;
-
     private boolean enableAssertions = false;
 
     public ManagedContainerConfiguration() {
-        if (javaHome == null || javaHome.isEmpty()) {
-            javaHome = System.getProperty("java.home");
+        if (javaHome == null || javaHome.length() == 0) {
+            javaHome = System.getenv("JAVA_HOME");
         }
 
         if (javaHome != null) {
             javaHome.trim();
         }
 
-        if (jbossHome == null || jbossHome.isEmpty()) {
-            jbossHome = System.getProperty("jboss.home");
+        if (jbossHome == null || jbossHome.length() == 0) {
+            jbossHome = System.getenv("JBOSS_HOME");
         }
 
         if (jbossHome != null) {
@@ -76,6 +74,8 @@ public class ManagedContainerConfiguration {
             if (!jbossHome.exists() || !jbossHome.isDirectory()) {
                 throw new IllegalStateException("jbossHome '" + jbossHome.getAbsolutePath() + "' must exist!");
             }
+        } else {
+            throw new IllegalStateException("Could not determine the value of JBoss home directory.");
         }
 
         if (javaHome != null) {
@@ -84,6 +84,8 @@ public class ManagedContainerConfiguration {
             if (!javaHome.exists() || !javaHome.isDirectory()) {
                 throw new IllegalStateException("javaHome '" + javaHome.getAbsolutePath() + "' must exist!");
             }
+        } else {
+            throw new IllegalStateException("Could not determine the value of Java home directory.");
         }
     }
 
@@ -191,15 +193,6 @@ public class ManagedContainerConfiguration {
 
     public ManagedContainerConfiguration setModulePath(String modulePath) {
         this.modulePath = modulePath;
-        return this;
-    }
-
-    public boolean isAllowConnectingToRunningServer() {
-        return allowConnectingToRunningServer;
-    }
-
-    public ManagedContainerConfiguration setAllowConnectingToRunningServer(boolean allowConnectingToRunningServer) {
-        this.allowConnectingToRunningServer = allowConnectingToRunningServer;
         return this;
     }
 

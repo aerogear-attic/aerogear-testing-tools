@@ -51,11 +51,14 @@
         <version.org.apache.commons.lang3>3.1</version.org.apache.commons.lang3>
 
         <!--
-            Options to override the compiler arguments directly on the compiler arument line to separate between what
+            Options to override the compiler arguments directly on the compiler argument line to separate between what
             the IDE understands as the source level and what the Maven compiler actually use.  
         -->
-        <maven.compiler.argument.target>1.6</maven.compiler.argument.target>
-        <maven.compiler.argument.source>1.6</maven.compiler.argument.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.6</maven.compiler.source>        
+
+        <maven.compiler.argument.target>1.5</maven.compiler.argument.target>
+        <maven.compiler.argument.source>1.5</maven.compiler.argument.source>
     </properties>
 
     <dependencyManagement>
@@ -135,7 +138,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>1.7</version>
+                <version>1.12</version>
                 <executions>
                     <execution>
                         <id>signature-check</id>
@@ -148,7 +151,7 @@
                 <configuration>
                     <signature>
                         <groupId>org.codehaus.mojo.signature</groupId>
-                        <artifactId>java16</artifactId>
+                        <artifactId>java15</artifactId>
                         <version>1.0</version>
                     </signature>
                 </configuration>
