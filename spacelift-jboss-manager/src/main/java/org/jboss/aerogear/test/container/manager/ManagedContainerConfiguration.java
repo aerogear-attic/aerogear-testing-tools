@@ -20,10 +20,10 @@ package org.jboss.aerogear.test.container.manager;
 import java.io.File;
 
 /**
- *
- *
+ * 
+ * 
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
- * @version $Revision: $
+ * @author <a href="mailto:aslak@redhat.com">Stefan Miklosovic</a>
  */
 public class ManagedContainerConfiguration {
 
@@ -42,6 +42,10 @@ public class ManagedContainerConfiguration {
     private String serverConfig = System.getProperty("jboss.server.config.file.name", "standalone.xml");
 
     private boolean enableAssertions = false;
+
+    private String user;
+
+    private String password;
 
     public ManagedContainerConfiguration() {
         if (javaHome == null || javaHome.length() == 0) {
@@ -62,9 +66,8 @@ public class ManagedContainerConfiguration {
     }
 
     /**
-     *
-     * @throws IllegalStateException if {@code jbossHome} or {@code javaHome} are not valid directories or if {@code username}
-     *         is not null and password is null
+     * 
+     * @throws IllegalStateException if {@code jbossHome} or {@code javaHome} are not valid directories
      */
     public void validate() throws IllegalStateException {
 
@@ -93,7 +96,16 @@ public class ManagedContainerConfiguration {
      * @return the jbossHome
      */
     public String getJbossHome() {
-        return jbossHome;
+
+        String resolvedJbossHome = null;
+
+        if (jbossHome.contains(" ")) {
+            resolvedJbossHome = "\"" + jbossHome + "\"";
+        } else {
+            resolvedJbossHome = jbossHome;
+        }
+
+        return resolvedJbossHome;
     }
 
     /**
@@ -170,7 +182,7 @@ public class ManagedContainerConfiguration {
 
     /**
      * Get the server configuration file name. Equivalent to [-server-config=...] on the command line.
-     *
+     * 
      * @return the server config
      */
     public String getServerConfig() {
@@ -179,7 +191,7 @@ public class ManagedContainerConfiguration {
 
     /**
      * Set the server configuration file name. Equivalent to [-server-config=...] on the command line.
-     *
+     * 
      * @param serverConfig the server config
      */
     public ManagedContainerConfiguration setServerConfig(String serverConfig) {
@@ -188,7 +200,16 @@ public class ManagedContainerConfiguration {
     }
 
     public String getModulePath() {
-        return modulePath;
+
+        String resolvedModulePath = null;
+
+        if (modulePath == null || modulePath.length() == 0) {
+            resolvedModulePath = getJbossHome() + File.separatorChar + "modules";
+        } else {
+            resolvedModulePath = modulePath;
+        }
+
+        return resolvedModulePath;
     }
 
     public ManagedContainerConfiguration setModulePath(String modulePath) {
@@ -204,4 +225,48 @@ public class ManagedContainerConfiguration {
         this.enableAssertions = enableAssertions;
     }
 
+    /**
+     * 
+     * @param user user name of jboss-cli administration console
+     */
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * 
+     * @param password password for jboss-cli administration console
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Gets Java binary path constructed from {@link #javaHome()}. If {@link #javaHome()} is not set, Java executable equals to
+     * {@code java}.
+     * 
+     * @return
+     */
+    public String getJavaBin() {
+        String javaExec = null;
+
+        if (getJavaHome() != null) {
+            javaExec = getJavaHome() + File.separatorChar + "bin" + File.separatorChar + "java";
+            if (getJavaHome().contains(" ")) {
+                javaExec = "\"" + javaExec + "\"";
+            }
+        } else {
+            javaExec = "java";
+        }
+
+        return javaExec;
+    }
 }

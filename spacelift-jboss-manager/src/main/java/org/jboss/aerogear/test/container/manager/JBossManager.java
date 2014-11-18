@@ -17,17 +17,15 @@
 package org.jboss.aerogear.test.container.manager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.arquillian.spacelift.execution.CountDownWatch;
 import org.arquillian.spacelift.execution.Tasks;
+import org.arquillian.spacelift.process.Command;
 import org.jboss.aerogear.test.container.manager.api.ContainerManager;
 import org.jboss.aerogear.test.container.manager.api.ContainerManagerException;
 
@@ -44,10 +42,6 @@ public class JBossManager implements ContainerManager {
 
     private static final Logger logger = Logger.getLogger(JBossManager.class.getName());
 
-    private static final String SERVER_BASE_PATH = "/standalone/";
-    private static final String CONFIG_PATH = SERVER_BASE_PATH + "configuration/";
-    private static final String LOG_PATH = SERVER_BASE_PATH + "log/";
-
     private Thread shutdownThread;
     private Process process;
     private final ManagedContainerConfiguration configuration;
@@ -57,83 +51,21 @@ public class JBossManager implements ContainerManager {
     }
 
     public JBossManager(ManagedContainerConfiguration configuration) {
+        if (configuration == null) {
+            throw new IllegalArgumentException("Provided configuration to JBossManager is a null object!");
+        }
         this.configuration = configuration;
     }
 
     @Override
     public void start() throws ContainerManagerException {
 
-        if (configuration.getJbossHome() == null) {
-            throw new IllegalStateException("JBOSS_HOME is set to null for JBossManager");
-        }
-
         try {
-            String jbossHomeDir = configuration.getJbossHome();
-            if (configuration.getJbossHome().contains(" ")) {
-                jbossHomeDir = "\"" + jbossHomeDir + "\"";
-            }
+            Command command = new JBossCommandBuilder().build(configuration);
 
-            String modulesPath = configuration.getModulePath();
-            if (modulesPath == null || modulesPath.length() == 0) {
-                modulesPath = jbossHomeDir + File.separatorChar + "modules";
-            }
-            File modulesDir = new File(modulesPath);
-            if (modulesDir.isDirectory() == false)
-                throw new IllegalStateException("Cannot find: " + modulesDir);
+            logger.info("Starting container with: " + command.toString());
 
-            String bundlesPath = modulesDir.getParent() + File.separator + "bundles";
-            File bundlesDir = new File(bundlesPath);
-            if (bundlesDir.isDirectory() == false)
-                throw new IllegalStateException("Cannot find: " + bundlesDir);
-
-            final String additionalJavaOpts = configuration.getJavaVmArguments();
-
-            File modulesJar = new File(jbossHomeDir + File.separatorChar + "jboss-modules.jar");
-            if (!modulesJar.exists())
-                throw new IllegalStateException("Cannot find: " + modulesJar);
-
-            List<String> cmd = new ArrayList<String>();
-
-            String javaExec = null;
-
-            if (configuration.getJavaHome() != null) {
-                javaExec = configuration.getJavaHome() + File.separatorChar + "bin" + File.separatorChar + "java";
-                if (configuration.getJavaHome().contains(" ")) {
-                    javaExec = "\"" + javaExec + "\"";
-                }
-            } else {
-                javaExec = "java";
-            }
-
-            cmd.add(javaExec);
-            if (additionalJavaOpts != null) {
-                for (String opt : additionalJavaOpts.split("\\s+")) {
-                    cmd.add(opt);
-                }
-            }
-
-            if (configuration.isEnableAssertions()) {
-                cmd.add("-ea");
-            }
-
-            cmd.add("-Djboss.home.dir=" + jbossHomeDir);
-            cmd.add("-Dorg.jboss.boot.log.file=" + jbossHomeDir + LOG_PATH + "boot.log");
-            cmd.add("-Dlogging.configuration=file:" + jbossHomeDir + CONFIG_PATH + "logging.properties");
-            cmd.add("-Djboss.modules.dir=" + modulesDir.getCanonicalPath());
-            cmd.add("-Djboss.bundles.dir=" + bundlesDir.getCanonicalPath());
-            cmd.add("-jar");
-            cmd.add(modulesJar.getAbsolutePath());
-            cmd.add("-mp");
-            cmd.add(modulesPath);
-            cmd.add("-jaxpmodule");
-            cmd.add("javax.xml.jaxp-provider");
-            cmd.add("org.jboss.as.standalone");
-            cmd.add("-server-config");
-            cmd.add(configuration.getServerConfig());
-
-            logger.info("Starting container with: " + cmd.toString());
-
-            ProcessBuilder processBuilder = new ProcessBuilder(cmd);
+            ProcessBuilder processBuilder = new ProcessBuilder(command.getFullCommand());
             processBuilder.redirectErrorStream(true);
             process = processBuilder.start();
 

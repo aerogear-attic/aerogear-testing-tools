@@ -50,6 +50,8 @@ class JBossStartChecker extends Task<Object, Boolean> {
         try {
             processResult = Tasks.prepare(JBossCLI.class)
                 .environment("JBOSS_HOME", configuration.getJbossHome())
+                .user(configuration.getUser())
+                .password(configuration.getPassword())
                 .connect()
                 .cliCommand(":read-attribute(name=server-state)")
                 .execute().await();
