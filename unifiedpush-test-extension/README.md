@@ -27,17 +27,18 @@ Simply copy the `unifiedpush-test-extension.war` file into `$JBOSS_HOME/standalo
 Deployment to OpenShift can be done either directly using `sftp` or by pushing into the git repository.
 
 * #### SFTP upload
-
-Connect to your application and upload the `unifiedpush-test-extension.war` file into `~/ag-push/`
+  Connect to your application and upload the `unifiedpush-test-extension.war` file into `~/ag-push/`
 
 * #### Push to git repository
 
   1. Clone your application's git repository
   2. Add the `unifiedpush-test-extension.war` file into the root of the repository.
   3. Create file named `deploy` in `$REPOSITORY/.openshift/action_hooks` and add following content:
-  ```sh
-  mv ~/app-root/repo/unifiedpush-test-extension.war ~/ag-push/standalone/deployments/unifiedpush-test-extension.war
-  ```
+
+    ```sh
+    mv ~/app-root/repo/unifiedpush-test-extension.war ~/ag-push/standalone/deployments/unifiedpush-test-extension.war
+    ```
+
   4. Commit and push
 
   After these steps, the server should restart and try deploying the test extension.
