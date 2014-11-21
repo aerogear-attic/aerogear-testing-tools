@@ -36,8 +36,8 @@ import java.util.logging.Logger;
 
 /**
  * Class which creates a proxy when deployed and shuts it down when undeployed.
- * <p/>
- * FIXME missing propert implementation, currently only works as pass-through proxy, but it should validate the sent
+ *
+ * FIXME missing proper implementation, currently only works as pass-through proxy, but it should validate the sent
  * push messages.
  */
 @Startup

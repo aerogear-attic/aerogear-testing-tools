@@ -23,6 +23,7 @@ import org.keycloak.models.jpa.entities.RoleEntity;
 import org.keycloak.models.jpa.entities.ScopeMappingEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.jpa.entities.UserRequiredActionEntity;
+import org.keycloak.models.utils.KeycloakModelUtils;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -74,6 +75,7 @@ public class KeycloakConfigurator {
             }
 
             OAuthClientEntity oAuthClient = new OAuthClientEntity();
+            oAuthClient.setId(KeycloakModelUtils.generateId());
             oAuthClient.setName("integration-tests");
             oAuthClient.setEnabled(true);
             oAuthClient.setPublicClient(true);
