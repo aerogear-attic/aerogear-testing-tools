@@ -24,7 +24,11 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 @Stateless
 @Path("/cleanup")
@@ -35,8 +39,10 @@ public class CleanupEndpoint {
 
     @GET
     @Path("/applications")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response cleanupApplications() {
 
+        long start = System.currentTimeMillis();
         /* Retyping the count to int so it can be used in the findAll. It's basically impossible to have more than
          * 2^31 push applications and if so, we should fix this endpoint to allow long count. */
         int count = (int) pushApplicationDao.getNumberOfPushApplicationsForDeveloper();
@@ -47,7 +53,12 @@ public class CleanupEndpoint {
             pushApplicationDao.delete(pushApplication);
         }
 
-        return Response.ok().build();
+        long stop = System.currentTimeMillis();
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("cleaned", count);
+        response.put("duration", stop - start);
+        return Response.ok(response).build();
     }
 
 }
