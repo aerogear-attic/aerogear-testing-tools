@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 public class KeycloakConfigurator {
     private static final Logger LOGGER = Logger.getLogger(KeycloakConfigurator.class.getName());
 
-    @PersistenceContext
+    @PersistenceContext(unitName = "keycloak-default")
     EntityManager entityManager;
 
     /**
