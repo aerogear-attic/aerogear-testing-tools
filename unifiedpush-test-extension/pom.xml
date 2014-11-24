@@ -101,6 +101,13 @@
             <version>${hibernate.entitymanager.version}</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- aerogear model dependencies -->
+        <dependency>
+            <groupId>org.jboss.aerogear.unifiedpush</groupId>
+            <artifactId>unifiedpush-jaxrs</artifactId>
+            <version>1.0.2</version>
+        </dependency>
     </dependencies>
 
     <build>

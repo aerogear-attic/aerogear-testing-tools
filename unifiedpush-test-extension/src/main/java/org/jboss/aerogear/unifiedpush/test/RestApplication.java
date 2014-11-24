@@ -36,6 +36,7 @@ public class RestApplication extends Application {
         Set<Class<?>> classes = new HashSet<Class<?>>(super.getClasses());
 
         classes.add(UtilityEndpoint.class);
+        classes.add(CleanupEndpoint.class);
         classes.add(KeycloakConfigurationEndpoint.class);
 
         return classes;

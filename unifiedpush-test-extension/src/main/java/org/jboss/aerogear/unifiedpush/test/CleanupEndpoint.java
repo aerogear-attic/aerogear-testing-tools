@@ -16,25 +16,37 @@
  */
 package org.jboss.aerogear.unifiedpush.test;
 
+import org.jboss.aerogear.unifiedpush.api.PushApplication;
+import org.jboss.aerogear.unifiedpush.dao.PageResult;
+import org.jboss.aerogear.unifiedpush.dao.PushApplicationDao;
+
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 @Stateless
-@Path("/")
-public class UtilityEndpoint {
+@Path("/cleanup")
+public class CleanupEndpoint {
 
+    @Inject
+    PushApplicationDao pushApplicationDao;
 
-    /**
-     * Status endpoint is basically just a fast way to detect if the archive has been deployed, so it can be checked
-     * from outside just by polling this endpoint and waiting until 200 is returned.
-     *
-     * @return Always HTTP 200.
-     */
     @GET
-    @Path("/status")
-    public Response getStatus() {
+    @Path("/applications")
+    public Response cleanupApplications() {
+
+        /* Retyping the count to int so it can be used in the findAll. It's basically impossible to have more than
+         * 2^31 push applications and if so, we should fix this endpoint to allow long count. */
+        int count = (int) pushApplicationDao.getNumberOfPushApplicationsForDeveloper();
+
+        PageResult<PushApplication> pushApplicationPageResult = pushApplicationDao.findAll(0, count);
+
+        for (PushApplication pushApplication : pushApplicationPageResult.getResultList()) {
+            pushApplicationDao.delete(pushApplication);
+        }
+
         return Response.ok().build();
     }
 
