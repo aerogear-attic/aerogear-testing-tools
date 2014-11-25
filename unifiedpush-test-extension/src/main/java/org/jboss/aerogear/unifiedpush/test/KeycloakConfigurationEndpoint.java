@@ -34,7 +34,7 @@ public class KeycloakConfigurationEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response configureKeycloak() {
-        KeycloakConfigurator.KeycloakConfigurationResult result = configurator.configureForIntegrationTests();
+        KeycloakConfigurationResult result = configurator.configureForIntegrationTests();
         return Response.ok(result).build();
     }
 

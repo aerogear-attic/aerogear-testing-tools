@@ -26,14 +26,9 @@ import org.keycloak.models.jpa.entities.UserRequiredActionEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 import javax.ejb.Stateless;
-import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,7 +54,7 @@ public class KeycloakConfigurator {
 
         for (RealmEntity realm : realmQuery.getResultList()) {
             LOGGER.warning("Editing realm: " + realm.getName());
-            result.foundRealms.add(realm.getName() + ":" + realm.getId());
+            result.getFoundRealms().add(realm.getName() + ":" + realm.getId());
             TypedQuery<UserEntity> userQuery = entityManager.createNamedQuery("getAllUsersByRealm", UserEntity.class);
             userQuery.setParameter("realmId", realm.getId());
 
@@ -75,11 +70,11 @@ public class KeycloakConfigurator {
             // Any required action would prevent us to login
             for (UserEntity user : userQuery.getResultList()) {
                 LOGGER.log(Level.INFO, "Editing user: {0}", user.getUsername());
-                result.foundUsers.add(user.getUsername());
+                result.getFoundUsers().add(user.getUsername());
                 for (UserRequiredActionEntity userRequiredAction : user.getRequiredActions()) {
                     LOGGER.log(Level.INFO, "Removing required action: {0}", userRequiredAction.getAction().name());
-                    String current = result.removedRequiredActions.get(user.getUsername());
-                    result.removedRequiredActions.put(user.getUsername(), current + userRequiredAction.getAction().name() + ", ");
+                    String current = result.getRemovedRequiredActions().get(user.getUsername());
+                    result.getRemovedRequiredActions().put(user.getUsername(), current + userRequiredAction.getAction().name() + ", ");
                     entityManager.remove(userRequiredAction);
                 }
                 user.getRequiredActions().clear();
@@ -103,7 +98,7 @@ public class KeycloakConfigurator {
                 entityManager.persist(oAuthClient);
 
                 for (RoleEntity roleEntity : realm.getRoles()) {
-                    result.roles.add(roleEntity.getName());
+                    result.getRoles().add(roleEntity.getName());
                     ScopeMappingEntity scopemapping = new ScopeMappingEntity();
                     scopemapping.setClient(oAuthClient);
                     scopemapping.setRole(roleEntity);
@@ -117,43 +112,4 @@ public class KeycloakConfigurator {
         return result;
     }
 
-    @Named
-    public static class KeycloakConfigurationResult {
-        private List<String> foundRealms = new ArrayList<String>();
-        private List<String> foundUsers = new ArrayList<String>();
-        private Map<String, String> removedRequiredActions = new HashMap<String, String>();
-        private List<String> roles = new ArrayList<String>();
-
-        public List<String> getFoundRealms() {
-            return foundRealms;
-        }
-
-        public void setFoundRealms(List<String> foundRealms) {
-            this.foundRealms = foundRealms;
-        }
-
-        public List<String> getFoundUsers() {
-            return foundUsers;
-        }
-
-        public void setFoundUsers(List<String> foundUsers) {
-            this.foundUsers = foundUsers;
-        }
-
-        public Map<String, String> getRemovedRequiredActions() {
-            return removedRequiredActions;
-        }
-
-        public void setRemovedRequiredActions(Map<String, String> removedRequiredActions) {
-            this.removedRequiredActions = removedRequiredActions;
-        }
-
-        public List<String> getRoles() {
-            return roles;
-        }
-
-        public void setRoles(List<String> roles) {
-            this.roles = roles;
-        }
-    }
 }
