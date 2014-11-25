@@ -26,6 +26,7 @@ import org.keycloak.models.jpa.entities.UserRequiredActionEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 
 import javax.ejb.Stateless;
+import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -109,11 +110,14 @@ public class KeycloakConfigurator {
                     entityManager.persist(scopemapping);
                 }
             }
+
+            entityManager.persist(realm);
         }
 
         return result;
     }
 
+    @Named
     public static class KeycloakConfigurationResult {
         private List<String> foundRealms = new ArrayList<String>();
         private List<String> foundUsers = new ArrayList<String>();
