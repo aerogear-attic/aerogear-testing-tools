@@ -84,22 +84,30 @@ public class KeycloakConfigurator {
                 user.getRequiredActions().clear();
             }
 
-            OAuthClientEntity oAuthClient = new OAuthClientEntity();
-            oAuthClient.setId(KeycloakModelUtils.generateId());
-            oAuthClient.setName("integration-tests");
-            oAuthClient.setEnabled(true);
-            oAuthClient.setPublicClient(true);
-            oAuthClient.setDirectGrantsOnly(true);
-            oAuthClient.setAllowedClaimsMask(ClaimMask.USERNAME);
-            oAuthClient.setRealm(realm);
-            entityManager.persist(oAuthClient);
+            TypedQuery<OAuthClientEntity> existingEntityQuery =
+                    entityManager.createNamedQuery("findOAuthClientByName", OAuthClientEntity.class);
+            existingEntityQuery.setParameter("name", "integration-tests");
+            existingEntityQuery.setParameter("realm", realm);
 
-            for (RoleEntity roleEntity : realm.getRoles()) {
-                result.roles.add(roleEntity.getName());
-                ScopeMappingEntity scopemapping = new ScopeMappingEntity();
-                scopemapping.setClient(oAuthClient);
-                scopemapping.setRole(roleEntity);
-                entityManager.persist(scopemapping);
+            // TODO should we instead remove all the oauthClients and create a new one?
+            if(existingEntityQuery.getResultList().isEmpty()) {
+                OAuthClientEntity oAuthClient = new OAuthClientEntity();
+                oAuthClient.setId(KeycloakModelUtils.generateId());
+                oAuthClient.setName("integration-tests");
+                oAuthClient.setEnabled(true);
+                oAuthClient.setPublicClient(true);
+                oAuthClient.setDirectGrantsOnly(true);
+                oAuthClient.setAllowedClaimsMask(ClaimMask.USERNAME);
+                oAuthClient.setRealm(realm);
+                entityManager.persist(oAuthClient);
+
+                for (RoleEntity roleEntity : realm.getRoles()) {
+                    result.roles.add(roleEntity.getName());
+                    ScopeMappingEntity scopemapping = new ScopeMappingEntity();
+                    scopemapping.setClient(oAuthClient);
+                    scopemapping.setRole(roleEntity);
+                    entityManager.persist(scopemapping);
+                }
             }
         }
 
