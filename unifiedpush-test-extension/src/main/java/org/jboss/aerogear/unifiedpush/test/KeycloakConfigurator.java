@@ -119,5 +119,37 @@ public class KeycloakConfigurator {
         private List<String> foundUsers = new ArrayList<String>();
         private Map<String, String> removedRequiredActions = new HashMap<String, String>();
         private List<String> roles = new ArrayList<String>();
+
+        public List<String> getFoundRealms() {
+            return foundRealms;
+        }
+
+        public void setFoundRealms(List<String> foundRealms) {
+            this.foundRealms = foundRealms;
+        }
+
+        public List<String> getFoundUsers() {
+            return foundUsers;
+        }
+
+        public void setFoundUsers(List<String> foundUsers) {
+            this.foundUsers = foundUsers;
+        }
+
+        public Map<String, String> getRemovedRequiredActions() {
+            return removedRequiredActions;
+        }
+
+        public void setRemovedRequiredActions(Map<String, String> removedRequiredActions) {
+            this.removedRequiredActions = removedRequiredActions;
+        }
+
+        public List<String> getRoles() {
+            return roles;
+        }
+
+        public void setRoles(List<String> roles) {
+            this.roles = roles;
+        }
     }
 }
