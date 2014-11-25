@@ -54,18 +54,34 @@ public class KeycloakConfigurator {
 
         for (RealmEntity realm : realmQuery.getResultList()) {
             LOGGER.warning("Editing realm: " + realm.getName());
-            result.getFoundRealms().add(realm.getName() + ":" + realm.getId());
+            String realmReadableId = realm.getName() + ":" + realm.getId();
+            result.getFoundRealms().add(realmReadableId);
             TypedQuery<UserEntity> userQuery = entityManager.createNamedQuery("getAllUsersByRealm", UserEntity.class);
             userQuery.setParameter("realmId", realm.getId());
 
             // Enable Direct Grant API
+            result.getExtra().put(realmReadableId + "-passwordCredentialGrantAllowed",
+                    realm.isPasswordCredentialGrantAllowed());
             realm.setPasswordCredentialGrantAllowed(true);
 
             // Make sure the session won't expire even when the testing runs very slow
+            result.getExtra().put(realmReadableId + "-accessTokenLifespan",
+                    realm.getAccessTokenLifespan());
             realm.setAccessTokenLifespan(3600);
+
+            result.getExtra().put(realmReadableId + "-accessCodeLifespan",
+                    realm.getAccessCodeLifespan());
             realm.setAccessCodeLifespan(3600);
+
+            result.getExtra().put(realmReadableId + "-accessCodeLifespanUserAction",
+                    realm.getAccessCodeLifespanUserAction());
             realm.setAccessCodeLifespanUserAction(3600);
+
+            result.getExtra().put(realmReadableId + "-ssoSessionIdleTimeout",
+                    realm.getSsoSessionIdleTimeout());
             realm.setSsoSessionIdleTimeout(3600);
+
+            entityManager.merge(realm);
 
             // Any required action would prevent us to login
             for (UserEntity user : userQuery.getResultList()) {
@@ -74,7 +90,8 @@ public class KeycloakConfigurator {
                 for (UserRequiredActionEntity userRequiredAction : user.getRequiredActions()) {
                     LOGGER.log(Level.INFO, "Removing required action: {0}", userRequiredAction.getAction().name());
                     String current = result.getRemovedRequiredActions().get(user.getUsername());
-                    result.getRemovedRequiredActions().put(user.getUsername(), current + userRequiredAction.getAction().name() + ", ");
+                    result.getRemovedRequiredActions().put(user.getUsername(), current + userRequiredAction.getAction
+                            ().name() + ", ");
                     entityManager.remove(userRequiredAction);
                 }
                 user.getRequiredActions().clear();
@@ -86,7 +103,7 @@ public class KeycloakConfigurator {
             existingEntityQuery.setParameter("realm", realm);
 
             // TODO should we instead remove all the oauthClients and create a new one?
-            if(existingEntityQuery.getResultList().isEmpty()) {
+            if (existingEntityQuery.getResultList().isEmpty()) {
                 OAuthClientEntity oAuthClient = new OAuthClientEntity();
                 oAuthClient.setId(KeycloakModelUtils.generateId());
                 oAuthClient.setName("integration-tests");
@@ -105,8 +122,6 @@ public class KeycloakConfigurator {
                     entityManager.persist(scopemapping);
                 }
             }
-
-            entityManager.persist(realm);
         }
 
         return result;

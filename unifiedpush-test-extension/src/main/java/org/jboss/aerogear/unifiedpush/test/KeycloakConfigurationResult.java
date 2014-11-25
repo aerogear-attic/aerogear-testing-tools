@@ -26,6 +26,7 @@ public class KeycloakConfigurationResult {
     private List<String> foundUsers = new ArrayList<String>();
     private Map<String, String> removedRequiredActions = new HashMap<String, String>();
     private List<String> roles = new ArrayList<String>();
+    private Map<String, Object> extra = new HashMap<String, Object>();
 
     public List<String> getFoundRealms() {
         return foundRealms;
@@ -57,5 +58,13 @@ public class KeycloakConfigurationResult {
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
+    }
+
+    public Map<String, Object> getExtra() {
+        return extra;
+    }
+
+    public void setExtra(Map<String, Object> extra) {
+        this.extra = extra;
     }
 }
