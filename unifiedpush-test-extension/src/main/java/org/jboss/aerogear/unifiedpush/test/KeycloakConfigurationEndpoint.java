@@ -20,6 +20,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Stateless
@@ -30,9 +32,10 @@ public class KeycloakConfigurationEndpoint {
     KeycloakConfigurator configurator;
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public Response configureKeycloak() {
-        configurator.configureForIntegrationTests();
-        return Response.ok().build();
+        KeycloakConfigurator.KeycloakConfigurationResult result = configurator.configureForIntegrationTests();
+        return Response.ok(result).build();
     }
 
 }

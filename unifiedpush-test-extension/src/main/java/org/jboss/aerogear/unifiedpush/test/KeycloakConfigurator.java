@@ -29,6 +29,10 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,12 +50,15 @@ public class KeycloakConfigurator {
      * Changes keycloak configuration to allow rest login and removes all required actions for all users in the
      * `aerogear` realm/
      */
-    public void configureForIntegrationTests() {
+    public KeycloakConfigurationResult configureForIntegrationTests() {
+        KeycloakConfigurationResult result = new KeycloakConfigurationResult();
+
         TypedQuery<RealmEntity> realmQuery = entityManager.createNamedQuery("getRealmByName", RealmEntity.class);
         realmQuery.setParameter("name", "aerogear");
 
         for (RealmEntity realm : realmQuery.getResultList()) {
             LOGGER.warning("Editing realm: " + realm.getName());
+            result.foundRealms.add(realm.getName() + ":" + realm.getId());
             TypedQuery<UserEntity> userQuery = entityManager.createNamedQuery("getAllUsersByRealm", UserEntity.class);
             userQuery.setParameter("realmId", realm.getId());
 
@@ -67,8 +74,11 @@ public class KeycloakConfigurator {
             // Any required action would prevent us to login
             for (UserEntity user : userQuery.getResultList()) {
                 LOGGER.log(Level.INFO, "Editing user: {0}", user.getUsername());
+                result.foundUsers.add(user.getUsername());
                 for (UserRequiredActionEntity userRequiredAction : user.getRequiredActions()) {
                     LOGGER.log(Level.INFO, "Removing required action: {0}", userRequiredAction.getAction().name());
+                    String current = result.removedRequiredActions.get(user.getUsername());
+                    result.removedRequiredActions.put(user.getUsername(), current + userRequiredAction.getAction().name() + ", ");
                     entityManager.remove(userRequiredAction);
                 }
                 user.getRequiredActions().clear();
@@ -85,11 +95,21 @@ public class KeycloakConfigurator {
             entityManager.persist(oAuthClient);
 
             for (RoleEntity roleEntity : realm.getRoles()) {
+                result.roles.add(roleEntity.getName());
                 ScopeMappingEntity scopemapping = new ScopeMappingEntity();
                 scopemapping.setClient(oAuthClient);
                 scopemapping.setRole(roleEntity);
                 entityManager.persist(scopemapping);
             }
         }
+
+        return result;
+    }
+
+    public static class KeycloakConfigurationResult {
+        private List<String> foundRealms = new ArrayList<String>();
+        private List<String> foundUsers = new ArrayList<String>();
+        private Map<String, String> removedRequiredActions = new HashMap<String, String>();
+        private List<String> roles = new ArrayList<String>();
     }
 }
