@@ -62,6 +62,11 @@
             <artifactId>resteasy-jaxrs</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- keycloak configuration dependencies -->
         <dependency>
@@ -105,7 +110,7 @@
         <!-- aerogear model dependencies -->
         <dependency>
             <groupId>org.jboss.aerogear.unifiedpush</groupId>
-            <artifactId>unifiedpush-jaxrs</artifactId>
+            <artifactId>unifiedpush-model-jpa</artifactId>
             <version>1.0.2</version>
         </dependency>
     </dependencies>
