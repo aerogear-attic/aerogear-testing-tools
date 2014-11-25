@@ -49,8 +49,8 @@ public class ProxySetup {
     /**
      * First found will be used. If none found, the {@link #DEFAULT_BIND_IP} will be used.
      */
-    private static final String[] POSSIBLE_BIND_IP_PROPERTIES =
-            { "OPENSHIFT_AEROGEAR_PUSH_IP", "OPENSHIFT_JBOSS_UNIFIED_PUSH_IP", "MYTESTIP_1" };
+    private static final String[] POSSIBLE_BIND_IP_PROPERTIES = { "OPENSHIFT_AEROGEAR_PUSH_IP",
+            "OPENSHIFT_JBOSS_UNIFIED_PUSH_IP", "MYTESTIP_1", "OPENSHIFT_UNIFIED_PUSH_IP" };
     private static final String DEFAULT_BIND_IP = "127.0.0.1";
     // TODO add a possibility to change the port using an env property
     private static final int HTTP_PROXY_PORT = 16000;
