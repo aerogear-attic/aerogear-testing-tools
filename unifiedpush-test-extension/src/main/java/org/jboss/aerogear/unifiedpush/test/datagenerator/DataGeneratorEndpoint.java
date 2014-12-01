@@ -4,14 +4,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.sql.DataSource;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -39,12 +45,15 @@ public class DataGeneratorEndpoint {
 
     @Resource(name = "java:jboss/datasources/UnifiedPushDS")
     private DataSource ds;
+    
+    @Inject
+    private Validator validator;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response generate(DataGeneratorConfig config) {
-        // TODO validate configuration
+        validateConfig(config);
 
         DataGeneratorContext ctx = new DataGeneratorContext(config);
 
@@ -54,6 +63,13 @@ public class DataGeneratorEndpoint {
         generateCategories(ctx);
 
         return Response.ok().build();
+    }
+
+    private void validateConfig(DataGeneratorConfig config) {
+        Set<ConstraintViolation<DataGeneratorConfig>> violations = validator.validate(config);
+        if( !violations.isEmpty() ) {
+            throw new ConstraintViolationException(new HashSet<ConstraintViolation<?>>(violations));
+        }
     }
 
     private void generateApplications(DataGeneratorContext ctx) {
