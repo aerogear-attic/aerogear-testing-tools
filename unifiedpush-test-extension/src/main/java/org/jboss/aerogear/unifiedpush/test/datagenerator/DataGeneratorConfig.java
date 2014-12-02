@@ -7,6 +7,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.apache.commons.codec.binary.Base64;
 import org.jboss.aerogear.unifiedpush.api.VariantType;
 
 public class DataGeneratorConfig implements Serializable {
@@ -55,11 +56,13 @@ public class DataGeneratorConfig implements Serializable {
     
     private String projectNumber = UUID.randomUUID().toString();
     
-    private String certificatePath;
+    private String certificateBase64;
     
     private String certificatePass;
     
     private boolean certificateProduction = false;
+    
+    private boolean cleanupDatabase = false;
 
     public int getApplicationsCount() {
         return applicationsCount;
@@ -149,12 +152,20 @@ public class DataGeneratorConfig implements Serializable {
         this.projectNumber = projectNumber;
     }
 
-    public String getCertificatePath() {
-        return certificatePath;
+    public String getCertificateBase64() {
+        return certificateBase64;
     }
 
-    public void setCertificatePath(String certificatePath) {
-        this.certificatePath = certificatePath;
+    public void setCertificateBase64(String certificateBase64) {
+        this.certificateBase64 = certificateBase64;
+    }
+
+    public byte[] getCertificateBytes() {
+        return Base64.decodeBase64(certificateBase64);
+    }
+
+    public void setCertificateBytes(byte[] certificateBystes) {
+        this.certificateBase64 = Base64.encodeBase64String(certificateBystes);
     }
 
     public String getCertificatePass() {
@@ -171,6 +182,14 @@ public class DataGeneratorConfig implements Serializable {
 
     public void setCertificateProduction(boolean certificateProduction) {
         this.certificateProduction = certificateProduction;
+    }
+
+    public boolean isCleanupDatabase() {
+        return cleanupDatabase;
+    }
+
+    public void setCleanupDatabase(boolean cleanupDatabase) {
+        this.cleanupDatabase = cleanupDatabase;
     }
 
 }

@@ -3,13 +3,17 @@ package org.jboss.aerogear.unifiedpush.test.datagenerator;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
@@ -29,6 +33,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.math3.distribution.ParetoDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 import org.jboss.aerogear.unifiedpush.api.AndroidVariant;
+import org.jboss.aerogear.unifiedpush.api.Category;
 import org.jboss.aerogear.unifiedpush.api.ChromePackagedAppVariant;
 import org.jboss.aerogear.unifiedpush.api.Installation;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
@@ -40,6 +45,8 @@ import org.jboss.aerogear.unifiedpush.api.iOSVariant;
 @Stateless
 @Path("/datagenerator")
 public class DataGeneratorEndpoint {
+    
+    private static final Logger LOGGER = Logger.getLogger(DataGeneratorEndpoint.class.getName());
 
     private static final Random RANDOM = new Random();
 
@@ -53,16 +60,47 @@ public class DataGeneratorEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response generate(DataGeneratorConfig config) {
+        LOGGER.info("Generating test data started");
+        
         validateConfig(config);
 
         DataGeneratorContext ctx = new DataGeneratorContext(config);
 
+        cleanupDatabase(ctx);
         generateApplications(ctx);
         generateVariants(ctx);
         generateInstallations(ctx);
         generateCategories(ctx);
+        generateCategoriesPerInstallations(ctx);
+        
+        LOGGER.info("Generating test data finished");
 
         return Response.ok().build();
+    }
+
+    private void cleanupDatabase(DataGeneratorContext ctx) {
+        if (!ctx.getConfig().isCleanupDatabase()) {
+            return;
+        }
+
+        LOGGER.info("Cleaning of database");
+
+        try {
+            Connection c = ds.getConnection();
+            Statement stmt = c.createStatement();
+            stmt.executeUpdate("delete from Installation_Category");
+            stmt.executeUpdate("delete from Category");
+            stmt.executeUpdate("delete from Installation");
+            stmt.executeUpdate("delete from SimplePushVariant");
+            stmt.executeUpdate("delete from iOSVariant");
+            stmt.executeUpdate("delete from AndroidVariant");
+            stmt.executeUpdate("delete from Variant");
+            stmt.executeUpdate("delete from PushApplication");
+            stmt.close();
+            c.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void validateConfig(DataGeneratorConfig config) {
@@ -73,6 +111,7 @@ public class DataGeneratorEndpoint {
     }
 
     private void generateApplications(DataGeneratorContext ctx) {
+        LOGGER.info("Generating applications");
         try {
             Connection c = ds.getConnection();
             PreparedStatement ps = c.prepareStatement("insert into PushApplication(id, name, description, pushApplicationID, masterSecret, developer) values(?, ?, ?, ?, ?, ?)");
@@ -97,6 +136,7 @@ public class DataGeneratorEndpoint {
     }
 
     private void generateVariants(DataGeneratorContext ctx) {
+        LOGGER.info("Generating variants");
         try {
             Connection c = ds.getConnection();
             PreparedStatement insertVariant = c.prepareStatement("insert into Variant(id, name, description, developer, secret, variantid, variants_id, variant_type, type) values(?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -124,7 +164,7 @@ public class DataGeneratorEndpoint {
                         break;
                     case IOS:
                         iOSVariant iosVariant = (iOSVariant) variant;
-                        iosVariant.setCertificate(null); // TODO ctx.getConfig().getCertificatePath()
+                        iosVariant.setCertificate(ctx.getConfig().getCertificateBytes());
                         iosVariant.setPassphrase(ctx.getConfig().getCertificatePass());
                         iosVariant.setProduction(ctx.getConfig().isCertificateProduction());
                         prepareInsertIosVariantStmt(insertIosVariant, iosVariant);
@@ -154,6 +194,8 @@ public class DataGeneratorEndpoint {
     }
 
     private void generateInstallations(DataGeneratorContext ctx) {
+        LOGGER.info("Generating installations");
+        
         Map<Variant, Integer> installationsCount = calculateInstallationDistribution(ctx);
         for (Map.Entry<Variant, Integer> installationCount : installationsCount.entrySet()) {
 
@@ -206,15 +248,66 @@ public class DataGeneratorEndpoint {
     }
 
     private void generateCategories(DataGeneratorContext ctx) {
-        /*
-         * 
-         * TODO
-         * 
-         * Table found: thradec.Category [id, name]
-         * 
-         * Table found: thradec.Installation_Category [installation_id,
-         * categories_id]
-         */
+        if (ctx.getConfig().getCategoriesCount() <= 0) {
+            return;
+        }
+
+        LOGGER.info("Generating categories");
+
+        for (int i = 0; i < ctx.getConfig().getCategoriesCount(); i++) {
+            Category category = new Category();
+            category.setId(new Long(i));
+            category.setName(UUID.randomUUID().toString());
+            ctx.getCategories().add(category);
+        }
+
+        try {
+            Connection c = ds.getConnection();
+            PreparedStatement insertCategoryStmt = c.prepareStatement("insert into Category(id, name) values(?, ?)");
+            for(Category category : ctx.getCategories()) {
+                insertCategoryStmt.clearParameters();
+                insertCategoryStmt.setLong(1, category.getId());
+                insertCategoryStmt.setString(2, category.getName());
+                insertCategoryStmt.addBatch();
+            }
+            insertCategoryStmt.executeBatch();
+            insertCategoryStmt.close();
+            c.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private void generateCategoriesPerInstallations(DataGeneratorContext ctx) {
+        if (ctx.getCategories().isEmpty() || ctx.getConfig().getCategoriesPerInstallation() <= 0) {
+            return;
+        }
+
+        LOGGER.info("Generating categories per installations");
+
+        List<Category> categoriesShuffled = new ArrayList<Category>(ctx.getCategories());
+        for (Installation installation : ctx.getInstallations()) {
+            Collections.shuffle(categoriesShuffled);
+            installation.setCategories(new HashSet<Category>(categoriesShuffled.subList(0, ctx.getConfig().getCategoriesPerInstallation())));
+        }
+
+        try {
+            Connection c = ds.getConnection();
+            PreparedStatement insertInstCatStmt = c.prepareStatement("insert into Installation_Category(installation_id, categories_id) values(?, ?)");
+            for (Installation installation : ctx.getInstallations()) {
+                for (Category category : installation.getCategories()) {
+                    insertInstCatStmt.clearParameters();
+                    insertInstCatStmt.setString(1, installation.getId());
+                    insertInstCatStmt.setLong(2, category.getId());
+                    insertInstCatStmt.addBatch();
+                }
+            }
+            insertInstCatStmt.executeBatch();
+            insertInstCatStmt.close();
+            c.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Map<Variant, Integer> calculateInstallationDistribution(DataGeneratorContext ctx) {
