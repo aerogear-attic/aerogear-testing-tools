@@ -29,9 +29,9 @@ import com.jayway.restassured.response.Response;
 
 /**
  * Checks target URI for HTTP status code of 200 when doing HTTP GET request.
- * 
+ *
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
- * 
+ *
  */
 public class HTTPCodeStatusCheck implements StatusCheck {
 

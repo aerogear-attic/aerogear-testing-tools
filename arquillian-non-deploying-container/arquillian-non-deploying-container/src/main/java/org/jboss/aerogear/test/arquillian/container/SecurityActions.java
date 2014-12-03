@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * A set of privileged actions that are not to leak out of this package
- * 
+ *
  * @version $Revision: $
  */
 final class SecurityActions
@@ -117,7 +117,7 @@ final class SecurityActions
     /**
      * Create a new instance by finding a constructor that matches the argumentTypes signature using the arguments for
      * instantiation.
-     * 
+     *
      * @param className Full classname of class to create
      * @param argumentTypes The constructor argument types
      * @param arguments The constructor arguments
@@ -159,7 +159,7 @@ final class SecurityActions
 
     /**
      * Obtains the Constructor specified from the given Class and argument types
-     * 
+     *
      * @param clazz
      * @param argumentTypes
      * @return
@@ -205,7 +205,7 @@ final class SecurityActions
 
     /**
      * Set a single Field value
-     * 
+     *
      * @param target The object to set it on
      * @param fieldName The field name
      * @param value The new value

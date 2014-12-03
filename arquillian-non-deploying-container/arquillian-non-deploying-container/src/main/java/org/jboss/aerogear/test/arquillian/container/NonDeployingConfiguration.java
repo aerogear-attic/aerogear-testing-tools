@@ -89,6 +89,8 @@ public class NonDeployingConfiguration implements ContainerConfiguration {
             } catch (URISyntaxException e) {
                 throw new ConfigurationException("Parameter \"baseURI\" does not represent a valid URI", e);
             }
+
+            setBaseURI(removeTrailingSlash(getBaseURI()));
         }
 
         if (getContextRootRemap() != null) {
@@ -113,6 +115,17 @@ public class NonDeployingConfiguration implements ContainerConfiguration {
         }
 
         logger.info(this.toString());
+    }
+
+    private String removeTrailingSlash(String url) {
+        while (endsOnSlash(url)) {
+            url = url.substring(0, url.length() - 1);
+        }
+        return url;
+    }
+
+    public boolean endsOnSlash(String url) {
+        return url != null && !url.isEmpty() && url.endsWith("/");
     }
 
     @Override

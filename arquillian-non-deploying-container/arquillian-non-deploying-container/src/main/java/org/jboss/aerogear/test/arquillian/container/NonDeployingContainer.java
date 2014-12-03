@@ -35,6 +35,7 @@ import org.jboss.arquillian.container.spi.client.container.DeploymentException;
 import org.jboss.arquillian.container.spi.client.container.LifecycleException;
 import org.jboss.arquillian.container.spi.client.protocol.ProtocolDescription;
 import org.jboss.arquillian.container.spi.client.protocol.metadata.HTTPContext;
+import org.jboss.arquillian.container.spi.client.protocol.metadata.HTTPSServlet;
 import org.jboss.arquillian.container.spi.client.protocol.metadata.ProtocolMetaData;
 import org.jboss.arquillian.container.spi.client.protocol.metadata.Servlet;
 import org.jboss.arquillian.core.api.Instance;
@@ -131,9 +132,27 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
 
         URI contextURI = getAppURI();
 
-        HTTPContext context = new HTTPContext("openshift", contextURI.getHost(), getPort(contextURI));
-        Servlet servlet = new Servlet("deployment", contextPath);
-        context.add(servlet);
+        int port = contextURI.getPort();
+
+        if (port == -1) {
+            if (contextURI.getScheme().equals("http")) {
+                port = 80;
+            } else if (contextURI.getScheme().equals("https")) {
+                port = 443;
+            } else {
+                throw new IllegalStateException("Unable to resolve port according to your protocol: " + contextURI.getScheme());
+            }
+        }
+
+        HTTPContext context = new HTTPContext("nondeploy", contextURI.getHost(), port);
+
+        if (contextURI.getScheme().equals("http")) {
+            context.add(new Servlet("http-deployment", contextPath));
+        } else if (contextURI.getScheme().equals("https")) {
+            context.add(new HTTPSServlet("https-deployment", contextPath));
+        } else {
+            throw new IllegalStateException("Unable to add servlet to HTTPContext.");
+        }
 
         ProtocolMetaData metaData = new ProtocolMetaData();
         metaData.addContext(context);
@@ -141,7 +160,12 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
         log.info("Performing status check");
 
         StatusCheck statusCheck = getStatusCheck();
-        statusCheck.target(contextURI);
+
+        URI uri = getStatusCheckURI(contextURI, contextPath);
+
+        log.info("Going to check status of: " + uri.toString());
+
+        statusCheck.target(getStatusCheckURI(contextURI, contextPath));
 
         CountDownWatch countDownWatch = new CountDownWatch(configuration.get().getCheckTimeout(), TimeUnit.SECONDS);
 
@@ -155,14 +179,6 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
         }
 
         return metaData;
-    }
-
-    private StatusCheck getStatusCheck() {
-        String checkClassName = configuration.get().getCheck();
-
-        StatusCheck statusCheck = SecurityActions.newInstance(checkClassName, new Class<?>[] {}, new Object[] {}, StatusCheck.class);
-
-        return statusCheck;
     }
 
     @Override
@@ -208,6 +224,14 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
         return contextPath;
     }
 
+    private StatusCheck getStatusCheck() {
+        String checkClassName = configuration.get().getCheck();
+
+        StatusCheck statusCheck = SecurityActions.newInstance(checkClassName, new Class<?>[] {}, new Object[] {}, StatusCheck.class);
+
+        return statusCheck;
+    }
+
     /**
      * 
      * @return context root remap from configuration as a JSON object
@@ -234,28 +258,24 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
         return uri;
     }
 
-    /**
-     * When {@code contextURI} does not have a port, {@code defaultPort} will be used. When it is not specified, 80 is used.
-     * 
-     * @param contextURI uri to get port from
-     * @param defaultPort other default port then 80
-     * @return port from {@code contextURI}
-     */
-    private int getPort(URI contextURI, int... defaultPort) {
+    private URI getStatusCheckURI(URI contextURI, String contextPath) {
 
-        final int DEFAULT_PORT = 80;
+        URI uri = null;
 
-        int port = contextURI.getPort();
-
-        if (port == -1) {
-            if (defaultPort.length == 1) {
-                port = defaultPort[0];
-            } else {
-                port = DEFAULT_PORT;
-            }
+        try {
+            uri = new URI(
+                contextURI.getScheme(),
+                contextURI.getUserInfo(),
+                contextURI.getHost(),
+                contextURI.getPort(),
+                (contextURI.getPath() + "/" + contextPath).replaceAll("(//)+", "/"),
+                contextURI.getQuery(),
+                null);
+        } catch (URISyntaxException ex) {
+            throw new ConfigurationException(ex);
         }
 
-        return port;
+        return uri;
     }
 
 }
