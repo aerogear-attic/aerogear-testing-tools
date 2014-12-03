@@ -1,14 +1,13 @@
 package org.jboss.aerogear.unifiedpush.test.datagenerator;
 
-import java.io.Serializable;
-import java.util.UUID;
+import org.apache.commons.codec.binary.Base64;
+import org.jboss.aerogear.unifiedpush.api.VariantType;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
-import org.apache.commons.codec.binary.Base64;
-import org.jboss.aerogear.unifiedpush.api.VariantType;
+import java.io.Serializable;
+import java.util.UUID;
 
 public class DataGeneratorConfig implements Serializable {
 
@@ -28,40 +27,41 @@ public class DataGeneratorConfig implements Serializable {
 
     @Min(1)
     private int applicationsCount;
-    
+
     @Min(1)
     private int variantsCount;
-    
+
     @Min(1)
     private int installationsCount;
-    
+
     @Min(0)
     private int categoriesCount;
-    
+
     @Min(0)
     private int categoriesPerInstallation;
-    
+
     private VariantType variantType;
-    
+
     @NotNull
     private VariantDistribution variantDistribution = VariantDistribution.RANDOM;
-    
+
     @NotNull
     private InstallationDistribution installationDistribution = InstallationDistribution.FLAT;
-    
-    @NotNull @Size(min = 1, max = 255)
+
+    @NotNull
+    @Size(min = 1, max = 255)
     private String developer = "admin";
-    
+
     private String googleKey = UUID.randomUUID().toString();
-    
+
     private String projectNumber = UUID.randomUUID().toString();
-    
+
     private String certificateBase64;
-    
+
     private String certificatePass;
-    
+
     private boolean certificateProduction = false;
-    
+
     private boolean cleanupDatabase = false;
 
     public int getApplicationsCount() {
