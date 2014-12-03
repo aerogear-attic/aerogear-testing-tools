@@ -5,6 +5,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+    <!-- Model -->
+    <modelVersion>4.0.0</modelVersion>
+
     <!-- Parent -->
     <parent>
         <groupId>org.jboss</groupId>
@@ -13,16 +16,14 @@
         <relativePath />
     </parent>
 
-    <!-- Model Version -->
-    <modelVersion>4.0.0</modelVersion>
-
     <!-- Artifact Configuration -->
     <groupId>org.jboss.aerogear.test.arquillian</groupId>
-    <artifactId>arquillian-non-deploying-container</artifactId>
+    <artifactId>arquillian-non-deploying-container-parent</artifactId>
     <version>0.3.0-SNAPSHOT</version>
-    <name>Arquillian Non Deploying Container</name>
-    <description>A fake container that tests against already deployed archive but supports URI/URL injection</description>
+    <packaging>pom</packaging>
+    <name>Arquillian Non Deploying Container Parent</name>
 
+    <!-- Developers -->
     <developers>
         <developer>
             <name>Karel Piwko</name>
@@ -41,19 +42,12 @@
         <tag>HEAD</tag>
     </scm>
 
-
-    <!-- Properties -->
     <properties>
-
-        <!-- Versioning -->
-        <version.arquillian>1.1.4.Final</version.arquillian>
-        <version.junit>4.11</version.junit>
-        <version.mockito>1.9.5</version.mockito>
-        <version.json>20140107</version.json>
-        <version.spacelift>1.0.0.Alpha2</version.spacelift>
-        <version.com.jayway.restassured>2.3.1</version.com.jayway.restassured>
-
-        <!-- Other -->
+        <version.maven.release.plugin>2.5</version.maven.release.plugin>
+        <version.animal.sniffer.plugin>1.7</version.animal.sniffer.plugin>
+        <version.signature.java16>1.1</version.signature.java16>
+        <version.spacelift>1.0.0.Alpha3</version.spacelift>
+    
         <!--
             Options to override the compiler arguments directly on the compiler arument line to separate between what
             the IDE understands as the source level and what the Maven compiler actually use.  
@@ -62,122 +56,29 @@
         <maven.compiler.argument.source>1.6</maven.compiler.argument.source>
     </properties>
 
-    <!-- Dependency management -->
+    <modules>
+        <module>arquillian-non-deploying-container-checks-api</module>
+        <module>arquillian-non-deploying-container-checks-impl</module>
+        <module>arquillian-non-deploying-container</module>
+    </modules>
+
+    <!-- Dependency Management -->
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.jboss.arquillian</groupId>
-                <artifactId>arquillian-bom</artifactId>
-                <version>${version.arquillian}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <scope>test</scope>
-                <version>${version.junit}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <scope>test</scope>
-                <version>${version.mockito}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>${version.json}</version>
-            </dependency>
             <dependency>
                 <groupId>org.arquillian.spacelift</groupId>
                 <artifactId>arquillian-spacelift</artifactId>
                 <version>${version.spacelift}</version>
             </dependency>
-            <dependency>
-                <groupId>com.jayway.restassured</groupId>
-                <artifactId>rest-assured</artifactId>
-                <version>${version.com.jayway.restassured}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
-    <!-- Dependencies -->
-    <dependencies>
-
-        <!-- Arquillian dependencies -->
-        <dependency>
-            <groupId>org.jboss.arquillian.container</groupId>
-            <artifactId>arquillian-container-spi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.container</groupId>
-            <artifactId>arquillian-container-test-spi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.protocol</groupId>
-            <artifactId>arquillian-protocol-servlet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.testenricher</groupId>
-            <artifactId>arquillian-testenricher-cdi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.testenricher</groupId>
-            <artifactId>arquillian-testenricher-ejb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.testenricher</groupId>
-            <artifactId>arquillian-testenricher-resource</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.testenricher</groupId>
-            <artifactId>arquillian-testenricher-initialcontext</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.container</groupId>
-            <artifactId>arquillian-container-test-api</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        
-        <!-- Spacelift -->
-        <dependency>
-            <groupId>org.arquillian.spacelift</groupId>
-            <artifactId>arquillian-spacelift</artifactId>
-        </dependency>
-        
-        <!-- Rest Assured -->
-        <dependency>
-            <groupId>com.jayway.restassured</groupId>
-            <artifactId>rest-assured</artifactId>
-        </dependency>
-
-        <!-- json for map parsing -->
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-        </dependency>
-
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <!-- Build -->
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
+                <version>${version.maven.release.plugin}</version>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <pushChanges>false</pushChanges>
@@ -187,7 +88,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>1.7</version>
+                <version>${version.animal.sniffer.plugin}</version>
                 <executions>
                     <execution>
                         <id>signature-check</id>
@@ -201,7 +102,7 @@
                     <signature>
                         <groupId>org.codehaus.mojo.signature</groupId>
                         <artifactId>java16</artifactId>
-                        <version>1.0</version>
+                        <version>${version.signature.java16}</version>
                     </signature>
                 </configuration>
             </plugin>
