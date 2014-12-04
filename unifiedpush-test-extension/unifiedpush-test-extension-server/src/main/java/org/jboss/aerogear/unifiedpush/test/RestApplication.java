@@ -16,14 +16,11 @@
  */
 package org.jboss.aerogear.unifiedpush.test;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
-import org.jboss.aerogear.unifiedpush.test.datagenerator.DataGeneratorEndpoint;
-import org.jboss.aerogear.unifiedpush.test.datagenerator.DataGeneratorTest;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
 
 /**
  * The JAX-RS {@link Application} representing the base
@@ -42,8 +39,6 @@ public class RestApplication extends Application {
         classes.add(UtilityEndpoint.class);
         classes.add(CleanupEndpoint.class);
         classes.add(KeycloakConfigurationEndpoint.class);
-
-        classes.add(DataGeneratorTest.class);
         classes.add(DataGeneratorEndpoint.class);
 
         return classes;

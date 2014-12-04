@@ -1,4 +1,4 @@
-package org.jboss.aerogear.unifiedpush.test.datagenerator;
+package org.jboss.aerogear.unifiedpush.test;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jboss.aerogear.unifiedpush.api.VariantType;
