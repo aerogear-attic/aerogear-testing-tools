@@ -90,7 +90,13 @@ public class ProxySetup {
                 // Configure SSL.
                 SslContext sslCtx;
                 try {
-                    sslCtx = SslContext.newServerContext(new File("/home/asaleh/Work/jbossqe-mobile/patches/certs/sslcerts/myHost.crt"), new File("/home/asaleh/Work/jbossqe-mobile/patches/certs/sslcerts/myHost.pkcs.key"));
+                    java.util.Map<String, String> env = System.getenv();
+
+                    String path_to_cert = env.getOrDefault("GCM_MOCK_CRT","/tmp/gcm_mock.crt");
+
+                    String path_to_key = env.getOrDefault("GCM_MOCK_KEY","/tmp/gcm_mock.key");
+
+                    sslCtx = SslContext.newServerContext(new File(path_to_cert), new File(path_to_key));
                 } catch (SSLException e) {
                     sslCtx = null;
                 }
