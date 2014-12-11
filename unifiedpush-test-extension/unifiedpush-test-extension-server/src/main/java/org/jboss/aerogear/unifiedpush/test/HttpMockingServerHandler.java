@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.*;
@@ -26,13 +27,25 @@ public class HttpMockingServerHandler extends SimpleChannelInboundHandler<Object
     /** Buffer that stores the response content */
     private final StringBuilder buf = new StringBuilder();
     private final StringBuilder contentBuf = new StringBuilder();
-
+    private static int multicast_id_counter = 1337;
+    private static int message_id_counter = 1337;
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
     }
 
     String uri = null;
+
+    private ArrayList<HashMap<String,String>> CreateSuccessfullResultList (ArrayList<String> regids){
+        ArrayList<HashMap<String,String>> out = new  ArrayList<HashMap<String,String>>();
+        for(String s : regids){
+           HashMap<String,String> hm = new HashMap<String, String>();
+
+           hm.put("message_id","1:"+ new Integer(message_id_counter++).toString());
+           out.add(hm);
+        }
+        return out;
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
@@ -55,6 +68,7 @@ public class HttpMockingServerHandler extends SimpleChannelInboundHandler<Object
             contentBuf.append(content.toString(CharsetUtil.UTF_8));
             if (msg instanceof LastHttpContent) {
 
+                HashMap<String, Object> jsonResponse = new HashMap<String, Object>();
                 buf.setLength(0);
                 if(uri.contains("gcm")) {
                     ObjectMapper mapper = new ObjectMapper();
@@ -77,14 +91,17 @@ public class HttpMockingServerHandler extends SimpleChannelInboundHandler<Object
                         stats.gcmMessage = gcmMessage.build();
                         stats.deviceTokens = o.registration_ids;
 
+                        jsonResponse.put("success", new Integer(o.registration_ids.size()));
+                        jsonResponse.put("multicast_id", new Integer(multicast_id_counter++));
+                        jsonResponse.put("failure", new Integer(0));
+                        jsonResponse.put("results", this.CreateSuccessfullResultList(o.registration_ids));
+
                         SenderStatisticsEndpoint.setSenderStatistics(stats);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
 
-                    HashMap<String, Object> jsonResponse = new HashMap<String, Object>();
-                    jsonResponse.put("failure", new Integer(0));
                     jsonResponse.put("canonical_ids", new Integer(0));
                     try {
                         buf.append(mapper.writeValueAsString(jsonResponse));
