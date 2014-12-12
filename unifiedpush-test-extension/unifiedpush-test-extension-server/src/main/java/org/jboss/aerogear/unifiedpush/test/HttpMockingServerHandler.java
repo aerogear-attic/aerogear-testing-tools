@@ -24,11 +24,15 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class HttpMockingServerHandler extends SimpleChannelInboundHandler<Object> {
 
     private HttpRequest request;
+
     /** Buffer that stores the response content */
     private final StringBuilder buf = new StringBuilder();
+
     private final StringBuilder contentBuf = new StringBuilder();
+
     private static int multicast_id_counter = 1337;
     private static int message_id_counter = 1337;
+
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
@@ -36,15 +40,37 @@ public class HttpMockingServerHandler extends SimpleChannelInboundHandler<Object
 
     String uri = null;
 
-    private ArrayList<HashMap<String,String>> CreateSuccessfullResultList (ArrayList<String> regids){
+    private HashMap<String,Object> CreateResult (ArrayList<String> regIds){
+
+        HashMap<String, Object> jsonResponse = new HashMap<String, Object>();
+
         ArrayList<HashMap<String,String>> out = new  ArrayList<HashMap<String,String>>();
-        for(String s : regids){
+
+        int success=0;
+        int failures =0;
+
+        for(String s : regIds){
            HashMap<String,String> hm = new HashMap<String, String>();
 
-           hm.put("message_id","1:"+ new Integer(message_id_counter++).toString());
+            if (s.toLowerCase().startsWith(Tokens.TOKEN_INVALIDATION_PREFIX)) {
+                failures++;
+                hm.put("error", "InvalidRegistration");
+            } else {
+                success++;
+                hm.put("message_id","1:"+ new Integer(message_id_counter++).toString());
+            }
+
            out.add(hm);
         }
-        return out;
+
+        jsonResponse.put("success", new Integer(success));
+        jsonResponse.put("multicast_id", new Integer(multicast_id_counter++));
+        jsonResponse.put("failure", new Integer(failures));
+        jsonResponse.put("results", out);
+
+        jsonResponse.put("canonical_ids", new Integer(0));
+
+        return jsonResponse;
     }
 
     @Override
@@ -68,7 +94,6 @@ public class HttpMockingServerHandler extends SimpleChannelInboundHandler<Object
             contentBuf.append(content.toString(CharsetUtil.UTF_8));
             if (msg instanceof LastHttpContent) {
 
-                HashMap<String, Object> jsonResponse = new HashMap<String, Object>();
                 buf.setLength(0);
                 if(uri.contains("gcm")) {
                     ObjectMapper mapper = new ObjectMapper();
@@ -91,23 +116,19 @@ public class HttpMockingServerHandler extends SimpleChannelInboundHandler<Object
                         stats.gcmMessage = gcmMessage.build();
                         stats.deviceTokens = o.registration_ids;
 
-                        jsonResponse.put("success", new Integer(o.registration_ids.size()));
-                        jsonResponse.put("multicast_id", new Integer(multicast_id_counter++));
-                        jsonResponse.put("failure", new Integer(0));
-                        jsonResponse.put("results", this.CreateSuccessfullResultList(o.registration_ids));
-
                         SenderStatisticsEndpoint.setSenderStatistics(stats);
+                        contentBuf.delete(0,contentBuf.length());
+                        try {
+                            buf.append(mapper.writeValueAsString(this.CreateResult(o.registration_ids)));
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
 
-                    jsonResponse.put("canonical_ids", new Integer(0));
-                    try {
-                        buf.append(mapper.writeValueAsString(jsonResponse));
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
+
                 }
 
 
