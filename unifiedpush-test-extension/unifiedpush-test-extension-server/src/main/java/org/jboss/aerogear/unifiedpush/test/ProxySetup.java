@@ -16,10 +16,18 @@
  */
 package org.jboss.aerogear.unifiedpush.test;
 
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslContext;
 import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersAdapter;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
@@ -30,7 +38,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.net.ssl.SSLException;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,63 +69,136 @@ public class ProxySetup {
 
     private HttpProxyServer server;
 
+
+    private Thread performOnBackgroundThread(final Runnable runnable) {
+        final Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    runnable.run();
+                } finally {
+                }
+            }
+        };
+        t.start();
+        return t;
+    }
+
+    public Thread doWork() {
+        final Runnable runnable = new Runnable() {
+            public void run() {
+                final int PORT = 16001;
+                // Configure SSL.
+                SslContext sslCtx;
+                try {
+                    java.util.Map<String, String> env = System.getenv();
+
+                    String cf = env.getOrDefault("GCM_MOCK_CRT","/tmp/gcm_mock.crt");
+                    File certfile = new File(cf);
+                    String kf = env.getOrDefault("GCM_MOCK_KEY","/tmp/gcm_mock.key");
+                    File keyfile = new File(kf);
+
+                    if(certfile.exists()==false){
+                        throw new FileNotFoundException("File "+cf+" needs to exist.");
+                    }
+
+                    if(keyfile.exists()==false){
+                        throw new FileNotFoundException("File "+kf+" needs to exist.");
+                    }
+                    sslCtx = SslContext.newServerContext(certfile, keyfile);
+                } catch (SSLException e) {
+                    sslCtx = null;
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+
+                    sslCtx = null;
+                }
+                // Configure the server.
+                EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+                EventLoopGroup workerGroup = new NioEventLoopGroup();
+                try {
+                    ServerBootstrap b = new ServerBootstrap();
+                    b.group(bossGroup, workerGroup)
+                            .channel(NioServerSocketChannel.class)
+                            .handler(new LoggingHandler(LogLevel.INFO))
+                            .childHandler(new HttpMockingServerInitializer(sslCtx));
+
+                    Channel ch = b.bind(PORT).sync().channel();
+
+                    ch.closeFuture().sync();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    bossGroup.shutdownGracefully();
+                    workerGroup.shutdownGracefully();
+                }
+                System.out.println("Background Task here");
+            }
+        };
+
+        // run on background thread.
+        return performOnBackgroundThread(runnable);
+    }
+
     @PostConstruct
     public void init() {
         LOGGER.log(Level.INFO, "Initializing proxy");
 
-
+        Thread t = this.doWork();
         InetSocketAddress address = resolveBindAddress();
-
         server = DefaultHttpProxyServer.bootstrap()
+                // Include a ChainedProxyManager to make sure that MITM setting
+                // overrides this
                 .withAddress(address)
+                        // .withManInTheMiddle(new SignedMitmManager())
                 .withFiltersSource(new HttpFiltersSourceAdapter() {
-                    public HttpFilters filterRequest(HttpRequest originalRequest, ChannelHandlerContext ctx) {
-                        LOGGER.log(Level.INFO, "original request: {0}", originalRequest);
-
-                        return new HttpFiltersAdapter(originalRequest, ctx) {
+                    @Override
+                    public HttpFilters filterRequest(HttpRequest originalRequest) {
+                        return new HttpFiltersAdapter(originalRequest) {
                             @Override
-                            public HttpResponse requestPre(HttpObject httpObject) {
-                                LOGGER.log(Level.INFO, "before requestPre {0}", httpObject);
+                            public HttpResponse clientToProxyRequest(
+                                    HttpObject httpObject) {
+                                HttpRequest request = (HttpRequest) httpObject;
 
-                                HttpResponse response = super.requestPre(httpObject);
+                                if (request.getUri().contains("google")) {
+                                    request.setUri("localhost:16001");
+                                }
+                                super.clientToProxyRequest(request);
 
-                                LOGGER.log(Level.INFO, "after requestPre {0}", httpObject);
-
-                                return response;
-
+                                return null;
                             }
 
                             @Override
-                            public HttpResponse requestPost(HttpObject httpObject) {
-                                LOGGER.log(Level.INFO, "before requestPost {0}", httpObject);
+                            public HttpResponse proxyToServerRequest(
+                                    HttpObject httpObject) {
 
-                                HttpResponse response = super.requestPost(httpObject);
-
-                                LOGGER.log(Level.INFO, "after requestPost {0}", httpObject);
-
-                                return response;
+                                return null;
                             }
 
                             @Override
-                            public HttpObject responsePre(HttpObject httpObject) {
-                                LOGGER.log(Level.INFO, "before responsePre {0}", httpObject);
-
-                                HttpObject object = super.responsePre(httpObject);
-
-                                LOGGER.log(Level.INFO, "after responsePre {0}", httpObject);
-
-                                return object;
+                            public HttpObject serverToProxyResponse(
+                                    HttpObject httpObject) {
+                                if (httpObject instanceof HttpResponse) {
+                                    originalRequest.getMethod();
+                                } else if (httpObject instanceof HttpContent) {
+                                    ((HttpContent) httpObject)
+                                            .content().toString(
+                                            Charset.forName("UTF-8"));
+                                }
+                                return httpObject;
                             }
 
                             @Override
-                            public HttpObject responsePost(HttpObject httpObject) {
-                                LOGGER.log(Level.INFO, "before responsePost {0}", httpObject);
-
-                                HttpObject object = super.responsePost(httpObject);
-
-                                LOGGER.log(Level.INFO, "after responsePost {0}", httpObject);
-
-                                return object;
+                            public HttpObject proxyToClientResponse(
+                                    HttpObject httpObject) {
+                                if (httpObject instanceof HttpResponse) {
+                                    originalRequest.getMethod();
+                                } else if (httpObject instanceof HttpContent) {
+                                    ((HttpContent) httpObject)
+                                            .content().toString(
+                                            Charset.forName("UTF-8"));
+                                }
+                                return httpObject;
                             }
                         };
                     }
