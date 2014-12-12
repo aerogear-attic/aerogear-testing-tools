@@ -40,6 +40,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.net.ssl.SSLException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
@@ -92,12 +93,24 @@ public class ProxySetup {
                 try {
                     java.util.Map<String, String> env = System.getenv();
 
-                    String path_to_cert = env.getOrDefault("GCM_MOCK_CRT","/tmp/gcm_mock.crt");
+                    String cf = env.getOrDefault("GCM_MOCK_CRT","/tmp/gcm_mock.crt");
+                    File certfile = new File(cf);
+                    String kf = env.getOrDefault("GCM_MOCK_KEY","/tmp/gcm_mock.key");
+                    File keyfile = new File(kf);
 
-                    String path_to_key = env.getOrDefault("GCM_MOCK_KEY","/tmp/gcm_mock.key");
+                    if(certfile.exists()==false){
+                        throw new FileNotFoundException("File "+cf+" needs to exist.");
+                    }
 
-                    sslCtx = SslContext.newServerContext(new File(path_to_cert), new File(path_to_key));
+                    if(keyfile.exists()==false){
+                        throw new FileNotFoundException("File "+kf+" needs to exist.");
+                    }
+                    sslCtx = SslContext.newServerContext(certfile, keyfile);
                 } catch (SSLException e) {
+                    sslCtx = null;
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+
                     sslCtx = null;
                 }
                 // Configure the server.
