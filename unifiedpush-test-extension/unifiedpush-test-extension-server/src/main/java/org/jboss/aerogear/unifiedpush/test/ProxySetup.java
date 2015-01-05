@@ -91,11 +91,9 @@ public class ProxySetup {
                 // Configure SSL.
                 SslContext sslCtx;
                 try {
-                    java.util.Map<String, String> env = System.getenv();
-
-                    String cf = env.getOrDefault("GCM_MOCK_CRT","/tmp/gcm_mock.crt");
+                    String cf = System.getProperty("gcmMockCrt");
                     File certfile = new File(cf);
-                    String kf = env.getOrDefault("GCM_MOCK_KEY","/tmp/gcm_mock.key");
+                    String kf = System.getProperty("gcmMockKey");
                     File keyfile = new File(kf);
 
                     if(certfile.exists()==false){
