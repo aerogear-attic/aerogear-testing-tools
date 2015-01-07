@@ -33,7 +33,7 @@ public class ManagedContainerConfiguration {
 
     private String modulePath = System.getProperty("module.path");
 
-    private String javaVmArguments = System.getProperty("jboss.options", "-Xmx1512m -XX:MaxPermSize=2512");
+    private String javaVmArguments = System.getProperty("jboss.options", "-Xmx1512m -XX:MaxPermSize=2512m");
 
     private int startupTimeoutInSeconds = 60;
 
