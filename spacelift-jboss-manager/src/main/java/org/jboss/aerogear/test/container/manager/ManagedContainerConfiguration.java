@@ -20,8 +20,8 @@ package org.jboss.aerogear.test.container.manager;
 import java.io.File;
 
 /**
- * 
- * 
+ *
+ *
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
  * @author <a href="mailto:aslak@redhat.com">Stefan Miklosovic</a>
  */
@@ -33,7 +33,7 @@ public class ManagedContainerConfiguration {
 
     private String modulePath = System.getProperty("module.path");
 
-    private String javaVmArguments = System.getProperty("jboss.options", "-Xmx512m");
+    private String javaVmArguments = System.getProperty("jboss.options", "-Xmx1512m -XX:MaxPermSize=2512");
 
     private int startupTimeoutInSeconds = 60;
 
@@ -66,7 +66,7 @@ public class ManagedContainerConfiguration {
     }
 
     /**
-     * 
+     *
      * @throws IllegalStateException if {@code jbossHome} or {@code javaHome} are not valid directories
      */
     public void validate() throws IllegalStateException {
@@ -182,7 +182,7 @@ public class ManagedContainerConfiguration {
 
     /**
      * Get the server configuration file name. Equivalent to [-server-config=...] on the command line.
-     * 
+     *
      * @return the server config
      */
     public String getServerConfig() {
@@ -191,7 +191,7 @@ public class ManagedContainerConfiguration {
 
     /**
      * Set the server configuration file name. Equivalent to [-server-config=...] on the command line.
-     * 
+     *
      * @param serverConfig the server config
      */
     public ManagedContainerConfiguration setServerConfig(String serverConfig) {
@@ -226,7 +226,7 @@ public class ManagedContainerConfiguration {
     }
 
     /**
-     * 
+     *
      * @param user user name of jboss-cli administration console
      */
     public void setUser(String user) {
@@ -238,7 +238,7 @@ public class ManagedContainerConfiguration {
     }
 
     /**
-     * 
+     *
      * @param password password for jboss-cli administration console
      */
     public void setPassword(String password) {
@@ -252,7 +252,7 @@ public class ManagedContainerConfiguration {
     /**
      * Gets Java binary path constructed from {@link #javaHome()}. If {@link #javaHome()} is not set, Java executable equals to
      * {@code java}.
-     * 
+     *
      * @return
      */
     public String getJavaBin() {
