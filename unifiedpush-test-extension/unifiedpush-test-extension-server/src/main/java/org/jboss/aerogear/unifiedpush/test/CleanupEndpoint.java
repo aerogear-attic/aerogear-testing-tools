@@ -55,10 +55,11 @@ public class CleanupEndpoint {
 
         long stop = System.currentTimeMillis();
 
-        Map<String, Object> response = new HashMap<String, Object>();
-        response.put("cleaned", count);
-        response.put("duration", stop - start);
-        return Response.ok(response).build();
+        CleanupResult result = new CleanupResult();
+        result.setCleaned(count);
+        result.setDuration(stop - start);
+
+        return Response.ok(result).build();
     }
 
 }

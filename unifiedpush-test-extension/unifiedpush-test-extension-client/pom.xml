@@ -12,4 +12,15 @@
     <artifactId>unifiedpush-test-extension-client</artifactId>
 
 
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.aerogear.test</groupId>
+            <artifactId>unifiedpush-test-extension-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.aerogear.test</groupId>
+            <artifactId>aerogear-ups-rest-api</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

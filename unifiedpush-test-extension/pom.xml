@@ -45,6 +45,12 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.jboss.aerogear.test</groupId>
+                <artifactId>aerogear-ups-rest-api</artifactId>
+                <version>${aerogear.version}</version>
+            </dependency>
+
             <!-- batch endpoint dependencies -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
