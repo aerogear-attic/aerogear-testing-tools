@@ -29,6 +29,8 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -126,5 +128,15 @@ public class KeycloakConfigurator {
 
         return result;
     }
+
+    public List<String> getRealms() {
+        List<String> result = new ArrayList<String>();
+        TypedQuery<RealmEntity> realmQuery = entityManager.createNamedQuery("getAllRealms", RealmEntity.class);
+        for (RealmEntity realm : realmQuery.getResultList()) {
+            result.add(realm.getName());
+        }
+        return result;
+    }
+
 
 }

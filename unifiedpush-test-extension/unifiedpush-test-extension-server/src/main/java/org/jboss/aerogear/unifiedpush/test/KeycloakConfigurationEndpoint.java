@@ -23,6 +23,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @Stateless
 @Path("/keycloak")
@@ -35,6 +36,14 @@ public class KeycloakConfigurationEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response configureKeycloak() {
         KeycloakConfigurationResult result = configurator.configureForIntegrationTests();
+        return Response.ok(result).build();
+    }
+
+    @GET
+    @Path("/realms")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRealms() {
+        List<String> result = configurator.getRealms();
         return Response.ok(result).build();
     }
 
