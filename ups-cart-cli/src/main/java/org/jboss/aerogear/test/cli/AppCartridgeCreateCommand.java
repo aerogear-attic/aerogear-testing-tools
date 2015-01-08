@@ -14,7 +14,6 @@ import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.process.ProcessInteractionBuilder;
 import org.arquillian.spacelift.process.impl.CommandTool;
 import org.jboss.aerogear.test.GitHubRepository;
-import org.jboss.aerogear.test.cli.exception.GithubRepositoryException;
 import org.jboss.aerogear.unifiedpush.utils.AWS_REGION;
 import org.jboss.aerogear.unifiedpush.utils.GEAR_SIZE;
 
@@ -81,11 +80,7 @@ public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runna
 
         String latestCommit = null;
 
-        try {
-            latestCommit = ghRepository.getLastestCommit(branch);
-        } catch (GithubRepositoryException ex) {
-            throw new RuntimeException(ex);
-        }
+        latestCommit = ghRepository.getLastestCommit(branch);
 
         log.log(Level.INFO, "Latest commit in {0}/{1} branch {2} was {3}", new Object[] {
             organization,

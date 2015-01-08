@@ -1,7 +1,6 @@
 package org.jboss.aerogear.test;
 
 import org.apache.http.HttpStatus;
-import org.jboss.aerogear.test.cli.exception.GithubRepositoryException;
 
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
@@ -16,7 +15,7 @@ public class GitHubRepository {
         this.repository = repository;
     }
 
-    public String getLastestCommit(String branch) throws GithubRepositoryException {
+    public String getLastestCommit(String branch) {
 
         Response response = Session.newSession("https://api.github.com")
             .given()
@@ -26,13 +25,13 @@ public class GitHubRepository {
                 branch);
 
         if (response.statusCode() != HttpStatus.SC_OK) {
-            throw new GithubRepositoryException(response.getStatusLine());
+            throw new RuntimeException(response.getStatusLine());
         }
 
         String latestCommit = getLatestCommitSHA(response);
 
         if (latestCommit == null) {
-            throw new GithubRepositoryException("Unable to get latest commit.");
+            throw new RuntimeException("Unable to get latest commit.");
         }
 
         return latestCommit;
