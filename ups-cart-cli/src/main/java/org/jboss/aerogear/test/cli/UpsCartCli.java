@@ -1,12 +1,12 @@
 package org.jboss.aerogear.test.cli;
 
-import org.arquillian.spacelift.execution.Tasks;
-import org.arquillian.spacelift.execution.impl.DefaultExecutionServiceFactory;
-import org.jboss.aerogear.unifiedpush.utils.perf.UpsBatchGenerateCommand;
-
 import io.airlift.command.Cli;
 import io.airlift.command.Cli.CliBuilder;
 import io.airlift.command.Help;
+
+import org.arquillian.spacelift.execution.Tasks;
+import org.arquillian.spacelift.execution.impl.DefaultExecutionServiceFactory;
+import org.jboss.aerogear.unifiedpush.utils.perf.UpsBatchGenerateCommand;
 
 public class UpsCartCli {
 
@@ -18,6 +18,7 @@ public class UpsCartCli {
             .withCommands(Help.class,
                 AppCartridgeCreateCommand.class,
                 AppCartridgeDeleteCommand.class,
+                DataGeneratorCommand.class,
                 UpsGenerateAppsCommand.class,
                 UpsDeleteAppsCommand.class,
                 UpsDumpCommand.class,
