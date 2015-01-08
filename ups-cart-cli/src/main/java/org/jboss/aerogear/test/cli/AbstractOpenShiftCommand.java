@@ -2,7 +2,7 @@ package org.jboss.aerogear.test.cli;
 
 import io.airlift.command.Option;
 
-public abstract class OpenShiftCommand implements Runnable {
+public abstract class AbstractOpenShiftCommand implements Runnable {
 
     @Option(
         name = { "-a", "--app-name" },
@@ -16,4 +16,9 @@ public abstract class OpenShiftCommand implements Runnable {
         title = "namespace",
         description = "Namespace on OpenShift, default value: mobileqa")
     public String namespace = "mobileqa";
+    
+    protected String getUnifiedpushTestExtensionUri() {
+        return "https://"+appName+"-"+namespace+".rhcloud.com/unifiedpush-test-extension-server";
+    }
+    
 }

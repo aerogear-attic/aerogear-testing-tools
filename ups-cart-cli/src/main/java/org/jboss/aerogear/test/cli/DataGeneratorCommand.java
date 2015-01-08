@@ -4,6 +4,7 @@ import io.airlift.command.Command;
 import io.airlift.command.Option;
 
 import java.io.FileInputStream;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.jboss.aerogear.test.ContentTypes;
@@ -18,7 +19,9 @@ import com.jayway.restassured.response.Response;
 
 @Command(name = "generate-data", 
          description = "Generates testing data for an UPS instance with usage of DataGeneratorEndpoint from unifiedpush-test-extension-server.war")
-public class DataGeneratorCommand extends OpenShiftCommand {
+public class DataGeneratorCommand extends AbstractOpenShiftCommand {
+    
+    private static final Logger log = Logger.getLogger(DataGeneratorCommand.class.getName());
 
     @Option(name = "--applications", 
             title = "applications", 
@@ -95,19 +98,16 @@ public class DataGeneratorCommand extends OpenShiftCommand {
             description = "If set, all data will be deleted before generation.")
     private Boolean cleanupDatabase;
 
+    @Override
     public void run() {
         Response response = RestAssured.given().
-                baseUri(getBaseUri()).
+                baseUri(getUnifiedpushTestExtensionUri()).
                 body(getDataGeneratorConfig()).
                 header(Headers.acceptJson()).
                 contentType(ContentTypes.json()).
                 post("/datagenerator");
         
-        System.out.println(response.prettyPrint());        
-    }
-    
-    private String getBaseUri() {
-        return "https://"+appName+"-"+namespace+".rhcloud.com/unifiedpush-test-extension-server";
+        log.info(response.prettyPrint());        
     }
 
     private DataGeneratorConfig getDataGeneratorConfig() {

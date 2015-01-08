@@ -17,7 +17,7 @@ public class UpsCartCli {
             .withCommands(Help.class,
                 AppCartridgeCreateCommand.class,
                 DataGeneratorCommand.class,
-                UpsDeleteAppsCommand.class);
+                CleanupCommand.class);
 
         // register tasks execution factory
         Tasks.setDefaultExecutionServiceFactory(new DefaultExecutionServiceFactory());

@@ -18,7 +18,7 @@ import org.jboss.aerogear.unifiedpush.utils.AWS_REGION;
 import org.jboss.aerogear.unifiedpush.utils.GEAR_SIZE;
 
 @Command(name = "cart-create", description = "Create OpenShift Cartridge based on latest commit in given organization, repository and branch. Requires rhc tools installed")
-public class AppCartridgeCreateCommand extends OpenShiftCommand implements Runnable {
+public class AppCartridgeCreateCommand extends AbstractOpenShiftCommand implements Runnable {
 
     private static final Logger log = Logger.getLogger(AppCartridgeCreateCommand.class.getName());
 
