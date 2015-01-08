@@ -6,7 +6,6 @@ import io.airlift.command.Help;
 
 import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.execution.impl.DefaultExecutionServiceFactory;
-import org.jboss.aerogear.unifiedpush.utils.perf.UpsBatchGenerateCommand;
 
 public class UpsCartCli {
 
@@ -21,8 +20,7 @@ public class UpsCartCli {
                 DataGeneratorCommand.class,
                 UpsGenerateAppsCommand.class,
                 UpsDeleteAppsCommand.class,
-                UpsDumpCommand.class,
-                UpsBatchGenerateCommand.class);
+                UpsDumpCommand.class);
 
         // register tasks execution factory
         Tasks.setDefaultExecutionServiceFactory(new DefaultExecutionServiceFactory());
