@@ -44,13 +44,13 @@ public class JBossManager implements ContainerManager {
 
     private Thread shutdownThread;
     private Process process;
-    private final ManagedContainerConfiguration configuration;
+    private final JBossManagerConfiguration configuration;
 
     public JBossManager() {
-        this(new ManagedContainerConfiguration());
+        this(new JBossManagerConfiguration());
     }
 
-    public JBossManager(ManagedContainerConfiguration configuration) {
+    public JBossManager(JBossManagerConfiguration configuration) {
         if (configuration == null) {
             throw new IllegalArgumentException("Provided configuration to JBossManager is a null object!");
         }
@@ -88,8 +88,7 @@ public class JBossManager implements ContainerManager {
 
             Runtime.getRuntime().addShutdownHook(shutdownThread);
 
-            Tasks.prepare(JBossStartChecker.class)
-                .configuration(configuration)
+            Tasks.chain(configuration, JBossStartChecker.class)
                 .execute()
                 .until(new CountDownWatch(configuration.getStartupTimeoutInSeconds(), TimeUnit.SECONDS), JBossStartChecker.jbossStartedCondition);
 

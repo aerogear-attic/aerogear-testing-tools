@@ -16,11 +16,9 @@
  */
 package org.jboss.aerogear.test.container.spacelift;
 
-import java.util.logging.Logger;
-
 import org.arquillian.spacelift.execution.Task;
 import org.jboss.aerogear.test.container.manager.JBossManager;
-import org.jboss.aerogear.test.container.manager.ManagedContainerConfiguration;
+import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
 
 /**
  * Starts JBoss instance.
@@ -28,23 +26,21 @@ import org.jboss.aerogear.test.container.manager.ManagedContainerConfiguration;
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
  *
  */
-public class JBossStarter extends Task<ManagedContainerConfiguration, JBossManager> {
+public class JBossStarter extends Task<JBossManagerConfiguration, JBossManager> {
 
-    private static final Logger logger = Logger.getLogger(JBossStarter.class.getName());
+    private JBossManagerConfiguration configuration;
 
-    private ManagedContainerConfiguration configuration;
-
-    public JBossStarter configuration(ManagedContainerConfiguration configuration) {
+    public JBossStarter configuration(JBossManagerConfiguration configuration) {
         setConfiguration(configuration);
         return this;
     }
 
     public JBossStarter() {
-        configuration = new ManagedContainerConfiguration();
+        configuration = new JBossManagerConfiguration();
     }
 
     @Override
-    protected JBossManager process(ManagedContainerConfiguration configuration) throws Exception {
+    protected JBossManager process(JBossManagerConfiguration configuration) throws Exception {
 
         setConfiguration(configuration);
 
@@ -55,14 +51,10 @@ public class JBossStarter extends Task<ManagedContainerConfiguration, JBossManag
         return jbossManager;
     }
 
-    private void setConfiguration(ManagedContainerConfiguration configuration) {
+    private void setConfiguration(JBossManagerConfiguration configuration) {
         if (configuration != null) {
-            try {
-                configuration.validate();
-                this.configuration = configuration;
-            } catch (IllegalStateException ex) {
-                logger.info("Configuration passed to JBossStarted was not valid and it was not taken into account.");
-            }
+            configuration.validate();
+            this.configuration = configuration;
         }
     }
 }

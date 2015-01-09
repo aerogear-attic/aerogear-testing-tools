@@ -16,11 +16,16 @@
  */
 package org.jboss.aerogear.test.container;
 
+import org.jboss.aerogear.test.container.manager.configuration.CONTAINER_TYPE;
+
 /**
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
  *
  */
 public class TestUtils {
+
+    // default extracted container to target is JBoss AS 7
+    private static final CONTAINER_TYPE defaultContainerType = CONTAINER_TYPE.AS7;
 
     public static String getJBossHome() {
 
@@ -32,5 +37,24 @@ public class TestUtils {
         }
 
         return home;
+    }
+
+    public static CONTAINER_TYPE getContainerType() {
+
+        String containerTypeName = System.getProperty("containerType");
+
+        if (containerTypeName == null) {
+            return defaultContainerType;
+        }
+
+        CONTAINER_TYPE containerType = null;
+
+        try {
+            containerType = Enum.valueOf(CONTAINER_TYPE.class, containerTypeName);
+        } catch (IllegalArgumentException ex) {
+            containerType = defaultContainerType;
+        }
+
+        return containerType;
     }
 }

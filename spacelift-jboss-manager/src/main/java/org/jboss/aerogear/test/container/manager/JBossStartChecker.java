@@ -20,67 +20,63 @@ import org.arquillian.spacelift.execution.ExecutionCondition;
 import org.arquillian.spacelift.execution.ExecutionException;
 import org.arquillian.spacelift.execution.Task;
 import org.arquillian.spacelift.execution.Tasks;
-import org.arquillian.spacelift.process.ProcessResult;
-import org.jboss.aerogear.test.container.spacelift.JBossCLI;
+import org.jboss.aerogear.test.container.manager.check.DomainStartedCheckTask;
+import org.jboss.aerogear.test.container.manager.check.ServerInDomainStartCheckTask;
+import org.jboss.aerogear.test.container.manager.check.StandaloneStartedCheckTask;
 
 /**
  *
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
  *
  */
-class JBossStartChecker extends Task<Object, Boolean> {
+class JBossStartChecker extends Task<JBossManagerConfiguration, Boolean> {
 
     public static final ExecutionCondition<Boolean> jbossStartedCondition = new JBossStartChecker.JBossStartedCondition();
 
-    private ManagedContainerConfiguration configuration = new ManagedContainerConfiguration();
+    @Override
+    protected Boolean process(JBossManagerConfiguration configuration) throws Exception {
 
-    public JBossStartChecker configuration(ManagedContainerConfiguration configuration) {
-        if (configuration != null) {
-            configuration.validate();
-            this.configuration = configuration;
+        if (configuration == null) {
+            throw new IllegalStateException("configuration is null object!");
         }
-        return this;
+
+        configuration.validate();
+
+        if (configuration.isDomain()) {
+            return startDomainCheck(configuration);
+        } else {
+            return startStandaloneCheck(configuration);
+        }
     }
 
-    @Override
-    protected Boolean process(Object input) throws Exception {
+    private Boolean startStandaloneCheck(final JBossManagerConfiguration configuration) {
+        return Tasks.chain(configuration, StandaloneStartedCheckTask.class).execute().await();
+    }
 
-        ProcessResult processResult = null;
+    private Boolean startDomainCheck(JBossManagerConfiguration configuration) {
 
-        try {
-            processResult = Tasks.prepare(JBossCLI.class)
-                .environment("JBOSS_HOME", configuration.getJbossHome())
-                .user(configuration.getUser())
-                .password(configuration.getPassword())
-                .connect()
-                .cliCommand(":read-attribute(name=server-state)")
-                .execute().await();
-        } catch (Exception ex) {
+        boolean domainStarted = Tasks.prepare(DomainStartedCheckTask.class).configuration(configuration).execute().await();
 
-        }
-
-        if (processResult == null || processResult.exitValue() != 0) {
+        if (!domainStarted) {
             return false;
         }
 
-        boolean success = false;
-        boolean running = false;
+        // at this point we have all servers up but they are starting underneath
+        // we have to check the status of every server until all are in STARTED status
 
-        for (String output : processResult.output()) {
+        for (String domainServer : configuration.getDomainServers()) {
 
-            output = output.toLowerCase();
+            boolean domainServerStarted = Tasks.chain(domainServer, ServerInDomainStartCheckTask.class)
+                .configuration(configuration)
+                .execute()
+                .await();
 
-            if (output != null && output.contains("result") && output.contains("running")) {
-                running = true;
-                continue;
-            }
-
-            if (output != null && output.contains("outcome") && output.contains("success")) {
-                success = true;
+            if (!domainServerStarted) {
+                return false;
             }
         }
 
-        return success && running;
+        return true;
     }
 
     private static final class JBossStartedCondition implements ExecutionCondition<Boolean> {

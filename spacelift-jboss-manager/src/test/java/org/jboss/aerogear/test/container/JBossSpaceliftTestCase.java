@@ -18,7 +18,8 @@ package org.jboss.aerogear.test.container;
 
 import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.execution.impl.DefaultExecutionServiceFactory;
-import org.jboss.aerogear.test.container.manager.ManagedContainerConfiguration;
+import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
+import org.jboss.aerogear.test.container.manager.configuration.CONTAINER_TYPE;
 import org.jboss.aerogear.test.container.spacelift.JBossStarter;
 import org.jboss.aerogear.test.container.spacelift.JBossStopper;
 import org.junit.BeforeClass;
@@ -38,6 +39,10 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class JBossSpaceliftTestCase {
 
+    private String JBOSS_HOME = TestUtils.getJBossHome();
+
+    private CONTAINER_TYPE containerType = TestUtils.getContainerType();
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -47,12 +52,20 @@ public class JBossSpaceliftTestCase {
     }
 
     @Test
-    public void startAndStopJBossContainer() {
-
-        String JBOSS_HOME = TestUtils.getJBossHome();
+    public void startAndStopJBossContainerStandalone() {
 
         Tasks.prepare(JBossStarter.class)
-            .configuration(new ManagedContainerConfiguration().setJbossHome(JBOSS_HOME))
+            .configuration(new JBossManagerConfiguration().setJBossHome(JBOSS_HOME).setContainerType(containerType))
+            .then(JBossStopper.class)
+            .execute()
+            .await();
+    }
+
+    @Test
+    public void startAndStopJBossContainerDomain() {
+
+        Tasks.prepare(JBossStarter.class)
+            .configuration(new JBossManagerConfiguration().setJBossHome(JBOSS_HOME).setContainerType(containerType).domain())
             .then(JBossStopper.class)
             .execute()
             .await();
