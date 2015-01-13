@@ -17,6 +17,7 @@
 package org.jboss.aerogear.test.container.spacelift;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,9 +34,9 @@ import org.arquillian.spacelift.tool.Tool;
 
 /**
  * Wrapper around {@code jboss-cli.sh} script.
- *
+ * 
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
- *
+ * 
  */
 public class JBossCLI extends Tool<Object, ProcessResult> {
 
@@ -161,18 +162,60 @@ public class JBossCLI extends Tool<Object, ProcessResult> {
         return sb.toString();
     }
 
-    private CommandTool getJBossCliTool() {
+    private CommandTool getJBossCliTool() throws Exception {
 
         if (SystemUtils.IS_OS_WINDOWS) {
+
+            File jbossScript = new File(environment.get("JBOSS_HOME"), "/bin/jboss-cli.bat");
+
+            validateScript(jbossScript);
+
             return Tasks.prepare(CommandTool.class)
                 .command(new CommandBuilder("cmd.exe"))
-                .parameters("/C", new File(environment.get("JBOSS_HOME"), "/bin/jboss-cli.bat").getAbsolutePath())
+                .parameters("/C", jbossScript.getAbsolutePath())
                 .addEnvironment(environment);
         } else {
+
+            File jbossScript = new File(environment.get("JBOSS_HOME"), "/bin/jboss-cli.sh");
+
+            validateScript(jbossScript);
+
             return Tasks.prepare(CommandTool.class)
-                .command(new CommandBuilder(new File(environment.get("JBOSS_HOME"), "/bin/jboss-cli.sh").getAbsolutePath()))
+                .command(new CommandBuilder(jbossScript.getAbsolutePath()))
                 .addEnvironment(environment);
         }
+    }
+
+    private void validateScript(File jbossScript) throws Exception {
+        if (!jbossScript.exists()) {
+            throw new FileNotFoundException(jbossScript.getAbsolutePath() + " does not exist.");
+        }
+
+        if (!jbossScript.canExecute()) {
+            throw new NotExecutableScriptException(jbossScript + " is not executable.");
+        }
+    }
+
+    public static class NotExecutableScriptException extends Exception {
+
+        private static final long serialVersionUID = -2281993207167380102L;
+
+        public NotExecutableScriptException() {
+            super();
+        }
+
+        public NotExecutableScriptException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public NotExecutableScriptException(String message) {
+            super(message);
+        }
+
+        public NotExecutableScriptException(Throwable cause) {
+            super(cause);
+        }
+
     }
 
 }

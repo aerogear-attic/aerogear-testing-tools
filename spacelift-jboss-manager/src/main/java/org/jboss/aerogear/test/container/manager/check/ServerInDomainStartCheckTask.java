@@ -16,12 +16,15 @@
  */
 package org.jboss.aerogear.test.container.manager.check;
 
+import java.io.FileNotFoundException;
+
 import org.arquillian.spacelift.execution.ExecutionException;
 import org.arquillian.spacelift.execution.Task;
 import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.process.ProcessResult;
 import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
 import org.jboss.aerogear.test.container.spacelift.JBossCLI;
+import org.jboss.aerogear.test.container.spacelift.JBossCLI.NotExecutableScriptException;
 
 /**
  * Checks STARTED status of slave server in a domain.
@@ -68,7 +71,11 @@ public class ServerInDomainStartCheckTask extends Task<String, Boolean> {
             }
 
         } catch (ExecutionException ex) {
-
+            if (ex.getCause() instanceof FileNotFoundException) {
+                throw ex;
+            } else if (ex.getCause() instanceof NotExecutableScriptException) {
+                throw ex;
+            }
         }
 
         return false;

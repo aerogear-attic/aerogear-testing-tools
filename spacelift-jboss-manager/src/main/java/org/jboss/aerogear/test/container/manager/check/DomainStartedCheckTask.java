@@ -16,6 +16,7 @@
  */
 package org.jboss.aerogear.test.container.manager.check;
 
+import java.io.FileNotFoundException;
 import java.util.concurrent.TimeUnit;
 
 import org.arquillian.spacelift.execution.ExecutionCondition;
@@ -25,6 +26,7 @@ import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.process.ProcessResult;
 import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
 import org.jboss.aerogear.test.container.spacelift.JBossCLI;
+import org.jboss.aerogear.test.container.spacelift.JBossCLI.NotExecutableScriptException;
 
 /**
  * Checks if domain has started, meaning all slave servers are being about to start.
@@ -92,6 +94,11 @@ public class DomainStartedCheckTask extends Task<Object, Boolean> {
 
                 });
         } catch (Exception ex) {
+            if (ex.getCause() instanceof FileNotFoundException) {
+                throw ex;
+            } else if (ex.getCause() instanceof NotExecutableScriptException) {
+                throw ex;
+            }
             domainServersStartInitiatedResult = null;
         }
 

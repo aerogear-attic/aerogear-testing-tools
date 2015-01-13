@@ -1,0 +1,108 @@
+import org.arquillian.spacelift.gradle.*
+import org.arquillian.spacelift.gradle.android.*
+import org.arquillian.spacelift.execution.Tasks
+import org.arquillian.spacelift.gradle.maven.*
+import org.arquillian.spacelift.gradle.arquillian.*
+import org.arquillian.spacelift.process.impl.CommandTool
+import org.arquillian.spacelift.process.CommandBuilder
+import java.io.File
+import org.apache.commons.io.FileUtils
+
+defaultTasks 'test'
+apply plugin: 'spacelift'
+
+ext {
+    defaultWildflyVersion = "8.2.0.Final"
+    defaultJbossAS7Version = "7.1.1.Final"
+    defaultJbossAS7VersionMajor = "7.1"
+
+    defaultContainerEnvs = [:]
+}
+
+spacelift {
+
+    workspace = new File(project.rootDir, ".ws")
+    installationsDir = new File(workspace, "installations")
+
+    tools {
+        mvn {
+            command {
+                def m2 = System.getenv("M2")
+                def m2_home = System.getenv("M2_HOME")
+
+                if (m2 != null && !m2.isEmpty()) {
+                    return Tasks.prepare(CommandTool).command(new CommandBuilder("${m2}/mvn"))
+                } else if (m2_home != null && !m2_home.isEmpty()) {
+                    return Tasks.prepare(CommandTool).command(new CommandBuilder("${m2_home}/bin/mvn"))
+                } else {
+                    return Tasks.prepare(CommandTool).command(new CommandBuilder("mvn"))
+                }
+            }
+        }
+    }
+
+    profiles {
+        'default' {
+            tests 'jbossManagerTest'
+            enabledInstallations 'wildfly', 'as7' 
+        }
+    }
+
+    installations {
+        wildfly {
+            product 'jbossManager'
+            version { project.wildflyVersion }
+            remoteUrl { "http://download.jboss.org/wildfly/${project.wildflyVersion}/wildfly-${project.wildflyVersion}.tar.gz" }
+            home { "wildfly-${project.wildflyVersion}" }
+
+            postActions {
+                project.containerEnvs.put("${home.absolutePath}", "WILDFLY")
+                project.ant.chmod(dir: "${home.absolutePath}/bin", perm:"a+x", includes:"**/*.sh")
+            }
+        }
+
+        as7 {
+            product 'jbossManager'
+            version { project.jbossAS7Version }
+            remoteUrl { "http://download.jboss.org/jbossas/${project.jbossAS7VersionMajor}/jboss-as-${project.jbossAS7Version}/jboss-as-${project.jbossAS7Version}.zip" }
+            home = { "jboss-as-${project.jbossAS7Version}" }
+
+            postActions {
+                project.containerEnvs.put("${home.absolutePath}", "AS7")
+                project.ant.chmod(dir: "${home.absolutePath}/bin", perm:"a+x", includes:"**/*.sh")
+            }
+        }
+    }
+
+    tests {
+        jbossManagerTest {
+
+            dataProvider {
+                project.containerEnvs
+            }
+
+            execute { containerEnv ->
+
+                Tasks.prepare(MavenExecutor).pom("${project.rootDir}/pom.xml")
+                    .goals('clean', 'test')
+                    .property("jboss.home=${containerEnv.key}")
+                    .property("containerType=${containerEnv.value}")
+                    .execute().await()
+            }
+        }
+    }
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.arquillian.spacelift.gradle:arquillian-spacelift-gradle:1.0.0-alpha-5'
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.2'
+}

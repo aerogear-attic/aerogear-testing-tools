@@ -16,11 +16,14 @@
  */
 package org.jboss.aerogear.test.container.manager.check;
 
+import java.io.FileNotFoundException;
+
 import org.arquillian.spacelift.execution.Task;
 import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.process.ProcessResult;
 import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
 import org.jboss.aerogear.test.container.spacelift.JBossCLI;
+import org.jboss.aerogear.test.container.spacelift.JBossCLI.NotExecutableScriptException;
 
 /**
  * Checks start of single server instance, started in standalone mode.
@@ -50,7 +53,11 @@ public class StandaloneStartedCheckTask extends Task<JBossManagerConfiguration, 
                 .cliCommand(":read-attribute(name=server-state)")
                 .execute().await();
         } catch (Exception ex) {
-
+            if (ex.getCause() instanceof FileNotFoundException) {
+                throw ex;
+            } else if (ex.getCause() instanceof NotExecutableScriptException) {
+                throw ex;
+            }
         }
 
         if (processResult == null || processResult.exitValue() != 0) {
