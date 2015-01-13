@@ -51,6 +51,12 @@
                 <version>${aerogear.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.2.6</version>
+            </dependency>
+            
             <!-- batch endpoint dependencies -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
