@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jboss.aerogear.test.container.manager.configuration.CONTAINER_TYPE;
+import org.jboss.aerogear.test.container.manager.configuration.ContainerType;
 import org.jboss.aerogear.test.container.manager.configuration.ContainerJavaOptsConfiguration;
 
 /**
@@ -54,7 +54,7 @@ public class JBossManagerConfiguration {
 
     private String password;
 
-    private CONTAINER_TYPE containerType = CONTAINER_TYPE.WILDFLY;
+    private ContainerType containerType = ContainerType.WILDFLY;
 
     private String domainConfig = "domain.xml";
 
@@ -292,11 +292,11 @@ public class JBossManagerConfiguration {
         return password;
     }
 
-    public CONTAINER_TYPE getContainerType() {
+    public ContainerType getContainerType() {
         return containerType;
     }
 
-    public JBossManagerConfiguration setContainerType(CONTAINER_TYPE containerType) {
+    public JBossManagerConfiguration setContainerType(ContainerType containerType) {
         if (containerType != null) {
             this.containerType = containerType;
         }

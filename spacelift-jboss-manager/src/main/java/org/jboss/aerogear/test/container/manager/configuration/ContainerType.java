@@ -21,7 +21,7 @@ package org.jboss.aerogear.test.container.manager.configuration;
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
  *
  */
-public enum CONTAINER_TYPE {
+public enum ContainerType {
 
     AS7,
     EAP,

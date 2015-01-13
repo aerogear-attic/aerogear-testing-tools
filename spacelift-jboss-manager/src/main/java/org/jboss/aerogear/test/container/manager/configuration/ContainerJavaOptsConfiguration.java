@@ -34,7 +34,7 @@ public class ContainerJavaOptsConfiguration {
 
     public static final String getContainerJavaOpts(JBossManagerConfiguration configuration) {
 
-        CONTAINER_TYPE type = configuration.getContainerType();
+        ContainerType type = configuration.getContainerType();
 
         if (type == null) {
             throw new IllegalStateException("Type of container to get Java options for is a null object!");

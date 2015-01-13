@@ -20,7 +20,7 @@ import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.execution.impl.DefaultExecutionServiceFactory;
 import org.jboss.aerogear.test.container.manager.JBossManager;
 import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
-import org.jboss.aerogear.test.container.manager.configuration.CONTAINER_TYPE;
+import org.jboss.aerogear.test.container.manager.configuration.ContainerType;
 import org.jboss.aerogear.test.container.spacelift.JBossCLI;
 import org.jboss.aerogear.test.container.spacelift.JBossStarter;
 import org.jboss.aerogear.test.container.spacelift.JBossStopper;
@@ -42,7 +42,7 @@ public class JBossCLITestCase {
 
     private static final String JBOSS_HOME = TestUtils.getJBossHome();
 
-    private CONTAINER_TYPE containerType = TestUtils.getContainerType();
+    private ContainerType containerType = TestUtils.getContainerType();
 
     private JBossManager manager;
 
