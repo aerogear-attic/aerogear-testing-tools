@@ -72,8 +72,8 @@ public class AppCreateCommand extends AbstractCommand {
     private void copyExtension() {
         Tasks.prepare(CommandTool.class)
             .programName("rhc")
-            .parameters("scp", appName, "-n", namespace, "upload") 
-            .parameters("--local-path", "../../unifiedpush-test-extension/unifiedpush-test-extension-server/target/unifiedpush-test-extension-server.war")
+            .parameters("scp", appName, "-n", namespace, "upload")
+            .parameters("--local-path", "../../unifiedpush-test-extension-server/target/unifiedpush-test-extension-server.war")
             .parameters("--remote-path", "unified-push/standalone/deployments")
             .interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut())
             .execute().await();

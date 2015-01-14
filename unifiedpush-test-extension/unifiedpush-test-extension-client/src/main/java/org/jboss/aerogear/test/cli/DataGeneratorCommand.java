@@ -61,7 +61,7 @@ public class DataGeneratorCommand extends AbstractCommand {
 
     @Option(name = "--installation-distribution", 
             title = "installation-distribution", 
-            description = "Which distribution function to use for installation assignement for variants, possible values: 'pareto', 'flat'. Defauts to 'flat'.", allowedValues = { "PARETO", "FLAT" })    
+            description = "Which distribution function to use for installation assignement for variants, possible values: 'PARETO', 'FLAT'.")
     private InstallationDistribution installationDistribution;
 
     @Option(name = "--developer", 

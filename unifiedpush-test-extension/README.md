@@ -14,17 +14,17 @@ mvn clean package
 
 This command will create a war file and remove `persistence.xml` file from the keycloak dependency jar.
 
-Afterwards you will find `unifiedpush-test-extension.war` file in the `target/` directory.
+Afterwards you will find `unifiedpush-test-extension-server.war` file in the `unifiedpush-test-extension-server/target` directory.
 
 ## How to deploy
 
 ### WildFly, AS or EAP
 
-Simply copy the `unifiedpush-test-extension.war` file into `$JBOSS_HOME/standalone/deployments/` directory.
+Simply copy the `unifiedpush-test-extension-server.war` file into `$JBOSS_HOME/standalone/deployments/` directory.
 
 ### Openshift
 
-Deployment to OpenShift can be done either directly using `sftp` or by pushing into the git repository.
+Deployment to OpenShift can be done either directly using `sftp` or by pushing into the git repository or via cli tool `upte`.
 
 * #### SFTP upload
   Connect to your application and upload the `unifiedpush-test-extension.war` file into `~/ag-push/`
@@ -42,6 +42,17 @@ Deployment to OpenShift can be done either directly using `sftp` or by pushing i
   4. Commit and push
 
   After these steps, the server should restart and try deploying the test extension.
+  
+* #### CLI tool `upte`
+
+  1. Navigate to `unifiedpush-test-extension-client/target` directory.
+  2. There is tool `$./upte app-create` which can be used for create UPS cartridge with test extension, eg.
+  
+     ```sh
+     ./upte app-create --app-name foo --namespace mobileqa --force
+     ```
+     
+     (use help command for more details `.\upte help`)
 
 ## How to use
 
@@ -64,3 +75,24 @@ Where to find the `application ip`?
 ### KeyCloak configurator
 
 By default, UnifiedPush Server does not allow REST login. We exposed the `/keycloak` endpoint so that when you need to login using REST, you just access the `/keycloak` first and we will reconfigure the KeyCloak in a way that it allows REST authorization and does not require password change (which is also not possible with REST).
+
+### Data generator
+
+For example: You want to add 10000 applications, for each application there will be 10 variants. You want 
+to simulate installation of 125000 devices. Each device will be in 50 categories and you 
+are choosing these categories randomly from 1000 categories totally.
+
+```sh
+./upte generate-data --app-name foo \ 
+    --applications 100000 \
+    --categories 1000 \
+    --categories-per-installation 50 \ 
+    --installations 125000 \ 
+    --installation-distribution PARETO \ 
+    --variants 10 \ 
+    --variant-type ANDROID \ 
+    --variant-distribution EQUAL \ 
+    --cleanup-database
+```
+
+(use help command for more details `.\upte help`)
