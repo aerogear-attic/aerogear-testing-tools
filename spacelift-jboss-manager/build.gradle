@@ -1,12 +1,9 @@
 import org.arquillian.spacelift.gradle.*
-import org.arquillian.spacelift.gradle.android.*
 import org.arquillian.spacelift.execution.Tasks
 import org.arquillian.spacelift.gradle.maven.*
-import org.arquillian.spacelift.gradle.arquillian.*
 import org.arquillian.spacelift.process.impl.CommandTool
 import org.arquillian.spacelift.process.CommandBuilder
 import java.io.File
-import org.apache.commons.io.FileUtils
 
 defaultTasks 'test'
 apply plugin: 'spacelift'
