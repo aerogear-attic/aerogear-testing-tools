@@ -5,7 +5,7 @@ By this Spacelift task you start JBoss instance like this:
 [source,java]
 ----
 JBossManager manager = Tasks.prepare(JBossStarter.class)
-    .configuration(new ManagedContainerConfiguration().setJbossHome(JBOSS_HOME))
+    .configuration(new JBossManagerConfiguration().setJbossHome(JBOSS_HOME))
     .execute()
     .await();
 ----
@@ -42,12 +42,12 @@ Tasks.prepare(JBossStarter.class)
 By default, configuration of the container is suited for Wildfly. When you want to use options for Java process for 
 different container, please use +setContainerType(CONTAINER_TYPE)+ method on manager configuration object.
 
-If you want to use JBoss instance located by your JBOSS_HOME property, you can omit +configuration+ method.
+If you want to use JBoss instance located by your +JBOSS_HOME+ property, you can omit +configuration+ method.
 
 == JBossCLI
 
-Provides a way how to send commands via jboss-cli tool bundled in JBoss distribution via Java. After you 
-have started JBoss instance by JBossStarter, use it e.g. like this:
+JBossCLI provides a way how to send commands via jboss-cli tool bundled in JBoss distribution via Java. After you 
+have started JBoss instance by +JBossStarter+, use it e.g. like this:
 
 [source,java]
 ----
@@ -68,6 +68,8 @@ You can omit +environment+ if you are satisfied with defaults. Just shown comman
 +JBossCLI+ is a wrapper around jboss-cli scripts. It is multiplatform. You can automatically use it at Linux, Macs and Windows.
 Please investigate its API to get to know how to use it. Setters for that tool just copy parameters you can add to command line version of it.
 
+=== Testing of this project
+
 In order to try other container from default located in +target/jboss+ in tests, you need to set system property +jboss.home+ like
 
 ----
@@ -77,8 +79,17 @@ $ mvn clean test -Djboss.home=[path_to_jboss_home_of_my_interest]
 If you want to try to test another container different from JBoss AS 7, you have to specify its container type by system property +containerType+
 
 ----
-$ mvn clean test -DcontainerType={AS,EAP,WILDFLY} -Djboss.home={container directory}
+$ mvn clean test -DcontainerType={AS7,EAP,WILDFLY} -Djboss.home={container directory}
 ----
+
+This project uses https://github.com/arquillian/arquillian-spacelift-gradle-plugin[Spacelift Gradle plugin] as well. You can test JBoss AS 7 and Wildfly 8 just by executing:
+
+----
+$ ./gradlew test
+----
+
+JBoss AS 7 and Wildfly zips are downloaded automatically and tests for both containers are executed. If you want to test EAP containers, 
+it is up to you to provide Spacelift Gradle plugin installation for it since this container is not publicly available.
 
 == Release new version
 
