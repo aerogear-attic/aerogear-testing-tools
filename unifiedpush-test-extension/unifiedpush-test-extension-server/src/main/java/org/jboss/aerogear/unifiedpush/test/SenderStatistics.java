@@ -8,7 +8,7 @@ import java.util.List;
  * Created by asaleh on 12/11/14.
  */
 public class SenderStatistics {
-    public List<String> deviceTokens;
+    public List<String> deviceTokens = new ArrayList<String>();
     public Message gcmMessage;
     public String apnsAlert;
     public int apnsBadge;
