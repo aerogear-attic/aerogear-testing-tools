@@ -18,13 +18,14 @@ import javax.ws.rs.core.Response;
 // FIXME move to src/main
 public class SenderStatisticsEndpoint {
 
-    private static SenderStatistics senderStatistics;
+    private static SenderStatistics senderStatistics = new SenderStatistics();
+
     public static void setSenderStatistics(SenderStatistics statistics){
         senderStatistics = statistics;
     }
 
     public static void clearSenderStatistics(){
-        senderStatistics=null;
+        senderStatistics = new SenderStatistics();
     }
 
     @GET
