@@ -55,7 +55,7 @@ public class DataGeneratorEndpoint {
 
     private static final Random RANDOM = new Random();
 
-    @Resource(name = "java:jboss/datasources/UnifiedPushDS")
+    @Resource(lookup = "java:jboss/datasources/UnifiedPushDS")
     private DataSource ds;
     
     @Inject
