@@ -40,6 +40,8 @@ public class RestApplication extends Application {
         classes.add(KeycloakConfigurationEndpoint.class);
         classes.add(DataGeneratorEndpoint.class);
         classes.add(SenderStatisticsEndpoint.class);
+        classes.add(JavaSenderTestEndpoint.class);
+        
         return classes;
     }
 }

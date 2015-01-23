@@ -27,6 +27,7 @@
         <hibernate.entitymanager.version>4.0.1.Final</hibernate.entitymanager.version>
         <aerogear.version>1.0.2</aerogear.version>
         <littleproxy.version>1.1.0-beta1-SNAPSHOT</littleproxy.version>
+        <aerogear.unifiedpush-java-client.version>1.0.0</aerogear.unifiedpush-java-client.version>
     </properties>
 
     <dependencyManagement>
@@ -120,6 +121,12 @@
                 <artifactId>hibernate-entitymanager</artifactId>
                 <version>${hibernate.entitymanager.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <!-- UnifiedPush Java Sender to send messages -->
+            <dependency>
+                <groupId>org.jboss.aerogear</groupId>
+                <artifactId>unifiedpush-java-client</artifactId>
+                <version>${aerogear.unifiedpush-java-client.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
