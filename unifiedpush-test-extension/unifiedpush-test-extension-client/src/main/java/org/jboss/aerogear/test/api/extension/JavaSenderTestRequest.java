@@ -17,26 +17,35 @@
 package org.jboss.aerogear.test.api.extension;
 
 import com.jayway.restassured.response.Response;
-import org.jboss.aerogear.unifiedpush.test.CleanupResult;
+import org.apache.http.HttpStatus;
+import org.jboss.aerogear.test.UnexpectedResponseException;
+import org.jboss.aerogear.unifiedpush.api.PushApplication;
 
-public class CleanupRequest extends AbstractTestExtensionRequest<CleanupRequest> {
+import java.net.URL;
 
-    private CleanupRequest() {
+public class JavaSenderTestRequest extends AbstractTestExtensionRequest<JavaSenderTestRequest> {
+
+    private JavaSenderTestRequest() {
 
     }
 
-    public CleanupResult cleanApplications() {
+    public String sendTestMessage(PushApplication application, URL pushServerUrl, String alert) {
         Response response = getSession()
                 .given()
-                .get("/cleanup/applications");
+                .formParam("pushAppId", application.getPushApplicationID())
+                .formParam("secret", application.getMasterSecret())
+                .formParam("serverUrl", pushServerUrl.toExternalForm())
+                .formParam("alert", alert)
+                .post("/javaSenderTest");
 
-        return response.as(CleanupResult.class);
+        UnexpectedResponseException.verifyResponse(response, HttpStatus.SC_OK);
+
+        return response.asString();
     }
 
 
-    public static CleanupRequest request() {
-        return new CleanupRequest();
+    public static JavaSenderTestRequest request() {
+        return new JavaSenderTestRequest();
     }
-
 
 }
