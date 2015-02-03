@@ -6,6 +6,8 @@ NOTE: The proxy behavior is not yet working. Currently only `http` and `https` r
 
 ## How to build
 
+You need to clone and install LittleProxy prior to the installation of this extension itself. You need 1.1.0.Beta1-SNAPSHOT version of LittleProxy from here https://github.com/adamfisk/LittleProxy.
+
 All you need is to invoke the following command:
 
 ```
