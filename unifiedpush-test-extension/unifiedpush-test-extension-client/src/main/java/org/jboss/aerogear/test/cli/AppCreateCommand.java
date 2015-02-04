@@ -7,6 +7,8 @@ import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.process.ProcessInteractionBuilder;
 import org.arquillian.spacelift.process.impl.CommandTool;
 
+import com.jayway.restassured.RestAssured;
+
 @Command(name = "app-create", description = "Create OpenShift Cartridge. Requires rhc tools installed.")
 public class AppCreateCommand extends AbstractCommand {
 
@@ -29,7 +31,7 @@ public class AppCreateCommand extends AbstractCommand {
             title = "force",
             description = "Forces removal of the cartridge")
     private boolean force;
-
+    
     @Override
     public void run() {
         delete();
@@ -37,6 +39,8 @@ public class AppCreateCommand extends AbstractCommand {
         stop();
         copyExtension();
         start();
+        configureKeycloak();
+        restart();
     }
 
     private void delete() {
@@ -93,6 +97,18 @@ public class AppCreateCommand extends AbstractCommand {
             .parameters("app", "stop", appName, "-n", namespace)
             .interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut())
             .execute().await();
+    }
+    
+    private void restart() {
+        Tasks.prepare(CommandTool.class)
+            .programName("rhc")
+            .parameters("app", "restart", appName, "-n", namespace)
+            .interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut())
+            .execute().await();
+    }
+
+    private void configureKeycloak() {
+        RestAssured.given().baseUri(getUnifiedpushTestExtensionUri()).get("/keycloak");
     }
 
 }
