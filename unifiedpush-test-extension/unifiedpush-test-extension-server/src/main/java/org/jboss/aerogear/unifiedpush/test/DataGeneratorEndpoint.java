@@ -258,19 +258,25 @@ public class DataGeneratorEndpoint {
         LOGGER.info("Generating categories per installations");
 
         List<Category> categoriesShuffled = new ArrayList<Category>(ctx.getCategories());
-        for (Installation installation : ctx.getInstallations()) {
-            Collections.shuffle(categoriesShuffled);
-            installation.setCategories(new HashSet<Category>(categoriesShuffled.subList(0, ctx.getConfig().getCategoriesPerInstallation())));
-        }
-        
         List<Pair<String, Long>> instalationCategoryPairs = new ArrayList<Pair<String, Long>>();
         for (Installation installation : ctx.getInstallations()) {
-            for (Category category : installation.getCategories()) {
+            
+            Collections.shuffle(categoriesShuffled);
+            List<Category> categories = categoriesShuffled.subList(0, ctx.getConfig().getCategoriesPerInstallation());
+            for (Category category : categories) {
                 instalationCategoryPairs.add(Pair.of(installation.getId(), category.getId()));
+            }
+            
+            if( instalationCategoryPairs.size() > 10000 ) {
+                executeBatch("insert into Installation_Category(installation_id, categories_id) values(?, ?)", new PrepareInsertInstallationCategoryStmt(), instalationCategoryPairs);
+                instalationCategoryPairs.clear();
             }
         }
         
-        executeBatch("insert into Installation_Category(installation_id, categories_id) values(?, ?)", new PrepareInsertInstallationCategoryStmt(), instalationCategoryPairs);
+        if( instalationCategoryPairs.size() > 0 ) {
+            executeBatch("insert into Installation_Category(installation_id, categories_id) values(?, ?)", new PrepareInsertInstallationCategoryStmt(), instalationCategoryPairs);
+            instalationCategoryPairs.clear();
+        }
     }
 
     private Map<Variant, Integer> calculateInstallationDistribution(DataGeneratorContext ctx) {
