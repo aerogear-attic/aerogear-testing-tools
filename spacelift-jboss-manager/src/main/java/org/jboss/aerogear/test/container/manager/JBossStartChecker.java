@@ -16,10 +16,10 @@
  */
 package org.jboss.aerogear.test.container.manager;
 
+import org.arquillian.spacelift.Spacelift;
 import org.arquillian.spacelift.execution.ExecutionCondition;
 import org.arquillian.spacelift.execution.ExecutionException;
-import org.arquillian.spacelift.execution.Task;
-import org.arquillian.spacelift.execution.Tasks;
+import org.arquillian.spacelift.task.Task;
 import org.jboss.aerogear.test.container.manager.check.DomainStartedCheckTask;
 import org.jboss.aerogear.test.container.manager.check.ServerInDomainStartCheckTask;
 import org.jboss.aerogear.test.container.manager.check.StandaloneStartedCheckTask;
@@ -50,12 +50,12 @@ class JBossStartChecker extends Task<JBossManagerConfiguration, Boolean> {
     }
 
     private Boolean startStandaloneCheck(final JBossManagerConfiguration configuration) {
-        return Tasks.chain(configuration, StandaloneStartedCheckTask.class).execute().await();
+        return Spacelift.task(configuration, StandaloneStartedCheckTask.class).execute().await();
     }
 
     private Boolean startDomainCheck(JBossManagerConfiguration configuration) {
 
-        boolean domainStarted = Tasks.prepare(DomainStartedCheckTask.class).configuration(configuration).execute().await();
+        boolean domainStarted = Spacelift.task(DomainStartedCheckTask.class).configuration(configuration).execute().await();
 
         if (!domainStarted) {
             return false;
@@ -66,7 +66,7 @@ class JBossStartChecker extends Task<JBossManagerConfiguration, Boolean> {
 
         for (String domainServer : configuration.getDomainServers()) {
 
-            boolean domainServerStarted = Tasks.chain(domainServer, ServerInDomainStartCheckTask.class)
+            boolean domainServerStarted = Spacelift.task(domainServer, ServerInDomainStartCheckTask.class)
                 .configuration(configuration)
                 .execute()
                 .await();

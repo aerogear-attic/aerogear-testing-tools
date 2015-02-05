@@ -18,9 +18,9 @@ package org.jboss.aerogear.test.container.manager.check;
 
 import java.io.FileNotFoundException;
 
-import org.arquillian.spacelift.execution.Task;
-import org.arquillian.spacelift.execution.Tasks;
+import org.arquillian.spacelift.Spacelift;
 import org.arquillian.spacelift.process.ProcessResult;
+import org.arquillian.spacelift.task.Task;
 import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
 import org.jboss.aerogear.test.container.spacelift.JBossCLI;
 import org.jboss.aerogear.test.container.spacelift.JBossCLI.NotExecutableScriptException;
@@ -45,7 +45,7 @@ public class StandaloneStartedCheckTask extends Task<JBossManagerConfiguration, 
         ProcessResult processResult = null;
 
         try {
-            processResult = Tasks.prepare(JBossCLI.class)
+            processResult = Spacelift.task(JBossCLI.class)
                 .environment("JBOSS_HOME", configuration.getJBossHome())
                 .user(configuration.getUser())
                 .password(configuration.getPassword())

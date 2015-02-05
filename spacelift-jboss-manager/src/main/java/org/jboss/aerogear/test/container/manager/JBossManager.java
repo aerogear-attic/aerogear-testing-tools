@@ -23,8 +23,8 @@ import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import org.arquillian.spacelift.Spacelift;
 import org.arquillian.spacelift.execution.CountDownWatch;
-import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.process.Command;
 import org.jboss.aerogear.test.container.manager.api.ContainerManager;
 import org.jboss.aerogear.test.container.manager.api.ContainerManagerException;
@@ -88,7 +88,7 @@ public class JBossManager implements ContainerManager {
 
             Runtime.getRuntime().addShutdownHook(shutdownThread);
 
-            Tasks.chain(configuration, JBossStartChecker.class)
+            Spacelift.task(configuration, JBossStartChecker.class)
                 .execute()
                 .until(new CountDownWatch(configuration.getStartupTimeoutInSeconds(), TimeUnit.SECONDS), JBossStartChecker.jbossStartedCondition);
 

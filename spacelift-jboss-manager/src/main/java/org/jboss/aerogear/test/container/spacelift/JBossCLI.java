@@ -20,25 +20,24 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.arquillian.spacelift.execution.Tasks;
+import org.arquillian.spacelift.Spacelift;
 import org.arquillian.spacelift.process.CommandBuilder;
 import org.arquillian.spacelift.process.ProcessResult;
-import org.arquillian.spacelift.process.impl.CommandTool;
-import org.arquillian.spacelift.tool.Tool;
+import org.arquillian.spacelift.task.Task;
+import org.arquillian.spacelift.task.os.CommandTool;
 
 /**
  * Wrapper around {@code jboss-cli.sh} script.
- * 
+ *
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
- * 
+ *
  */
-public class JBossCLI extends Tool<Object, ProcessResult> {
+public class JBossCLI extends Task<Object, ProcessResult> {
 
     private final Map<String, String> environment = new HashMap<String, String>();
 
@@ -108,11 +107,6 @@ public class JBossCLI extends Tool<Object, ProcessResult> {
     }
 
     @Override
-    protected Collection<String> aliases() {
-        return Arrays.asList("jbosscli_binary");
-    }
-
-    @Override
     protected ProcessResult process(Object input) throws Exception {
 
         final CommandTool jbossCliTool = getJBossCliTool();
@@ -170,7 +164,7 @@ public class JBossCLI extends Tool<Object, ProcessResult> {
 
             validateScript(jbossScript);
 
-            return Tasks.prepare(CommandTool.class)
+            return Spacelift.task(CommandTool.class)
                 .command(new CommandBuilder("cmd.exe"))
                 .parameters("/C", jbossScript.getAbsolutePath())
                 .addEnvironment(environment);
@@ -180,7 +174,7 @@ public class JBossCLI extends Tool<Object, ProcessResult> {
 
             validateScript(jbossScript);
 
-            return Tasks.prepare(CommandTool.class)
+            return Spacelift.task(CommandTool.class)
                 .command(new CommandBuilder(jbossScript.getAbsolutePath()))
                 .addEnvironment(environment);
         }

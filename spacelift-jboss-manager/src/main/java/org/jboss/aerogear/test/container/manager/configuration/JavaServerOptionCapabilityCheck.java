@@ -19,10 +19,10 @@ package org.jboss.aerogear.test.container.manager.configuration;
 import java.util.List;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.arquillian.spacelift.execution.Task;
-import org.arquillian.spacelift.execution.Tasks;
+import org.arquillian.spacelift.Spacelift;
 import org.arquillian.spacelift.process.CommandBuilder;
-import org.arquillian.spacelift.process.impl.CommandTool;
+import org.arquillian.spacelift.task.Task;
+import org.arquillian.spacelift.task.os.CommandTool;
 import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
 
 /**
@@ -36,7 +36,7 @@ public class JavaServerOptionCapabilityCheck extends Task<JBossManagerConfigurat
     @Override
     protected Boolean process(JBossManagerConfiguration configuration) throws Exception {
 
-        List<String> javaVersionOutput = Tasks.prepare(CommandTool.class)
+        List<String> javaVersionOutput = Spacelift.task(CommandTool.class)
             .command(new CommandBuilder(configuration.getJavaBin()).build())
             .parameter("-version")
             .execute()

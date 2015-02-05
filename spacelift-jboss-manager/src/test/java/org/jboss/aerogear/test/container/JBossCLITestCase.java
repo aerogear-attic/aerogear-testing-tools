@@ -16,8 +16,7 @@
  */
 package org.jboss.aerogear.test.container;
 
-import org.arquillian.spacelift.execution.Tasks;
-import org.arquillian.spacelift.execution.impl.DefaultExecutionServiceFactory;
+import org.arquillian.spacelift.Spacelift;
 import org.jboss.aerogear.test.container.manager.JBossManager;
 import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
 import org.jboss.aerogear.test.container.manager.configuration.ContainerType;
@@ -26,7 +25,6 @@ import org.jboss.aerogear.test.container.spacelift.JBossStarter;
 import org.jboss.aerogear.test.container.spacelift.JBossStopper;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -46,14 +44,9 @@ public class JBossCLITestCase {
 
     private JBossManager manager;
 
-    @BeforeClass
-    public static void beforeClass() {
-        Tasks.setDefaultExecutionServiceFactory(new DefaultExecutionServiceFactory());
-    }
-
     @Before
     public void setup() {
-        manager = Tasks.prepare(JBossStarter.class)
+        manager = Spacelift.task(JBossStarter.class)
             .configuration(new JBossManagerConfiguration().setJBossHome(JBOSS_HOME).setContainerType(containerType))
             .execute()
             .await();
@@ -61,12 +54,12 @@ public class JBossCLITestCase {
 
     @After
     public void tearDown() {
-        Tasks.chain(manager, JBossStopper.class).execute().await();
+        Spacelift.task(manager, JBossStopper.class).execute().await();
     }
 
     @Test
     public void executeCliCommand() {
-        Tasks.prepare(JBossCLI.class)
+        Spacelift.task(JBossCLI.class)
             .environment("JBOSS_HOME", JBOSS_HOME)
             .connect()
             .cliCommand("quit")

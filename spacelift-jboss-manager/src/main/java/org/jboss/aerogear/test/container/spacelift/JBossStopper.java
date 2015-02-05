@@ -16,7 +16,7 @@
  */
 package org.jboss.aerogear.test.container.spacelift;
 
-import org.arquillian.spacelift.execution.Task;
+import org.arquillian.spacelift.task.Task;
 import org.jboss.aerogear.test.container.manager.JBossManager;
 
 /**

@@ -16,7 +16,7 @@
  */
 package org.jboss.aerogear.test.container.manager.configuration;
 
-import org.arquillian.spacelift.execution.Tasks;
+import org.arquillian.spacelift.Spacelift;
 import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
 
 /**
@@ -57,7 +57,7 @@ public class ContainerJavaOptsConfiguration {
 
         if (!configuration.isDomain()) {
             sb.append("-server").append(SPACE);
-        } else if (Tasks.chain(configuration, JavaServerOptionCapabilityCheck.class).execute().await()) {
+        } else if (Spacelift.task(configuration, JavaServerOptionCapabilityCheck.class).execute().await()) {
             sb.append("-server").append(SPACE);
         }
 
@@ -95,7 +95,7 @@ public class ContainerJavaOptsConfiguration {
                 .append("-Xms1303m").append(SPACE)
                 .append("-Xmx1303m").append(SPACE);
         } else {
-            if (Tasks.chain(configuration, JavaServerOptionCapabilityCheck.class).execute().await()) {
+            if (Spacelift.task(configuration, JavaServerOptionCapabilityCheck.class).execute().await()) {
                 sb.append("-server").append(SPACE);
             }
             sb.append("-Xms64m").append(SPACE).append("-Xmx512m").append(SPACE);
@@ -124,7 +124,7 @@ public class ContainerJavaOptsConfiguration {
             sb.append("-server").append(SPACE)
                 .append("-XX:+UseCompressedOops").append(SPACE)
                 .append("-XX:+TieredCompilation").append(SPACE);
-        } else if (Tasks.chain(configuration, JavaServerOptionCapabilityCheck.class).execute().await()) {
+        } else if (Spacelift.task(configuration, JavaServerOptionCapabilityCheck.class).execute().await()) {
             sb.append("-server").append(SPACE);
         }
 

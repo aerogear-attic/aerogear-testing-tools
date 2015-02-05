@@ -39,7 +39,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
         <!-- Spacelift related -->
-        <version.org.arquillian.spacelift>1.0.0.Alpha3</version.org.arquillian.spacelift>
+        <version.org.arquillian.spacelift>1.0.0.Alpha5</version.org.arquillian.spacelift>
 
         <!-- JBoss related -->
         <version.org.jboss.as>7.1.1.Final</version.org.jboss.as>

@@ -18,10 +18,10 @@ package org.jboss.aerogear.test.container.manager.check;
 
 import java.io.FileNotFoundException;
 
+import org.arquillian.spacelift.Spacelift;
 import org.arquillian.spacelift.execution.ExecutionException;
-import org.arquillian.spacelift.execution.Task;
-import org.arquillian.spacelift.execution.Tasks;
 import org.arquillian.spacelift.process.ProcessResult;
+import org.arquillian.spacelift.task.Task;
 import org.jboss.aerogear.test.container.manager.JBossManagerConfiguration;
 import org.jboss.aerogear.test.container.spacelift.JBossCLI;
 import org.jboss.aerogear.test.container.spacelift.JBossCLI.NotExecutableScriptException;
@@ -55,7 +55,7 @@ public class ServerInDomainStartCheckTask extends Task<String, Boolean> {
             + ":read-resource(include-runtime=true)";
 
         try {
-            result = Tasks.prepare(JBossCLI.class)
+            result = Spacelift.task(JBossCLI.class)
                 .environment("JBOSS_HOME", configuration.getJBossHome())
                 .user(configuration.getUser())
                 .password(configuration.getPassword())
