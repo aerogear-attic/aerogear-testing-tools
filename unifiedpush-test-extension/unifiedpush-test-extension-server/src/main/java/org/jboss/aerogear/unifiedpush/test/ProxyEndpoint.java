@@ -17,8 +17,7 @@
 package org.jboss.aerogear.unifiedpush.test;
 
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ws.rs.DELETE;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -26,32 +25,37 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Created by asaleh on 12/11/14.
+ * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
+ *
  */
 @Stateless
-@TransactionAttribute
-@Path("/senderStats")
-public class SenderStatisticsEndpoint {
+@Path("/")
+public class ProxyEndpoint {
 
-    private static SenderStatistics senderStatistics = new SenderStatistics();
+    @Inject
+    private ProxySetup proxySetup;
 
-    public static void setSenderStatistics(SenderStatistics statistics){
-        senderStatistics = statistics;
-    }
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/proxy_activate")
+    public Response activateProxy() {
 
-    public static void clearSenderStatistics(){
-        senderStatistics = new SenderStatistics();
+        if (!proxySetup.isActive()) {
+            proxySetup.startProxyServer();
+        }
+
+        return Response.ok().build();
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response listAllStatistics() {
-        return Response.ok(senderStatistics).build();
-    }
+    @Path("/proxy_deactivate")
+    public Response deactivateProxy() {
 
-    @DELETE
-    public Response resetStatistics() {
-        clearSenderStatistics();
-        return Response.noContent().build();
+        if (proxySetup.isActive()) {
+            proxySetup.stopProxyServer();
+        }
+
+        return Response.ok().build();
     }
 }
