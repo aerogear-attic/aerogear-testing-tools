@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 
 /**
  * Class which creates a proxy when deployed and shuts it down when undeployed.
- * 
+ *
  * FIXME missing proper implementation, currently only works as pass-through proxy, but it should validate the sent push
  * messages.
  */
@@ -58,20 +58,25 @@ public class ProxySetup {
 
     private static final Logger logger = Logger.getLogger(ProxySetup.class.getName());
 
-    /**
-     * First found will be used. If none found, the {@link #DEFAULT_BIND_IP} will be used.
-     */
-    private static final String[] POSSIBLE_BIND_IP_PROPERTIES = {
-        "OPENSHIFT_AEROGEAR_PUSH_IP",
-        "OPENSHIFT_JBOSS_UNIFIED_PUSH_IP",
-        "MYTESTIP_1",
-        "OPENSHIFT_UNIFIED_PUSH_IP"
+    private static final String[] POSSIBLE_HTTP_PROXY_HOST_PROPERTIES = {
+        "http.proxyHost",
+        "https.proxyHost"
+    };
+
+    private static final String[] POSSIBLE_HTTP_PROXY_PORT_PROPERTIES = {
+        "http.proxyPort",
+        "https.proxyPort"
+    };
+
+    private static final String[] POSSIBLE_GCM_MOCK_SERVER_PORT_PROPERTIES = {
+        "gcm.mock.server.port"
     };
 
     private static final String DEFAULT_BIND_IP = "127.0.0.1";
 
-    // TODO add a possibility to change the port using an env property
-    private static final int HTTP_PROXY_PORT = 16000;
+    private static final int DEFAULT_HTTP_PROXY_PORT = 16000;
+
+    private static final int DEFAULT_GCM_MOCK_SERVER_PORT = 16001;
 
     private static HttpProxyServer server;
 
@@ -88,10 +93,7 @@ public class ProxySetup {
         }
 
         server = DefaultHttpProxyServer.bootstrap()
-            // Include a ChainedProxyManager to make sure that MITM setting
-            // overrides this
             .withAddress(resolveBindAddress())
-            // .withManInTheMiddle(new SignedMitmManager())
             .withFiltersSource(new HttpFiltersSourceAdapter() {
 
                 @Override
@@ -105,7 +107,7 @@ public class ProxySetup {
                             HttpRequest request = (HttpRequest) httpObject;
 
                             if (request.getUri().contains("google")) {
-                                request.setUri("localhost:16001");
+                                request.setUri("localhost:" + backgroundThread.getGcmMockServePort());
                             }
 
                             super.clientToProxyRequest(request);
@@ -168,7 +170,9 @@ public class ProxySetup {
 
     private BackgroundThread startBackgroundThread() {
 
-        BackgroundThread backgroundThread = new BackgroundThread();
+        int gcmMockServePort = resolveGcmMockServerPort();
+
+        BackgroundThread backgroundThread = new BackgroundThread(gcmMockServePort);
 
         backgroundThread.start();
 
@@ -179,11 +183,20 @@ public class ProxySetup {
 
     private static class BackgroundThread extends Thread {
 
+        private final int gcmMockServePort;
+
         private Channel channel;
+
+        public BackgroundThread(int gcmMockServePort) {
+            this.gcmMockServePort = gcmMockServePort;
+        }
+
+        public int getGcmMockServePort() {
+            return gcmMockServePort;
+        }
 
         @Override
         public void run() {
-            final int PORT = 16001;
             // Configure SSL.
             SslContext sslCtx;
             try {
@@ -218,7 +231,7 @@ public class ProxySetup {
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new HttpMockingServerInitializer(sslCtx));
 
-                channel = serverBootstrap.bind(PORT).sync().channel();
+                channel = serverBootstrap.bind(gcmMockServePort).sync().channel();
 
                 channel.closeFuture().sync();
             } catch (InterruptedException e) {
@@ -245,19 +258,43 @@ public class ProxySetup {
 
     }
 
+    private int resolveGcmMockServerPort() {
+
+        int port = DEFAULT_GCM_MOCK_SERVER_PORT;
+
+        for (String propertyName : POSSIBLE_GCM_MOCK_SERVER_PORT_PROPERTIES) {
+            Integer parsedPort = Integer.getInteger(propertyName);
+            if (parsedPort != null && parsedPort > 0 && parsedPort < 65535) {
+                port = parsedPort;
+            }
+        }
+
+        return port;
+    }
+
     private InetSocketAddress resolveBindAddress() {
 
         String ip = DEFAULT_BIND_IP;
 
-        for (String propertyName : POSSIBLE_BIND_IP_PROPERTIES) {
-            String propertyValue = System.getenv(propertyName);
+        for (String propertyName : POSSIBLE_HTTP_PROXY_HOST_PROPERTIES) {
+            String parsedIp = System.getProperty(propertyName);
             // TODO it might be a good idea to add additional validation
-            if (propertyValue != null && propertyValue.length() != 0) {
-                ip = propertyValue;
+            if (parsedIp != null && parsedIp.length() != 0) {
+                ip = parsedIp;
                 break;
             }
         }
 
-        return new InetSocketAddress(ip, HTTP_PROXY_PORT);
+        int port = DEFAULT_HTTP_PROXY_PORT;
+
+        for (String propertyName : POSSIBLE_HTTP_PROXY_PORT_PROPERTIES) {
+            Integer parsedPort = Integer.getInteger(propertyName);
+            if (parsedPort != null && parsedPort > 0 && parsedPort < 65535) {
+                port = parsedPort;
+                break;
+            }
+        }
+
+        return new InetSocketAddress(ip, port);
     }
 }

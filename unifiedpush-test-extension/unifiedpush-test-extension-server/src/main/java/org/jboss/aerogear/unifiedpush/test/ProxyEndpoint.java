@@ -25,11 +25,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
+ * Starts and stops proxy on demand.
+ *
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>
  *
  */
 @Stateless
-@Path("/")
+@Path("/proxy")
 public class ProxyEndpoint {
 
     @Inject
@@ -37,7 +39,7 @@ public class ProxyEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/proxy_activate")
+    @Path("/activate")
     public Response activateProxy() {
 
         if (!proxySetup.isActive()) {
@@ -49,7 +51,7 @@ public class ProxyEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/proxy_deactivate")
+    @Path("/deactivate")
     public Response deactivateProxy() {
 
         if (proxySetup.isActive()) {
