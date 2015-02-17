@@ -92,7 +92,8 @@ public class KeycloakConfigurator {
                 for (UserRequiredActionEntity userRequiredAction : user.getRequiredActions()) {
                     LOGGER.log(Level.INFO, "Removing required action: {0}", userRequiredAction.getAction().name());
                     String current = result.getRemovedRequiredActions().get(user.getUsername());
-                    result.getRemovedRequiredActions().put(user.getUsername(), current + userRequiredAction.getAction
+                    result.getRemovedRequiredActions().put(user.getUsername(),
+                        (current == null || current.equals("null") ? "" : current + ", ") + userRequiredAction.getAction
                             ().name() + ", ");
                     entityManager.remove(userRequiredAction);
                 }
