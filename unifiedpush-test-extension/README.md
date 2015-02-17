@@ -78,6 +78,13 @@ Where to find the `application ip`?
 
 By default, UnifiedPush Server does not allow REST login. We exposed the `/keycloak` endpoint so that when you need to login using REST, you just access the `/keycloak` first and we will reconfigure the KeyCloak in a way that it allows REST authorization and does not require password change (which is also not possible with REST).
 
+### Proxy activation
+
+There is embedded proxy server in order to be able to route notifications to mocked server for further inspection. This proxy server setup is turned off by default. You have to turn it
+on explicitly, otherwise messages will be sent to real notification providers.
+
+Turning proxy on is done by calling REST endpoint `/proxy/activate`. Deactivation is done by calling `/proxy/deactivate`.
+
 ### Data generator
 
 For example: You want to add 10000 applications, for each application there will be 10 variants. You want 
