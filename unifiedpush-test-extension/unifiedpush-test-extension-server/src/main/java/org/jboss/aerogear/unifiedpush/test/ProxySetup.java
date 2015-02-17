@@ -162,9 +162,9 @@ public class ProxySetup {
             if (backgroundThread.isAlive() && !backgroundThread.isInterrupted()) {
                 backgroundThread.closeChannel();
                 backgroundThread.interrupt();
-                backgroundThread = null;
                 logger.log(Level.INFO, "Background thread interrupted in ProxySetup.");
             }
+            backgroundThread = null;
         }
     }
 
