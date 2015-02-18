@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.test;
+package org.jboss.aerogear.unifiedpush.test.sender;
+
+import org.jboss.aerogear.unifiedpush.test.SenderStatistics;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;

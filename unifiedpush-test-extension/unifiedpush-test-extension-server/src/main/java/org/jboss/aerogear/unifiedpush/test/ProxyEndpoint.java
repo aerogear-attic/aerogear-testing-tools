@@ -16,6 +16,8 @@
  */
 package org.jboss.aerogear.unifiedpush.test;
 
+import org.jboss.aerogear.unifiedpush.test.sender.ProxySetup;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.GET;

@@ -1,4 +1,4 @@
-package org.jboss.aerogear.unifiedpush.test;
+package org.jboss.aerogear.unifiedpush.test.sender.gcm;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;

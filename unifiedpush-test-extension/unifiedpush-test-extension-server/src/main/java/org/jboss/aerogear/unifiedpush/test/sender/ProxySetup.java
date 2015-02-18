@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.aerogear.unifiedpush.test;
+package org.jboss.aerogear.unifiedpush.test.sender;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -28,19 +28,25 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
-
+import org.jboss.aerogear.unifiedpush.test.sender.apns.ApnsServerSimulator;
+import org.jboss.aerogear.unifiedpush.test.sender.apns.FixedCertificates;
+import org.jboss.aerogear.unifiedpush.test.sender.gcm.HttpMockingServerInitializer;
+import org.jboss.aerogear.unifiedpush.test.sender.util.InetAddressPropertyUtil;
+import org.jboss.aerogear.unifiedpush.test.sender.util.PortVerifier;
+import org.jboss.aerogear.unifiedpush.test.sender.util.PropertyResolver;
 import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersAdapter;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
+import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.net.ssl.SSLException;
-
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
@@ -58,25 +64,37 @@ public class ProxySetup {
 
     private static final Logger logger = Logger.getLogger(ProxySetup.class.getName());
 
-    private static final String[] POSSIBLE_HTTP_PROXY_HOST_PROPERTIES = {
-        "http.proxyHost",
-        "https.proxyHost"
-    };
+    private static final PropertyResolver<String> HTTP_PROXY_HOST = PropertyResolver
+            .with("127.0.0.1", "http.proxyHost", "https.proxyHost");
 
-    private static final String[] POSSIBLE_HTTP_PROXY_PORT_PROPERTIES = {
-        "http.proxyPort",
-        "https.proxyPort"
-    };
+    private static final PropertyResolver<Integer> HTTP_PROXY_PORT = PropertyResolver
+            .with(16000, "http.proxyPort", "https.proxyPort")
+            .verifyOutputWith(new PortVerifier());
 
-    private static final String[] POSSIBLE_GCM_MOCK_SERVER_PORT_PROPERTIES = {
-        "gcm.mock.server.port"
-    };
+    private static final PropertyResolver<Integer> GCM_MOCK_SERVER_PORT = PropertyResolver
+            .with(16001, "gcm.mock.server.port")
+            .verifyOutputWith(new PortVerifier());
 
-    private static final String DEFAULT_BIND_IP = "127.0.0.1";
+    private static final PropertyResolver<InetAddress> APNS_MOCK_GATEWAY_HOST = PropertyResolver
+            .with(InetAddress.getLoopbackAddress(), "custom.aerogear.apns.push.host")
+            .instantiateWith(new InetAddressPropertyUtil.InetAddressInstantiator());
 
-    private static final int DEFAULT_HTTP_PROXY_PORT = 16000;
+    private static final PropertyResolver<Integer> APNS_MOCK_GATEWAY_PORT = PropertyResolver
+            .with(16002, "custom.aerogear.apns.push.port")
+            .verifyOutputWith(new PortVerifier());
 
-    private static final int DEFAULT_GCM_MOCK_SERVER_PORT = 16001;
+    private static final PropertyResolver<InetAddress> APNS_MOCK_FEEDBACK_HOST = PropertyResolver
+            .with(InetAddress.getLoopbackAddress(), "custom.aerogear.apns.feedback.host")
+            .instantiateWith(new InetAddressPropertyUtil.InetAddressInstantiator());
+
+    private static final PropertyResolver<Integer> APNS_MOCK_FEEDBACK_PORT = PropertyResolver
+            .with(16003, "custom.aerogear.apns.feedback.port")
+            .verifyOutputWith(new PortVerifier());
+
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
+
+    private ApnsServerSimulator apnsServerSimulator;
 
     private static HttpProxyServer server;
 
@@ -87,75 +105,87 @@ public class ProxySetup {
     }
 
     public void startProxyServer() {
-
         if (backgroundThread == null) {
             backgroundThread = startBackgroundThread();
         }
 
+        apnsServerSimulator = ApnsServerSimulator.prepareAndStart(
+                FixedCertificates.serverContext().getServerSocketFactory(),
+                APNS_MOCK_GATEWAY_HOST.resolve(),
+                APNS_MOCK_GATEWAY_PORT.resolve(),
+                APNS_MOCK_FEEDBACK_HOST.resolve(),
+                APNS_MOCK_FEEDBACK_PORT.resolve());
         server = DefaultHttpProxyServer.bootstrap()
-            .withAddress(resolveBindAddress())
-            .withFiltersSource(new HttpFiltersSourceAdapter() {
+                .withAddress(resolveBindAddress())
+                .withFiltersSource(new HttpFiltersSourceAdapter() {
 
-                @Override
-                public HttpFilters filterRequest(HttpRequest originalRequest) {
+                    @Override
+                    public HttpFilters filterRequest(HttpRequest originalRequest) {
 
-                    return new HttpFiltersAdapter(originalRequest) {
+                        return new HttpFiltersAdapter(originalRequest) {
 
-                        @Override
-                        public HttpResponse clientToProxyRequest(HttpObject httpObject) {
+                            @Override
+                            public HttpResponse clientToProxyRequest(HttpObject httpObject) {
 
-                            HttpRequest request = (HttpRequest) httpObject;
+                                HttpRequest request = (HttpRequest) httpObject;
 
-                            if (request.getUri().contains("google")) {
-                                request.setUri("localhost:" + backgroundThread.getGcmMockServePort());
+                                if (request.getUri().contains("google")) {
+                                    request.setUri("localhost:" + backgroundThread.getGcmMockServePort());
+                                }
+
+                                super.clientToProxyRequest(request);
+
+                                return null;
                             }
 
-                            super.clientToProxyRequest(request);
-
-                            return null;
-                        }
-
-                        @Override
-                        public HttpResponse proxyToServerRequest(HttpObject httpObject) {
-                            return null;
-                        }
-
-                        @Override
-                        public HttpObject serverToProxyResponse(HttpObject httpObject) {
-
-                            if (httpObject instanceof HttpResponse) {
-                                originalRequest.getMethod();
-                            } else if (httpObject instanceof HttpContent) {
-                                ((HttpContent) httpObject).content().toString(Charset.forName("UTF-8"));
+                            @Override
+                            public HttpResponse proxyToServerRequest(HttpObject httpObject) {
+                                return null;
                             }
 
-                            return httpObject;
-                        }
+                            @Override
+                            public HttpObject serverToProxyResponse(HttpObject httpObject) {
 
-                        @Override
-                        public HttpObject proxyToClientResponse(HttpObject httpObject) {
+                                if (httpObject instanceof HttpResponse) {
+                                    originalRequest.getMethod();
+                                } else if (httpObject instanceof HttpContent) {
+                                    ((HttpContent) httpObject).content().toString(Charset.forName("UTF-8"));
+                                }
 
-                            if (httpObject instanceof HttpResponse) {
-                                originalRequest.getMethod();
-                            } else if (httpObject instanceof HttpContent) {
-                                ((HttpContent) httpObject).content().toString(Charset.forName("UTF-8"));
+                                return httpObject;
                             }
 
-                            return httpObject;
-                        }
-                    };
-                }
-            })
-            .start();
+                            @Override
+                            public HttpObject proxyToClientResponse(HttpObject httpObject) {
+
+                                if (httpObject instanceof HttpResponse) {
+                                    originalRequest.getMethod();
+                                } else if (httpObject instanceof HttpContent) {
+                                    ((HttpContent) httpObject).content().toString(Charset.forName("UTF-8"));
+                                }
+
+                                return httpObject;
+                            }
+                        };
+                    }
+                })
+                .start();
 
         logger.log(Level.INFO, "Proxy server started.");
     }
 
+    @PreDestroy
     public void stopProxyServer() {
         if (server != null) {
             server.stop();
             server = null;
             logger.log(Level.INFO, "Proxy server stopped.");
+        }
+
+        if (apnsServerSimulator != null) {
+            apnsServerSimulator.stop();
+            apnsServerSimulator = null;
+            logger.log(Level.INFO, "APNS mock server stopped.");
         }
 
         if (backgroundThread != null) {
@@ -170,7 +200,7 @@ public class ProxySetup {
 
     private BackgroundThread startBackgroundThread() {
 
-        int gcmMockServePort = resolveGcmMockServerPort();
+        int gcmMockServePort = GCM_MOCK_SERVER_PORT.resolve();
 
         BackgroundThread backgroundThread = new BackgroundThread(gcmMockServePort);
 
@@ -205,11 +235,11 @@ public class ProxySetup {
                 String kf = System.getProperty("gcmMockKey");
                 File keyfile = new File(kf);
 
-                if (certfile.exists() == false) {
+                if (!certfile.exists()) {
                     throw new FileNotFoundException("File " + cf + " needs to exist.");
                 }
 
-                if (keyfile.exists() == false) {
+                if (!keyfile.exists()) {
                     throw new FileNotFoundException("File " + kf + " needs to exist.");
                 }
                 sslCtx = SslContext.newServerContext(certfile, keyfile);
@@ -227,9 +257,9 @@ public class ProxySetup {
             try {
                 ServerBootstrap serverBootstrap = new ServerBootstrap();
                 serverBootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new HttpMockingServerInitializer(sslCtx));
+                        .channel(NioServerSocketChannel.class)
+                        .handler(new LoggingHandler(LogLevel.INFO))
+                        .childHandler(new HttpMockingServerInitializer(sslCtx));
 
                 channel = serverBootstrap.bind(gcmMockServePort).sync().channel();
 
@@ -258,43 +288,7 @@ public class ProxySetup {
 
     }
 
-    private int resolveGcmMockServerPort() {
-
-        int port = DEFAULT_GCM_MOCK_SERVER_PORT;
-
-        for (String propertyName : POSSIBLE_GCM_MOCK_SERVER_PORT_PROPERTIES) {
-            Integer parsedPort = Integer.getInteger(propertyName);
-            if (parsedPort != null && parsedPort > 0 && parsedPort < 65535) {
-                port = parsedPort;
-            }
-        }
-
-        return port;
-    }
-
     private InetSocketAddress resolveBindAddress() {
-
-        String ip = DEFAULT_BIND_IP;
-
-        for (String propertyName : POSSIBLE_HTTP_PROXY_HOST_PROPERTIES) {
-            String parsedIp = System.getProperty(propertyName);
-            // TODO it might be a good idea to add additional validation
-            if (parsedIp != null && parsedIp.length() != 0) {
-                ip = parsedIp;
-                break;
-            }
-        }
-
-        int port = DEFAULT_HTTP_PROXY_PORT;
-
-        for (String propertyName : POSSIBLE_HTTP_PROXY_PORT_PROPERTIES) {
-            Integer parsedPort = Integer.getInteger(propertyName);
-            if (parsedPort != null && parsedPort > 0 && parsedPort < 65535) {
-                port = parsedPort;
-                break;
-            }
-        }
-
-        return new InetSocketAddress(ip, port);
+        return new InetSocketAddress(HTTP_PROXY_HOST.resolve(), HTTP_PROXY_PORT.resolve());
     }
 }
