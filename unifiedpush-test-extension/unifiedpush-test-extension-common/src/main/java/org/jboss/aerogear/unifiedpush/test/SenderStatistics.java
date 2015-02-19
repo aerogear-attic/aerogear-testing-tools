@@ -11,10 +11,7 @@ import java.util.ArrayList;
 public class SenderStatistics {
     public List<String> deviceTokens = new ArrayList<String>();
     public Message gcmMessage;
-    public String apnsAlert;
-    public int apnsBadge;
-    public String apnsSound;
-    public String apnsCustomFields;
-    public long apnsExpiry;
+    public String apnsPayload;
+    public int apnsExpiry;
     public String gcmForChromeAlert;
 }

@@ -17,6 +17,7 @@
 package org.jboss.aerogear.unifiedpush.test.sender.apns;
 
 import org.jboss.aerogear.unifiedpush.test.Tokens;
+import org.jboss.aerogear.unifiedpush.test.sender.SenderStatisticsEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,7 @@ public class ApnsServerSimulator {
     private int effectiveGatewayPort;
     private int effectiveFeedbackPort;
 
-    private List<byte[]> badTokens = new ArrayList<byte[]>();
+    private final List<byte[]> badTokens = new ArrayList<byte[]>();
 
     public ApnsServerSimulator(ServerSocketFactory sslFactory,
                                InetAddress gatewayHost, int gatewayPort,
@@ -148,9 +149,9 @@ public class ApnsServerSimulator {
     protected void onNotification(final Notification notification, final InputOutputSocket inputOutputSocket) throws
             IOException {
 
-        // FIXME save to sender statistics
         logger.info("Notification: " + notification.toString());
 
+        SenderStatisticsEndpoint.addAPNSNotification(notification);
     }
 
 

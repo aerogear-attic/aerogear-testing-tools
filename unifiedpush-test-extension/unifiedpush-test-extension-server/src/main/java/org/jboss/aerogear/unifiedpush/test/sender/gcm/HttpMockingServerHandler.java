@@ -2,7 +2,6 @@ package org.jboss.aerogear.unifiedpush.test.sender.gcm;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.android.gcm.server.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,9 +14,8 @@ import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.CharsetUtil;
-import org.jboss.aerogear.unifiedpush.test.SenderStatistics;
-import org.jboss.aerogear.unifiedpush.test.sender.SenderStatisticsEndpoint;
 import org.jboss.aerogear.unifiedpush.test.Tokens;
+import org.jboss.aerogear.unifiedpush.test.sender.SenderStatisticsEndpoint;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -111,24 +109,8 @@ public class HttpMockingServerHandler extends SimpleChannelInboundHandler<Object
                     ObjectMapper mapper = new ObjectMapper();
                     try {
                         GCMMessage message = mapper.readValue(requestContentBuffer.toString(), GCMMessage.class);
-                        SenderStatistics stats = new SenderStatistics();
-                        Message.Builder gcmMessage = new Message.Builder();
+                        SenderStatisticsEndpoint.addGCMMessage(message);
 
-                        gcmMessage.setData(message.data);
-                        if (message.collapseKey != null) {
-                            gcmMessage.collapseKey(message.collapseKey);
-                        }
-                        if (message.delayWhileIdle != null) {
-                            gcmMessage.delayWhileIdle(message.delayWhileIdle);
-                        }
-                        if (message.timeToLive != null) {
-                            gcmMessage.timeToLive(message.timeToLive);
-                        }
-
-                        stats.gcmMessage = gcmMessage.build();
-                        stats.deviceTokens = message.registrationIds;
-
-                        SenderStatisticsEndpoint.setSenderStatistics(stats);
                         requestContentBuffer.delete(0, requestContentBuffer.length());
                         try {
                             buf.append(mapper.writeValueAsString(this.createResponse(message.registrationIds)));

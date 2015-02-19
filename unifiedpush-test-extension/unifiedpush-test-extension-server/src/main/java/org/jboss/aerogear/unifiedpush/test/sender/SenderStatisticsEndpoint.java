@@ -16,7 +16,10 @@
  */
 package org.jboss.aerogear.unifiedpush.test.sender;
 
+import com.google.android.gcm.server.Message;
 import org.jboss.aerogear.unifiedpush.test.SenderStatistics;
+import org.jboss.aerogear.unifiedpush.test.sender.apns.ApnsServerSimulator;
+import org.jboss.aerogear.unifiedpush.test.sender.gcm.GCMMessage;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -26,6 +29,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by asaleh on 12/11/14.
@@ -35,20 +39,52 @@ import javax.ws.rs.core.Response;
 @Path("/senderStats")
 public class SenderStatisticsEndpoint {
 
-    private static SenderStatistics senderStatistics = new SenderStatistics();
+    private static final AtomicReference<SenderStatistics> senderStatisticsRef =
+            new AtomicReference<SenderStatistics>(new SenderStatistics());
 
-    public static void setSenderStatistics(SenderStatistics statistics){
-        senderStatistics = statistics;
+    public static void addGCMMessage(GCMMessage message) {
+        synchronized (senderStatisticsRef) {
+            SenderStatistics senderStatistics = senderStatisticsRef.get();
+
+            Message.Builder gcmMessage = new Message.Builder();
+
+            gcmMessage.setData(message.data);
+            if (message.collapseKey != null) {
+                gcmMessage.collapseKey(message.collapseKey);
+            }
+            if (message.delayWhileIdle != null) {
+                gcmMessage.delayWhileIdle(message.delayWhileIdle);
+            }
+            if (message.timeToLive != null) {
+                gcmMessage.timeToLive(message.timeToLive);
+            }
+
+            senderStatistics.gcmMessage = gcmMessage.build();
+            senderStatistics.deviceTokens.addAll(message.registrationIds);
+        }
     }
 
-    public static void clearSenderStatistics(){
-        senderStatistics = new SenderStatistics();
+    public static void addAPNSNotification(ApnsServerSimulator.Notification notification) {
+        synchronized (senderStatisticsRef) {
+            SenderStatistics senderStatistics = senderStatisticsRef.get();
+            senderStatistics.deviceTokens.add(ApnsServerSimulator.encodeHex(notification.getDeviceToken()));
+            senderStatistics.apnsPayload = new String(notification.getPayload());
+            senderStatistics.apnsExpiry = notification.getExpiry();
+        }
+    }
+
+    public static void clearSenderStatistics() {
+        synchronized (senderStatisticsRef) {
+            senderStatisticsRef.set(new SenderStatistics());
+        }
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response listAllStatistics() {
-        return Response.ok(senderStatistics).build();
+        synchronized (senderStatisticsRef) {
+            return Response.ok(senderStatisticsRef.get()).build();
+        }
     }
 
     @DELETE
