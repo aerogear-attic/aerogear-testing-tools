@@ -16,50 +16,53 @@
  */
 package org.jboss.aerogear.arquillian.junit;
 
-import java.util.List;
-
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.rules.MethodRule;
+import org.junit.rules.TestRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+
+import java.util.List;
 
 /**
  * Arquillian JUnit runner with support for {@link ArquillianRule}. ArquillianRule is like a JUnit {@link MethodRule},
  * it is executed around a test execution and it is automatically enriched by test
  *
  * @author <a href="mailto:kpiwko@redhat.com">Karel Piwko</a>
- *
  */
-public class ArquillianRules extends Arquillian
-{
+public class ArquillianRules extends Arquillian {
 
-    public ArquillianRules(Class<?> klass) throws InitializationError
-    {
+    public ArquillianRules(Class<?> klass) throws InitializationError {
         super(klass);
     }
 
     @Override
-    protected Statement methodInvoker(final FrameworkMethod method, final Object test)
-    {
+    protected Statement methodInvoker(final FrameworkMethod method, final Object test) {
 
         final Statement originalStatement = super.methodInvoker(method, test);
 
-        final List<MethodRule> rules = getTestClass().getAnnotatedFieldValues(test,
-            ArquillianRule.class,
-            MethodRule.class);
+        final List<MethodRule> methodRules = getTestClass().getAnnotatedFieldValues(test, ArquillianRule.class,
+                MethodRule.class);
 
-        if (rules.size() == 0) {
+        final List<TestRule> testRules = getTestClass().getAnnotatedFieldValues(test, ArquillianRule.class, TestRule
+                .class);
+
+        if (methodRules.size() == 0 && testRules.size() == 0) {
             return originalStatement;
         }
 
         return new Statement() {
+
             @Override
             public void evaluate() throws Throwable {
 
                 Statement statement = originalStatement;
-                for (MethodRule rule : rules) {
+                for (MethodRule rule : methodRules) {
                     statement = rule.apply(statement, method, test);
+                }
+                for (TestRule rule : testRules) {
+                    statement = rule.apply(statement, describeChild(method));
                 }
                 statement.evaluate();
             }
