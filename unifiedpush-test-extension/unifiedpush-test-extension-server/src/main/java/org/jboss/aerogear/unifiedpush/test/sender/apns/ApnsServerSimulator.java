@@ -157,7 +157,7 @@ public class ApnsServerSimulator {
 
     protected List<byte[]> getBadTokens() {
         synchronized (badTokens) {
-            List<byte[]> result = Collections.unmodifiableList(badTokens);
+            List<byte[]> result = new ArrayList<byte[]>(badTokens);
             badTokens.clear();
             return result;
         }
@@ -306,26 +306,24 @@ public class ApnsServerSimulator {
 
         private void parseNotifications(final InputOutputSocket inputOutputSocket) {
             logger.debug("Running parseNotifications {}", inputOutputSocket.getSocket());
-            synchronized (badTokens) {
-                while (!Thread.interrupted()) {
-                    try {
-                        final ApnsInputStream inputStream = inputOutputSocket.getInputStream();
-                        byte notificationType = inputStream.readByte();
-                        logger.debug("Received Notification (type {})", notificationType);
-                        switch (notificationType) {
-                            case 0:
-                                readLegacyNotification(inputOutputSocket);
-                                break;
-                            case 1:
-                                readEnhancedNotification(inputOutputSocket);
-                                break;
-                            case 2:
-                                readFramedNotifications(inputOutputSocket);
-                                break;
-                        }
-                    } catch (IOException ioe) {
-                        Thread.currentThread().interrupt();
+            while (!Thread.interrupted()) {
+                try {
+                    final ApnsInputStream inputStream = inputOutputSocket.getInputStream();
+                    byte notificationType = inputStream.readByte();
+                    logger.debug("Received Notification (type {})", notificationType);
+                    switch (notificationType) {
+                        case 0:
+                            readLegacyNotification(inputOutputSocket);
+                            break;
+                        case 1:
+                            readEnhancedNotification(inputOutputSocket);
+                            break;
+                        case 2:
+                            readFramedNotifications(inputOutputSocket);
+                            break;
                     }
+                } catch (IOException ioe) {
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -353,9 +351,9 @@ public class ApnsServerSimulator {
             final Notification notification = new Notification(2, identifier, expiry, deviceToken, payload, priority);
             logger.debug("Read framed notification {}", notification);
 
-            resolveBadToken(deviceToken);
-
-            onNotification(notification, inputOutputSocket);
+            if(!resolveBadToken(deviceToken)) {
+                onNotification(notification, inputOutputSocket);
+            }
         }
 
         private ApnsInputStream.Item get(final Map<Byte, ApnsInputStream.Item> map, final byte idDeviceToken) {
@@ -376,9 +374,9 @@ public class ApnsServerSimulator {
             final Notification notification = new Notification(1, identifier, expiry, deviceToken, payload);
             logger.debug("Read enhanced notification {}", notification);
 
-            resolveBadToken(deviceToken);
-
-            onNotification(notification, inputOutputSocket);
+            if(!resolveBadToken(deviceToken)) {
+                onNotification(notification, inputOutputSocket);
+            }
         }
 
         private void readLegacyNotification(final InputOutputSocket inputOutputSocket) throws IOException {
@@ -389,15 +387,20 @@ public class ApnsServerSimulator {
             final Notification notification = new Notification(0, deviceToken, payload);
             logger.debug("Read legacy notification {}", notification);
 
-            resolveBadToken(deviceToken);
-
-            onNotification(notification, inputOutputSocket);
+            if(!resolveBadToken(deviceToken)) {
+                onNotification(notification, inputOutputSocket);
+            }
         }
 
-        private void resolveBadToken(byte[] deviceToken) {
-            String encoded = encodeHex(deviceToken);
-            if (encoded.toUpperCase().startsWith(Tokens.TOKEN_INVALIDATION_PREFIX.toUpperCase())) {
-                badTokens.add(deviceToken);
+        private boolean resolveBadToken(byte[] deviceToken) {
+            synchronized (badTokens) {
+                String encoded = encodeHex(deviceToken);
+                if (encoded.toUpperCase().startsWith(Tokens.TOKEN_INVALIDATION_PREFIX.toUpperCase())) {
+                    badTokens.add(deviceToken);
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
 
