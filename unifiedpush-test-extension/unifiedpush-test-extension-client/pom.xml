@@ -7,7 +7,7 @@
     <parent>
         <artifactId>unifiedpush-test-extension</artifactId>
         <groupId>org.jboss.aerogear.test</groupId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>unifiedpush-test-extension-client</artifactId>
