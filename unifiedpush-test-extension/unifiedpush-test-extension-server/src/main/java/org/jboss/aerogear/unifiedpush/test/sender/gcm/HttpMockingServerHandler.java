@@ -2,6 +2,7 @@ package org.jboss.aerogear.unifiedpush.test.sender.gcm;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -107,6 +108,7 @@ public class HttpMockingServerHandler extends SimpleChannelInboundHandler<Object
                 buf.setLength(0);
                 if (uri.contains("gcm")) {
                     ObjectMapper mapper = new ObjectMapper();
+                    mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
                     try {
                         GCMMessage message = mapper.readValue(requestContentBuffer.toString(), GCMMessage.class);
                         SenderStatisticsEndpoint.addGCMMessage(message);
