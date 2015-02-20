@@ -31,7 +31,6 @@ import java.net.ServerSocket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -351,7 +350,7 @@ public class ApnsServerSimulator {
             final Notification notification = new Notification(2, identifier, expiry, deviceToken, payload, priority);
             logger.debug("Read framed notification {}", notification);
 
-            if(!resolveBadToken(deviceToken)) {
+            if (!resolveBadToken(deviceToken)) {
                 onNotification(notification, inputOutputSocket);
             }
         }
@@ -374,7 +373,7 @@ public class ApnsServerSimulator {
             final Notification notification = new Notification(1, identifier, expiry, deviceToken, payload);
             logger.debug("Read enhanced notification {}", notification);
 
-            if(!resolveBadToken(deviceToken)) {
+            if (!resolveBadToken(deviceToken)) {
                 onNotification(notification, inputOutputSocket);
             }
         }
@@ -387,7 +386,7 @@ public class ApnsServerSimulator {
             final Notification notification = new Notification(0, deviceToken, payload);
             logger.debug("Read legacy notification {}", notification);
 
-            if(!resolveBadToken(deviceToken)) {
+            if (!resolveBadToken(deviceToken)) {
                 onNotification(notification, inputOutputSocket);
             }
         }
