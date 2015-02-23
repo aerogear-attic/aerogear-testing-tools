@@ -350,9 +350,9 @@ public class ApnsServerSimulator {
             final Notification notification = new Notification(2, identifier, expiry, deviceToken, payload, priority);
             logger.debug("Read framed notification {}", notification);
 
-            if (!resolveBadToken(deviceToken)) {
-                onNotification(notification, inputOutputSocket);
-            }
+            resolveBadToken(deviceToken);
+
+            onNotification(notification, inputOutputSocket);
         }
 
         private ApnsInputStream.Item get(final Map<Byte, ApnsInputStream.Item> map, final byte idDeviceToken) {
@@ -373,9 +373,9 @@ public class ApnsServerSimulator {
             final Notification notification = new Notification(1, identifier, expiry, deviceToken, payload);
             logger.debug("Read enhanced notification {}", notification);
 
-            if (!resolveBadToken(deviceToken)) {
-                onNotification(notification, inputOutputSocket);
-            }
+            resolveBadToken(deviceToken);
+
+            onNotification(notification, inputOutputSocket);
         }
 
         private void readLegacyNotification(final InputOutputSocket inputOutputSocket) throws IOException {
@@ -386,19 +386,16 @@ public class ApnsServerSimulator {
             final Notification notification = new Notification(0, deviceToken, payload);
             logger.debug("Read legacy notification {}", notification);
 
-            if (!resolveBadToken(deviceToken)) {
-                onNotification(notification, inputOutputSocket);
-            }
+            resolveBadToken(deviceToken);
+
+            onNotification(notification, inputOutputSocket);
         }
 
-        private boolean resolveBadToken(byte[] deviceToken) {
+        private void resolveBadToken(byte[] deviceToken) {
             synchronized (badTokens) {
                 String encoded = encodeHex(deviceToken);
                 if (encoded.toUpperCase().startsWith(Tokens.TOKEN_INVALIDATION_PREFIX.toUpperCase())) {
                     badTokens.add(deviceToken);
-                    return true;
-                } else {
-                    return false;
                 }
             }
         }
