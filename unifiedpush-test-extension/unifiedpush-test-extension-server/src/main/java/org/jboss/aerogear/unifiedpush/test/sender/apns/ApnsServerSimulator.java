@@ -477,6 +477,9 @@ public class ApnsServerSimulator {
             for (byte[] token : badTokens) {
                 writeFeedback(inputOutputSocket, token);
             }
+
+            // Write -1 to indicate a closing socket. This might be a workaround, I'm not sure if it should be done this way.
+            inputOutputSocket.syncWrite(new byte[] { -1 });
         }
 
         private void writeFeedback(final InputOutputSocket inputOutputSocket, final byte[] token) throws IOException {
