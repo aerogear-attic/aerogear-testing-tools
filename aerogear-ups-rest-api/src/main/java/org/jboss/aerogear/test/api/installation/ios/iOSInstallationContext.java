@@ -45,7 +45,13 @@ public class iOSInstallationContext extends InstallationContext<iOSInstallationB
     @Override
     public iOSInstallationBlueprint generate() {
         return create()
-                .deviceToken(randomStringOfLength(64))
+                .deviceToken(randomIOSDeviceToken())
                 .alias(randomString());
+    }
+
+    public String randomIOSDeviceToken() {
+        // We ask for 128 which should be more than enough to leave us with at least 64 characters after
+        // all dashes are replaced.
+        return randomStringOfLength(128).toUpperCase().replaceAll("-", "").substring(0, 64);
     }
 }
