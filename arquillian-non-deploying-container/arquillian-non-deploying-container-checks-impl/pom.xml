@@ -21,7 +21,7 @@
 
     <!-- Properties -->
     <properties>
-        <version.com.jayway.restassured>2.3.1</version.com.jayway.restassured>
+        <version.com.jayway.restassured>2.4.0</version.com.jayway.restassured>
     </properties>
 
     <!-- Dependencies -->
