@@ -24,9 +24,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arquillian.spacelift.Spacelift;
 import org.arquillian.spacelift.execution.CountDownWatch;
 import org.arquillian.spacelift.execution.ExecutionException;
-import org.arquillian.spacelift.execution.Tasks;
 import org.jboss.aerogear.test.arquillian.container.check.StatusCheck;
 import org.jboss.aerogear.test.arquillian.container.check.StatusCheckTask;
 import org.jboss.arquillian.container.spi.ConfigurationException;
@@ -170,7 +170,7 @@ public class NonDeployingContainer implements DeployableContainer<NonDeployingCo
         CountDownWatch countDownWatch = new CountDownWatch(configuration.get().getCheckTimeout(), TimeUnit.SECONDS);
 
         try {
-            Tasks.prepare(StatusCheckTask.class)
+            Spacelift.task(StatusCheckTask.class)
                 .check(statusCheck)
                 .execute().until(countDownWatch, StatusCheckTask.statusCheckCondition);
         } catch (ExecutionException ex) {

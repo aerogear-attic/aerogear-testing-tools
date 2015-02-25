@@ -18,7 +18,7 @@ package org.jboss.aerogear.test.arquillian.container.check;
 
 import org.arquillian.spacelift.execution.ExecutionCondition;
 import org.arquillian.spacelift.execution.ExecutionException;
-import org.arquillian.spacelift.execution.Task;
+import org.arquillian.spacelift.task.Task;
 
 /**
  * @author <a href="mailto:smikloso@redhat.com">Stefan Miklosovic</a>

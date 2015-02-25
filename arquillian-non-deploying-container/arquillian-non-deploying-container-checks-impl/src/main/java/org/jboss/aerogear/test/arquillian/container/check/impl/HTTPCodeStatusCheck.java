@@ -22,8 +22,6 @@ import java.util.logging.Logger;
 import org.apache.http.HttpStatus;
 import org.jboss.aerogear.test.arquillian.container.check.StatusCheck;
 import org.jboss.aerogear.test.arquillian.container.check.StatusCheckException;
-import org.jboss.arquillian.core.spi.Validate;
-
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 
@@ -41,7 +39,9 @@ public class HTTPCodeStatusCheck implements StatusCheck {
 
     @Override
     public void target(URI uri) {
-        Validate.notNull(uri, "target URI to check status of can not be a null object");
+        if (uri == null) {
+            throw new IllegalArgumentException("target URI to check status of can not be a null object");
+        }
         this.uri = uri;
     }
 

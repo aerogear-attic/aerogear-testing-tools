@@ -46,7 +46,7 @@
         <version.maven.release.plugin>2.5</version.maven.release.plugin>
         <version.animal.sniffer.plugin>1.7</version.animal.sniffer.plugin>
         <version.signature.java16>1.1</version.signature.java16>
-        <version.spacelift>1.0.0.Alpha3</version.spacelift>
+        <version.spacelift>1.0.0.Alpha6</version.spacelift>
     
         <!--
             Options to override the compiler arguments directly on the compiler arument line to separate between what
