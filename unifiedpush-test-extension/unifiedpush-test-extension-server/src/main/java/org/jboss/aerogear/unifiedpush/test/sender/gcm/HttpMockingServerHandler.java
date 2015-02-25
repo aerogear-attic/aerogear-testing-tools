@@ -67,7 +67,7 @@ public class HttpMockingServerHandler extends SimpleChannelInboundHandler<Object
         for (String s : regIds) {
             HashMap<String, String> hm = new HashMap<String, String>();
 
-            if (s.toUpperCase().startsWith(Tokens.TOKEN_INVALIDATION_PREFIX)) {
+            if (s.toLowerCase().startsWith(Tokens.TOKEN_INVALIDATION_PREFIX)) {
                 failures++;
                 hm.put("error", "InvalidRegistration");
             } else {

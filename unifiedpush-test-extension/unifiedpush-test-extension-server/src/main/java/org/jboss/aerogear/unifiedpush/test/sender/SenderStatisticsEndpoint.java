@@ -66,8 +66,9 @@ public class SenderStatisticsEndpoint {
 
     public static void addAPNSNotification(ApnsServerSimulator.Notification notification) {
         synchronized (senderStatisticsRef) {
+            String deviceToken = ApnsServerSimulator.encodeHex(notification.getDeviceToken()).toLowerCase();
             SenderStatistics senderStatistics = senderStatisticsRef.get();
-            senderStatistics.deviceTokens.add(ApnsServerSimulator.encodeHex(notification.getDeviceToken()));
+            senderStatistics.deviceTokens.add(deviceToken);
             senderStatistics.apnsPayload = new String(notification.getPayload());
             senderStatistics.apnsExpiry = notification.getExpiry();
         }
