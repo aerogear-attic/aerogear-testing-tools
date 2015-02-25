@@ -23,7 +23,7 @@
 
     <!-- Properties -->
     <properties>
-        <version.arquillian>1.1.5.Final</version.arquillian>
+        <version.arquillian>1.1.7.Final</version.arquillian>
         <version.junit>4.11</version.junit>
         <version.mockito>1.9.5</version.mockito>
         <version.json>20140107</version.json>
