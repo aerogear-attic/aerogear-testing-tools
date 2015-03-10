@@ -18,16 +18,23 @@ package org.jboss.aerogear.unifiedpush.test.sender.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PropertyResolver<T> {
 
+    private static final Logger LOGGER = Logger.getLogger(PropertyResolver.class.getName());
+
+    private final Class<T> propertyClass;
     private final T defaultValue;
     private final String[] possibleProperties;
 
     private PropertyInstantiator<T> instantiator;
     private PropertyInputVerifier inputVerifier;
     private PropertyOutputVerifier<T> outputVerifier;
+    private boolean required = false;
 
     @SuppressWarnings("unchecked")
     private PropertyResolver(T defaultValue, String... possibleProperties) {
@@ -42,6 +49,7 @@ public class PropertyResolver<T> {
         this.instantiator = new ReflectionPropertyInstantiator<T>(propertyClass);
         this.inputVerifier = new DefaultInputVerifier();
         this.outputVerifier = new DefaultOutputVerifier<T>();
+        this.propertyClass = propertyClass;
         this.defaultValue = defaultValue;
         this.possibleProperties = possibleProperties;
     }
@@ -61,30 +69,62 @@ public class PropertyResolver<T> {
         return this;
     }
 
+    public PropertyResolver<T> required() {
+        required = true;
+        return this;
+    }
+
     public T resolve() {
         return resolve(System.getProperties());
     }
 
     public T resolve(Properties properties) {
+        LOGGER.log(Level.FINE, "Started resolving property of type {0} with possible property names: {1}",
+                new String[] { propertyClass.getName(), joinStringArray(", ", possibleProperties) });
+
         for (String possibleProperty : possibleProperties) {
+            LOGGER.log(Level.FINE, "Trying to resolve property with name: {0}.", possibleProperty);
             if (!properties.containsKey(possibleProperty)) {
+                LOGGER.log(Level.FINE, "Property {0} not found.");
                 continue;
             }
 
             String propertyValue = properties.getProperty(possibleProperty);
+            LOGGER.log(Level.FINE, "Found property {0} with value {1}.",
+                    new String[] { possibleProperty, propertyValue });
             if (!inputVerifier.verify(propertyValue)) {
+                LOGGER.log(Level.WARNING, "Could not verify property {0} with input value {1}.",
+                        new String[] { possibleProperty, propertyValue });
                 continue;
             }
 
+            LOGGER.log(Level.FINE, "Trying to instantiate desired type {0} for property {1}.",
+                    new String[] { propertyClass.getName(), possibleProperty });
             T propertyInstance = instantiator.instantiate(propertyValue);
 
             if (!outputVerifier.verify(propertyInstance)) {
+                LOGGER.log(Level.WARNING, "Could not verify property {0} with output value {1}.",
+                        new Object[] { possibleProperty, propertyInstance });
                 continue;
             }
+
+            LOGGER.log(Level.INFO, "Resolved property {0} with input value {1} and output value {2}.",
+                    new Object[] { possibleProperty, propertyValue, propertyInstance });
             return propertyInstance;
         }
 
-        return defaultValue;
+        if (required && defaultValue == null) {
+            throw new IllegalStateException(MessageFormat.format(
+                    "Could not resolve a required property of type {0} from possible property names " +
+                    "{1}!", new String[] { propertyClass.getName(), joinStringArray(", ", possibleProperties) }));
+        } else {
+            LOGGER.log(Level.INFO, "Could not resolve property of type {0} from possible property names {1}. " +
+                    "Returning default value {2}.", new Object[] { propertyClass.getName(), joinStringArray(", ",
+                    possibleProperties), defaultValue });
+
+
+            return defaultValue;
+        }
     }
 
     public static <T> PropertyResolver<T> with(T defaultValue, String... possibleProperties) {
@@ -93,6 +133,19 @@ public class PropertyResolver<T> {
 
     public static <T> PropertyResolver<T> with(Class<T> propertyClass, String... possibleProperties) {
         return new PropertyResolver<T>(propertyClass, possibleProperties);
+    }
+
+    private static String joinStringArray(String delimiter, String... items) {
+        if (items.length == 0) {
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(items[0]);
+        for (int i = 1; i < items.length; i++) {
+            builder.append(delimiter).append(items[i]);
+        }
+        return builder.toString();
     }
 
     public interface PropertyInstantiator<T> {

@@ -394,7 +394,7 @@ public class ApnsServerSimulator {
         private void resolveBadToken(byte[] deviceToken) {
             synchronized (badTokens) {
                 String encoded = encodeHex(deviceToken);
-                if (encoded.toUpperCase().startsWith(Tokens.TOKEN_INVALIDATION_PREFIX.toUpperCase())) {
+                if (encoded.toLowerCase().startsWith(Tokens.TOKEN_INVALIDATION_PREFIX)) {
                     badTokens.add(deviceToken);
                 }
             }

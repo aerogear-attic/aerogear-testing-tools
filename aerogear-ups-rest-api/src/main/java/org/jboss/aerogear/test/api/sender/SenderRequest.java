@@ -38,6 +38,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class SenderRequest extends AbstractSessionRequest<SenderRequest> {
 
+    private String customTrustStorePath = null;
+    private String customTrustStoreType = null;
+    private String customTrustStorePassword = null;
+
     public UnifiedMessageBlueprint message() {
         return new UnifiedMessageBlueprint();
     }
@@ -47,10 +51,22 @@ public class SenderRequest extends AbstractSessionRequest<SenderRequest> {
         return message();
     }*/
 
+    public SenderRequest customTrustStore(String trustStorePath, String trustStoreType, String trustStorePassword) {
+        customTrustStorePath = trustStorePath;
+        customTrustStoreType = trustStoreType;
+        customTrustStorePassword = trustStorePassword;
+        return this;
+    }
+
     public SenderRequest send(UnifiedMessage message) {
-        SenderClient senderClient = new SenderClient.Builder(getSession().getBaseUrl().toExternalForm())
-                .customTrustStore("setup/aerogear.truststore", null, "aerogear")
-                .build();
+        SenderClient.Builder senderClientBuilder = new SenderClient.Builder(getSession().getBaseUrl().toExternalForm());
+
+        if(customTrustStorePath != null) {
+            senderClientBuilder.customTrustStore(customTrustStorePath, customTrustStoreType, customTrustStorePassword);
+        }
+
+
+        SenderClient senderClient = senderClientBuilder.build();
 
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicInteger statusCode = new AtomicInteger(-1);

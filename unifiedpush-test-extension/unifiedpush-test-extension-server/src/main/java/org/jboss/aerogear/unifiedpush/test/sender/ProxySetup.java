@@ -29,7 +29,7 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import org.jboss.aerogear.unifiedpush.test.sender.apns.ApnsServerSimulator;
-import org.jboss.aerogear.unifiedpush.test.sender.apns.FixedCertificates;
+import org.jboss.aerogear.unifiedpush.test.sender.util.CertificateLoader;
 import org.jboss.aerogear.unifiedpush.test.sender.gcm.HttpMockingServerInitializer;
 import org.jboss.aerogear.unifiedpush.test.sender.util.InetAddressPropertyUtil;
 import org.jboss.aerogear.unifiedpush.test.sender.util.PortVerifier;
@@ -75,6 +75,14 @@ public class ProxySetup {
             .with(16001, "gcm.mock.server.port")
             .verifyOutputWith(new PortVerifier());
 
+    private static final PropertyResolver<File> GCM_CERTIFICATE_FILE = PropertyResolver
+            .with(File.class, "gcm.mock.certificate.path")
+            .required();
+
+    private static final PropertyResolver<File> GCM_CERTIFICATE_KEY_FILE = PropertyResolver
+            .with(File.class, "gcm.mock.certificate.password")
+            .required();
+
     private static final PropertyResolver<InetAddress> APNS_MOCK_GATEWAY_HOST = PropertyResolver
             .with(InetAddress.getLoopbackAddress(), "custom.aerogear.apns.push.host")
             .instantiateWith(new InetAddressPropertyUtil.InetAddressInstantiator());
@@ -110,11 +118,12 @@ public class ProxySetup {
         }
 
         apnsServerSimulator = ApnsServerSimulator.prepareAndStart(
-                FixedCertificates.serverContext().getServerSocketFactory(),
+                CertificateLoader.apnsSocketFactory(),
                 APNS_MOCK_GATEWAY_HOST.resolve(),
                 APNS_MOCK_GATEWAY_PORT.resolve(),
                 APNS_MOCK_FEEDBACK_HOST.resolve(),
                 APNS_MOCK_FEEDBACK_PORT.resolve());
+
         server = DefaultHttpProxyServer.bootstrap()
                 .withAddress(resolveBindAddress())
                 .withFiltersSource(new HttpFiltersSourceAdapter() {
@@ -230,19 +239,17 @@ public class ProxySetup {
             // Configure SSL.
             SslContext sslCtx;
             try {
-                String cf = System.getProperty("gcmMockCrt");
-                File certfile = new File(cf);
-                String kf = System.getProperty("gcmMockKey");
-                File keyfile = new File(kf);
+                File certificateFile = GCM_CERTIFICATE_FILE.resolve();
+                File certificateKeyFile = GCM_CERTIFICATE_KEY_FILE.resolve();
 
-                if (!certfile.exists()) {
-                    throw new FileNotFoundException("File " + cf + " needs to exist.");
+                if (!certificateFile.exists()) {
+                    throw new FileNotFoundException("File " + certificateFile.getAbsolutePath() + " needs to exist.");
                 }
 
-                if (!keyfile.exists()) {
-                    throw new FileNotFoundException("File " + kf + " needs to exist.");
+                if (!certificateKeyFile.exists()) {
+                    throw new FileNotFoundException("File " + certificateKeyFile.getAbsolutePath() + " needs to exist.");
                 }
-                sslCtx = SslContext.newServerContext(certfile, keyfile);
+                sslCtx = SslContext.newServerContext(certificateFile, certificateKeyFile);
             } catch (SSLException e) {
                 sslCtx = null;
             } catch (FileNotFoundException e) {
