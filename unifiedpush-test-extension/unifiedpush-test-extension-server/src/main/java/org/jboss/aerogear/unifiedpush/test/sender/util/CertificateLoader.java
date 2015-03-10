@@ -21,7 +21,6 @@ import org.jboss.aerogear.unifiedpush.test.sender.apns.InvalidSSLConfig;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,7 +49,7 @@ public class CertificateLoader {
         try {
             InputStream stream;
             File externalApnsCertificateFile = APNS_KEYSTORE_FILE.resolve();
-            if(externalApnsCertificateFile != null) {
+            if (externalApnsCertificateFile != null) {
                 stream = new FileInputStream(externalApnsCertificateFile);
             } else {
                 stream = CertificateLoader.class.getResourceAsStream("/" + RESOURCE_SERVER_STORE);
@@ -66,7 +65,7 @@ public class CertificateLoader {
     }
 
     public static SSLServerSocketFactory newSSLSocketFactory(final InputStream cert, final String password,
-                                                       final String ksType, final String ksAlgorithm) throws
+                                                             final String ksType, final String ksAlgorithm) throws
             InvalidSSLConfig {
         final SSLContext context = newSSLContext(cert, password, ksType, ksAlgorithm);
         return context.getServerSocketFactory();
