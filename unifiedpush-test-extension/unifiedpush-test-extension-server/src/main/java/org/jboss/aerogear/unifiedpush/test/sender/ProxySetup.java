@@ -268,7 +268,7 @@ public class ProxySetup {
                         .handler(new LoggingHandler(LogLevel.INFO))
                         .childHandler(new HttpMockingServerInitializer(sslCtx));
 
-                channel = serverBootstrap.bind(gcmMockServePort).sync().channel();
+                channel = serverBootstrap.bind(HTTP_PROXY_HOST.resolve(), gcmMockServePort).sync().channel();
 
                 channel.closeFuture().sync();
             } catch (InterruptedException e) {
