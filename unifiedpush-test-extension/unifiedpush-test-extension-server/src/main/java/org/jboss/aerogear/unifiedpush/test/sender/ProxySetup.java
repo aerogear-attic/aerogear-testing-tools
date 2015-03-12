@@ -138,9 +138,12 @@ public class ProxySetup {
 
                                 HttpRequest request = (HttpRequest) httpObject;
 
+                                logger.log(Level.WARNING, "clientToProxyRequest uri: " + request.getUri());
                                 if (request.getUri().contains("google")) {
+                                    logger.log(Level.WARNING, "contains google!: " + request.getUri());
                                     request.setUri(backgroundThread.getGcmMockServerHost() + ":" + backgroundThread.getGcmMockServePort());
                                 }
+                                logger.log(Level.WARNING, "clientToProxyRequest after if uri: " + request.getUri());
 
                                 super.clientToProxyRequest(request);
 
