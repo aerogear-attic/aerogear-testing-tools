@@ -139,7 +139,7 @@ public class ProxySetup {
                                 HttpRequest request = (HttpRequest) httpObject;
 
                                 if (request.getUri().contains("google")) {
-                                    request.setUri("localhost:" + backgroundThread.getGcmMockServePort());
+                                    request.setUri(backgroundThread.getGcmMockServerHost() + ":" + backgroundThread.getGcmMockServePort());
                                 }
 
                                 super.clientToProxyRequest(request);
@@ -209,9 +209,10 @@ public class ProxySetup {
 
     private BackgroundThread startBackgroundThread() {
 
+        String gcmMockServerHost = HTTP_PROXY_HOST.resolve();
         int gcmMockServePort = GCM_MOCK_SERVER_PORT.resolve();
 
-        BackgroundThread backgroundThread = new BackgroundThread(gcmMockServePort);
+        BackgroundThread backgroundThread = new BackgroundThread(gcmMockServerHost, gcmMockServePort);
 
         backgroundThread.start();
 
@@ -222,12 +223,18 @@ public class ProxySetup {
 
     private static class BackgroundThread extends Thread {
 
+        private final String gcmMockServerHost;
         private final int gcmMockServePort;
 
         private Channel channel;
 
-        public BackgroundThread(int gcmMockServePort) {
+        public BackgroundThread(String gcmMockServerHost, int gcmMockServePort) {
+            this.gcmMockServerHost = gcmMockServerHost;
             this.gcmMockServePort = gcmMockServePort;
+        }
+
+        public String getGcmMockServerHost() {
+            return gcmMockServerHost;
         }
 
         public int getGcmMockServePort() {
@@ -268,7 +275,7 @@ public class ProxySetup {
                         .handler(new LoggingHandler(LogLevel.INFO))
                         .childHandler(new HttpMockingServerInitializer(sslCtx));
 
-                channel = serverBootstrap.bind(HTTP_PROXY_HOST.resolve(), gcmMockServePort).sync().channel();
+                channel = serverBootstrap.bind(gcmMockServerHost, gcmMockServePort).sync().channel();
 
                 channel.closeFuture().sync();
             } catch (InterruptedException e) {
