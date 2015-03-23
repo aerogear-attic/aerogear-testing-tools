@@ -32,6 +32,17 @@ public class AppCreateCommand extends AbstractCommand {
             description = "Forces removal of the cartridge")
     private boolean force;
     
+    @Option(name = { "-c", "--cartridge"},
+            title = "cartridge",
+            description = "Cartridge to use, defaults to jboss-mobile/jboss-unified-push-openshift-cartridge")
+    private String cartridge = "https://cartreflect-claytondev.rhcloud.com/reflect?github=jboss-mobile/jboss-unified-push-openshift-cartridge";
+
+    @Option(name = { "-t", "--community"},
+            title = "community",
+            description = "Flag saying that cartridge is of community version. When not set, product version is taken into consideration."
+        )
+    private boolean community = false;
+    
     @Override
     public void run() {
         delete();
@@ -57,8 +68,8 @@ public class AppCreateCommand extends AbstractCommand {
     private void create() {
         CommandTool ct = Tasks.prepare(CommandTool.class)
             .programName("rhc")
-            .parameters("app", "create", "--no-git", "-n", namespace, appName, "jboss-unified-push-1");
-    
+            .parameters("app", "create", appName, cartridge, "--no-git", "-n", namespace);
+
         if( gearSize != null ) {
             ct.parameters("--gear-size", gearSize);
         }
@@ -74,13 +85,18 @@ public class AppCreateCommand extends AbstractCommand {
     }
 
     private void copyExtension() {
-        Tasks.prepare(CommandTool.class)
+        CommandTool ct = Tasks.prepare(CommandTool.class)
             .programName("rhc")
             .parameters("scp", appName, "-n", namespace, "upload")
-            .parameters("--local-path", "../../unifiedpush-test-extension-server/target/unifiedpush-test-extension-server.war")
-            .parameters("--remote-path", "unified-push/standalone/deployments")
-            .interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut())
-            .execute().await();
+            .parameters("--local-path", "../../unifiedpush-test-extension-server/target/unifiedpush-test-extension-server.war");
+
+        if (community) {
+            ct.parameters("--remote-path", "aerogear-push/standalone/deployments");
+        } else {
+            ct.parameters("--remote-path", "unified-push/standalone/deployments");
+        }
+        
+        ct.interaction(new ProcessInteractionBuilder().outputPrefix("").when(".*").printToOut()).execute().await();
     }
 
     private void start() {
