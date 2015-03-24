@@ -25,7 +25,7 @@
         <jboss-as-maven-plugin.version>7.5.Final</jboss-as-maven-plugin.version>
         <hibernate.javax.persistence.version>1.0.1.Final</hibernate.javax.persistence.version>
         <hibernate.entitymanager.version>4.0.1.Final</hibernate.entitymanager.version>
-        <aerogear.version>1.0.3</aerogear.version>
+        <aerogear.version>1.0.3.redhat-1</aerogear.version>
         <ups-rest-api.version>1.0.3</ups-rest-api.version>
         <littleproxy.version>1.1.0-beta1-SNAPSHOT</littleproxy.version>
         <aerogear.unifiedpush-java-client.version>1.0.0</aerogear.unifiedpush-java-client.version>

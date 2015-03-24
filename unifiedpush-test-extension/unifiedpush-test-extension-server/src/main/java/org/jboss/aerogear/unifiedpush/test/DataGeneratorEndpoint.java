@@ -108,11 +108,11 @@ public class DataGeneratorEndpoint {
         try {
             Connection c = ds.getConnection();
             Statement stmt = c.createStatement();
-            stmt.executeUpdate("delete from Installation_Category");
-            stmt.executeUpdate("delete from Category");
-            stmt.executeUpdate("delete from Installation");
+            stmt.executeUpdate("delete from installation_category");
+            stmt.executeUpdate("delete from category");
+            stmt.executeUpdate("delete from installation");
             stmt.executeUpdate("delete from SimplePushVariant");
-            stmt.executeUpdate("delete from iOSVariant");
+            stmt.executeUpdate("delete from ios_ariant");
             stmt.executeUpdate("delete from AndroidVariant");
             stmt.executeUpdate("delete from Variant");
             stmt.executeUpdate("delete from PushApplication");
@@ -178,9 +178,10 @@ public class DataGeneratorEndpoint {
             }
         }
 
-        executeBatch("insert into Variant(id, name, description, developer, secret, variantid, variants_id, variant_type, type) values(?, ?, ?, ?, ?, ?, ?, ?, ?)", new PrepareInsertVariantStmt(), variants);
-        executeBatch("insert into AndroidVariant(id, projectnumber, googlekey) values(?, ?, ?)", new PrepareInsertAndroidVariantStmt(), variants);
-        executeBatch("insert into iOSVariant(id, certificate, passphrase, production) values(?, ?, ?, ?)", new PrepareInsertIosVariantStmt(), variants);
+        // TODO
+        executeBatch("insert into Variant(id, name, description, developer, secret, variantID, variants_id, VARIANT_TYPE, type) values(?, ?, ?, ?, ?, ?, ?, ?, ?)", new PrepareInsertVariantStmt(), variants);
+        executeBatch("insert into AndroidVariant(id, projectNumber, googleKey) values(?, ?, ?)", new PrepareInsertAndroidVariantStmt(), variants);
+        executeBatch("insert into ios_variant(id, cert_data, passphrase, production) values(?, ?, ?, ?)", new PrepareInsertIosVariantStmt(), variants);
         executeBatch("insert into SimplePushVariant(id) values(?)", new PrepareInsertSimplePushVariantStmt(), variants);
         
         ctx.getResponse().put("variantsCount", variants.size());
@@ -226,7 +227,7 @@ public class DataGeneratorEndpoint {
             }
         }
         
-        executeBatch("insert into Installation(id, alias, deviceToken, deviceType, operatingSystem, osVersion, platform, variantid, enabled) values(?, ?, ?, ?, ?, ?, ?, ?, ?)", new PrepareInsertInstallationStmt(), ctx.getInstallations());
+        executeBatch("insert into installation(id, alias, deviceToken, deviceType, operatingSystem, osVersion, platform, variantid, enabled) values(?, ?, ?, ?, ?, ?, ?, ?, ?)", new PrepareInsertInstallationStmt(), ctx.getInstallations());
         
         ctx.getResponse().put("installationsCount", ctx.getInstallations().size());
     }
@@ -245,7 +246,7 @@ public class DataGeneratorEndpoint {
             ctx.getCategories().add(category);
         }
         
-        executeBatch("insert into Category(id, name) values(?, ?)", new PrepareInsertCategoryStmt(), ctx.getCategories());
+        executeBatch("insert into category(id, name) values(?, ?)", new PrepareInsertCategoryStmt(), ctx.getCategories());
         
         ctx.getResponse().put("categoriesCount", ctx.getCategories().size());
     }
@@ -268,13 +269,13 @@ public class DataGeneratorEndpoint {
             }
             
             if( instalationCategoryPairs.size() > 10000 ) {
-                executeBatch("insert into Installation_Category(installation_id, categories_id) values(?, ?)", new PrepareInsertInstallationCategoryStmt(), instalationCategoryPairs);
+                executeBatch("insert into installation_category(installation_id, category_id) values(?, ?)", new PrepareInsertInstallationCategoryStmt(), instalationCategoryPairs);
                 instalationCategoryPairs.clear();
             }
         }
         
         if( instalationCategoryPairs.size() > 0 ) {
-            executeBatch("insert into Installation_Category(installation_id, categories_id) values(?, ?)", new PrepareInsertInstallationCategoryStmt(), instalationCategoryPairs);
+            executeBatch("insert into installation_category(installation_id, category_id) values(?, ?)", new PrepareInsertInstallationCategoryStmt(), instalationCategoryPairs);
             instalationCategoryPairs.clear();
         }
     }

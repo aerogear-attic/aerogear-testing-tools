@@ -35,7 +35,7 @@ public class AppCreateCommand extends AbstractCommand {
     @Option(name = { "-c", "--cartridge"},
             title = "cartridge",
             description = "Cartridge to use, defaults to jboss-mobile/jboss-unified-push-openshift-cartridge")
-    private String cartridge = "https://cartreflect-claytondev.rhcloud.com/reflect?github=jboss-mobile/jboss-unified-push-openshift-cartridge";
+    private String cartridge = "https://raw.githubusercontent.com/jboss-mobile/jboss-unified-push-openshift-cartridge/master/metadata/manifest.yml";
 
     @Option(name = { "-t", "--community"},
             title = "community",

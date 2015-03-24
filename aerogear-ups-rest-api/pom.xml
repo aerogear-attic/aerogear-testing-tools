@@ -33,7 +33,7 @@
 
         <keycloak.version>1.0.4.Final</keycloak.version>
 		<aerogear.unifiedpush-java-client.version>1.0.0</aerogear.unifiedpush-java-client.version>
-		<aerogear.unifiedpush-server-model.version>1.0.3</aerogear.unifiedpush-server-model.version>
+		<aerogear.unifiedpush-server-model.version>1.0.3.redhat-1</aerogear.unifiedpush-server-model.version>
 
 	</properties>
 
