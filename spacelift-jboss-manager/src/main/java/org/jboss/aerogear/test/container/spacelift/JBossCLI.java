@@ -51,7 +51,9 @@ public class JBossCLI extends Task<Object, ProcessResult> {
 
     private boolean connect = false;
 
-    List<String> command = new ArrayList<String>();
+    private List<String> command = new ArrayList<String>();
+
+    private List<Integer> exitCodes = new ArrayList<Integer>();
 
     public JBossCLI environment(String key, String value) {
         if (key != null && value != null) {
@@ -106,6 +108,11 @@ public class JBossCLI extends Task<Object, ProcessResult> {
         return this;
     }
 
+    public JBossCLI exitCodes(Integer... exitCodes) {
+        this.exitCodes.addAll(Arrays.asList(exitCodes));
+        return this;
+    }
+
     @Override
     protected ProcessResult process(Object input) throws Exception {
 
@@ -138,6 +145,8 @@ public class JBossCLI extends Task<Object, ProcessResult> {
         if (password != null) {
             jbossCliTool.parameter("--password=" + password);
         }
+
+        jbossCliTool.shouldExitWith(exitCodes.toArray(new Integer[exitCodes.size()]));
 
         final ProcessResult processResult = jbossCliTool.execute().await();
 
