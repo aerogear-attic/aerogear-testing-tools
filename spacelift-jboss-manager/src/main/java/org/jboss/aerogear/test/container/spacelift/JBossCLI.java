@@ -108,7 +108,7 @@ public class JBossCLI extends Task<Object, ProcessResult> {
         return this;
     }
 
-    public JBossCLI exitCodes(Integer... exitCodes) {
+    public JBossCLI shouldExitWith(Integer... exitCodes) {
         this.exitCodes.addAll(Arrays.asList(exitCodes));
         return this;
     }
