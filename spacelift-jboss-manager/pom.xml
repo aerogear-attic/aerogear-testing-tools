@@ -17,7 +17,7 @@
     <!-- Artifact Configuration -->
     <groupId>org.jboss.aerogear.test</groupId>
     <artifactId>spacelift-jboss-manager</artifactId>
-    <version>0.8.0</version>
+    <version>0.9.0-SNAPSHOT</version>
     <name>Spacelift JBoss manager</name>
     <description>Starts and stops JBoss instance via Spacelift</description>
 
