@@ -18,6 +18,7 @@
 package org.jboss.aerogear.test.container.manager;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,9 +35,9 @@ public class JBossManagerConfiguration {
 
     private static final String[] DEFAULT_DOMAIN_SERVERS = new String[] { "server-one", "server-two" };
 
-    private String javaHome = System.getProperty("java.home");
+    private File javaHome = null;
 
-    private String jbossHome = System.getProperty("jboss.home");
+    private File jbossHome = null;
 
     private String javaOpts = null;
 
@@ -75,20 +76,23 @@ public class JBossManagerConfiguration {
     private String domainMasterHostName = "master";
 
     public JBossManagerConfiguration() {
+        // get either from system property or env variable
+        String javaHome = System.getProperty("java.home");
         if (javaHome == null || javaHome.length() == 0) {
             javaHome = System.getenv("JAVA_HOME");
         }
-
         if (javaHome != null) {
-            javaHome.trim();
+            this.javaHome = new File(javaHome);
         }
 
+        // get either from system property or env variable
+        String jbossHome = System.getProperty("jboss.home");
         if (jbossHome == null || jbossHome.length() == 0) {
             jbossHome = System.getenv("JBOSS_HOME");
         }
 
         if (jbossHome != null) {
-            jbossHome.trim();
+            this.jbossHome = new File(jbossHome);
         }
 
     }
@@ -99,9 +103,7 @@ public class JBossManagerConfiguration {
      */
     public void validate() throws IllegalStateException {
 
-        if (getJBossHome() != null) {
-            File jbossHome = new File(getJBossHome());
-
+        if (jbossHome != null) {
             if (!jbossHome.exists() || !jbossHome.isDirectory()) {
                 throw new IllegalStateException("jbossHome '" + getJBossHome() + "' must exist!");
             }
@@ -118,8 +120,6 @@ public class JBossManagerConfiguration {
         }
 
         if (javaHome != null) {
-            File javaHome = new File(this.javaHome);
-
             if (!javaHome.exists() || !javaHome.isDirectory()) {
                 throw new IllegalStateException("javaHome '" + javaHome.getAbsolutePath() + "' must exist!");
             }
@@ -129,12 +129,17 @@ public class JBossManagerConfiguration {
     }
 
     public String getJavaHome() {
-        return javaHome;
+        try {
+            return javaHome.getCanonicalPath();
+        }
+        catch(IOException e) {
+            throw new IllegalStateException("Unable to get canonical path of " + javaHome, e);
+        }
     }
 
     public JBossManagerConfiguration setJavaHome(String javaHome) {
         if (javaHome != null && new File(javaHome).isDirectory()) {
-            this.javaHome = javaHome;
+            this.javaHome = new File(javaHome);
         }
         return this;
     }
@@ -143,33 +148,24 @@ public class JBossManagerConfiguration {
         String javaExec = null;
 
         if (getJavaHome() != null) {
-            javaExec = getJavaHome() + File.separatorChar + "bin" + File.separatorChar + "java";
-            if (getJavaHome().contains(" ")) {
-                javaExec = "\"" + javaExec + "\"";
-            }
+            return getJavaHome() + File.separatorChar + "bin" + File.separatorChar + "java";
         } else {
-            javaExec = "java";
+            return "java";
         }
-
-        return javaExec;
     }
 
     public String getJBossHome() {
-
-        String resolvedJbossHome = null;
-
-        if (jbossHome.contains(" ")) {
-            resolvedJbossHome = "\"" + jbossHome + "\"";
-        } else {
-            resolvedJbossHome = jbossHome;
+        try {
+            return jbossHome.getCanonicalPath();
         }
-
-        return new File(resolvedJbossHome).getAbsolutePath();
+        catch(IOException e) {
+            throw new IllegalStateException("Unable to get canonical path of " + jbossHome, e);
+        }
     }
 
     public JBossManagerConfiguration setJBossHome(String jbossHome) {
         if (jbossHome != null && new File(jbossHome).isDirectory()) {
-            this.jbossHome = jbossHome.trim();
+            this.jbossHome = new File(jbossHome);
         }
         return this;
     }

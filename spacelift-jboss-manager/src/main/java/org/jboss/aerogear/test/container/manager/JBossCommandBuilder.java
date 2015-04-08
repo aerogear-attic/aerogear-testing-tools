@@ -60,12 +60,17 @@ public class JBossCommandBuilder {
             cb.parameter("-Djboss.bundles.dir=" + configuration.getJBossModuleDir() + "/bundles");
         }
 
-        cb.parameters("-jar", configuration.getJBossHome() + "/jboss-modules.jar");
-        cb.parameters("-mp", configuration.getJBossModuleDir());
+        cb.parameter("-jar")
+            .parameter(configuration.getJBossHome() + "/jboss-modules.jar");
+        cb.parameter("-mp")
+            .parameter(configuration.getJBossModuleDir());
         cb.parameter("org.jboss.as.process-controller");
-        cb.parameters("-jboss-home", configuration.getJBossHome());
-        cb.parameters("-jvm", configuration.getJavaBin());
-        cb.parameters("-mp", configuration.getJBossModuleDir());
+        cb.parameter("-jboss-home")
+            .parameter(configuration.getJBossHome());
+        cb.parameter("-jvm")
+            .parameter(configuration.getJavaBin());
+        cb.parameter("-mp")
+            .parameter(configuration.getJBossModuleDir());
         cb.parameter("--");
         cb.parameter("-Dorg.jboss.boot.log.file=" + configuration.getJBossLogDir() + "/host-controller.log");
         cb.parameter("-Dlogging.configuration=file:" + configuration.getJBossConfigDir() + "/logging.properties");
