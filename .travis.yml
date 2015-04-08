@@ -1,0 +1,9 @@
+language: java
+jdk:
+    - oraclejdk7
+env:
+    - TESTCOMPONENT=unified-push-extension 
+install:
+    - true
+script:
+    - cd $TESTCOMPONENT && ./gradlew --stacktrace test
