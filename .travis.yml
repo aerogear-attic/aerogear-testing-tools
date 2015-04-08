@@ -2,7 +2,7 @@ language: java
 jdk:
     - oraclejdk7
 env:
-    - TESTCOMPONENT=unified-push-extension 
+    - TESTCOMPONENT=spacelift-jboss-manager 
 install:
     - true
 script:
