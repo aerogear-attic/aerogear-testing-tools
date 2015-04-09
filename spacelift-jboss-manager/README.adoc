@@ -97,6 +97,7 @@ Maven Release plugin does not work for projects that are not represented by Git 
 Follow this process to release new version
 
 1. Update version to release version in pom.xml
-2. Execute +mvn deploy -Pjboss-release+
-3. Tag current commit via +git tag+
-4. Bump version to next development version
+2. Make sure workspace is clean - e.g. you are not packaging Spacelift workspace into _sources-release.zip_ 
+3. Execute +mvn deploy -Pjboss-release+
+4. Tag current commit via +git tag+
+5. Bump version to next development version
