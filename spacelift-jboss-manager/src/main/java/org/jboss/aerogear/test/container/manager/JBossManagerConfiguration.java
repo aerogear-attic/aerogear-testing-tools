@@ -17,13 +17,13 @@
  */
 package org.jboss.aerogear.test.container.manager;
 
+import org.jboss.aerogear.test.container.manager.configuration.ContainerType;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.jboss.aerogear.test.container.manager.configuration.ContainerType;
-import org.jboss.aerogear.test.container.manager.configuration.ContainerJavaOptsConfiguration;
 
 /**
  *
@@ -39,13 +39,13 @@ public class JBossManagerConfiguration {
 
     private File jbossHome = null;
 
-    private String javaOpts = null;
+    private List<String> javaOpts = new ArrayList<String>();
 
-    private String processControllerJavaOpts = null;
+    private List<String> processControllerJavaOpts = new ArrayList<String>();
 
-    private String hostControllerJavaOpts = null;
+    private List<String> hostControllerJavaOpts = new ArrayList<String>();
 
-    private String serverJavaOpts = "";
+    private List<String> serverJavaOpts = new ArrayList<String>();
 
     private int startupTimeoutInSeconds = 120;
 
@@ -192,18 +192,17 @@ public class JBossManagerConfiguration {
         return getJBossHome() + "/modules";
     }
 
-    public String getJavaOpts() {
-        if (javaOpts == null) {
-            return ContainerJavaOptsConfiguration.getContainerJavaOpts(this);
-        } else {
-            return javaOpts;
+    public List<String> getJavaOpts() {
+        if(javaOpts.size()==0 || containerType!=null) {
+            return containerType.javaOptions(this);
         }
+
+        return javaOpts;
+
     }
 
-    public JBossManagerConfiguration setJavaOpts(String javaOpts) {
-        if (javaOpts != null) {
-            this.javaOpts = javaOpts;
-        }
+    public JBossManagerConfiguration setJavaOpts(String... javaOpts) {
+        this.javaOpts.addAll(Arrays.asList(javaOpts));
         return this;
     }
 
@@ -227,42 +226,37 @@ public class JBossManagerConfiguration {
         return outputToConsole;
     }
 
-    public String getProcessControllerJavaOpts() {
-        if (processControllerJavaOpts == null) {
-            return ContainerJavaOptsConfiguration.getContainerJavaOpts(this);
+    public List<String> getProcessControllerJavaOpts() {
+        if(processControllerJavaOpts.size()==0 || containerType!=null) {
+            return containerType.javaOptions(this);
         }
         return processControllerJavaOpts;
     }
 
-    public JBossManagerConfiguration setProcessControllerJavaOpts(String processControllerJavaOpts) {
-        if (processControllerJavaOpts != null) {
-            this.processControllerJavaOpts = processControllerJavaOpts;
-        }
+    public JBossManagerConfiguration setProcessControllerJavaOpts(String... processControllerJavaOpts) {
+        this.processControllerJavaOpts.addAll(Arrays.asList(processControllerJavaOpts));
         return this;
     }
 
-    public String getHostControllerJavaOpts() {
-        if (hostControllerJavaOpts == null) {
-            return ContainerJavaOptsConfiguration.getContainerJavaOpts(this);
+    public List<String> getHostControllerJavaOpts() {
+        if(hostControllerJavaOpts.size() == 0 || containerType!=null) {
+            return containerType.javaOptions(this);
         }
+
         return hostControllerJavaOpts;
     }
 
-    public JBossManagerConfiguration setHostControllerJavaOpts(String hostControllerJavaOpts) {
-        if (hostControllerJavaOpts != null) {
-            this.hostControllerJavaOpts = hostControllerJavaOpts;
-        }
+    public JBossManagerConfiguration setHostControllerJavaOpts(String... hostControllerJavaOpts) {
+        this.hostControllerJavaOpts.addAll(Arrays.asList(hostControllerJavaOpts));
         return this;
     }
 
-    public String getServerJavaOpts() {
+    public List<String> getServerJavaOpts() {
         return serverJavaOpts;
     }
 
-    public JBossManagerConfiguration setServerJavaOpts(String serverJavaOpts) {
-        if (serverJavaOpts != null) {
-            this.serverJavaOpts = serverJavaOpts;
-        }
+    public JBossManagerConfiguration setServerJavaOpts(String... serverJavaOpts) {
+        this.serverJavaOpts.addAll(Arrays.asList(serverJavaOpts));
         return this;
     }
 
@@ -296,6 +290,11 @@ public class JBossManagerConfiguration {
         if (containerType != null) {
             this.containerType = containerType;
         }
+        return this;
+    }
+
+    public JBossManagerConfiguration setContainerType(String containerType) throws IllegalArgumentException {
+        this.containerType = ContainerType.valueOf(containerType);
         return this;
     }
 

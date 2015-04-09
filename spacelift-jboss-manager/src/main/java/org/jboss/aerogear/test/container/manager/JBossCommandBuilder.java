@@ -28,7 +28,7 @@ public class JBossCommandBuilder {
         final CommandBuilder cb = new CommandBuilder(configuration.getJavaBin());
 
         cb.parameter("-D[Standalone]");
-        cb.splitToParameters(configuration.getJavaOpts());
+        cb.parameters(configuration.getJavaOpts());
         cb.parameter("-Dorg.jboss.boot.log.file=" + configuration.getJBossLogDir() + "/server.log");
         cb.parameter("-Dlogging.configuration=file:" + configuration.getJBossConfigDir() + "/logging.properties");
 
@@ -42,7 +42,7 @@ public class JBossCommandBuilder {
         cb.parameters("org.jboss.as.standalone");
         cb.parameter("-Djboss.home.dir=" + configuration.getJBossHome());
         cb.parameter("-Djboss.server.base.dir=" + configuration.getJBossBaseDir());
-        cb.splitToParameters(configuration.getServerJavaOpts());
+        cb.parameters(configuration.getServerJavaOpts());
 
         return cb.build();
     }
@@ -51,8 +51,8 @@ public class JBossCommandBuilder {
 
         final CommandBuilder cb = new CommandBuilder(configuration.getJavaBin());
 
-        cb.parameters("-D[Process Controller]");
-        cb.splitToParameters(configuration.getProcessControllerJavaOpts());
+        cb.parameter("-D[Process Controller]");
+        cb.parameters(configuration.getProcessControllerJavaOpts());
         cb.parameter("-Dorg.jboss.boot.log.file=" + configuration.getJBossLogDir() + "/process-controller.log");
         cb.parameter("-Dlogging.configuration=file:" + configuration.getJBossConfigDir() + "/logging.properties");
 
@@ -74,7 +74,7 @@ public class JBossCommandBuilder {
         cb.parameter("--");
         cb.parameter("-Dorg.jboss.boot.log.file=" + configuration.getJBossLogDir() + "/host-controller.log");
         cb.parameter("-Dlogging.configuration=file:" + configuration.getJBossConfigDir() + "/logging.properties");
-        cb.splitToParameters(configuration.getHostControllerJavaOpts());
+        cb.parameters(configuration.getHostControllerJavaOpts());
         cb.parameter("--");
         cb.parameters("-default-jvm", configuration.getJavaBin());
 
@@ -85,7 +85,7 @@ public class JBossCommandBuilder {
      *
      * @param configuration
      * @throws IllegalArgumentException iff {@code configuration} is null object.
-     * @throws IllegalStateException iff {@link JBossManagerConfiguration#getJbossHome()} returns null.
+     * @throws IllegalStateException iff {@link JBossManagerConfiguration#getJBossHome()} returns null.
      */
     private void validate(JBossManagerConfiguration configuration) throws RuntimeException {
         if (configuration == null) {
