@@ -193,7 +193,7 @@ public class JBossManagerConfiguration {
     }
 
     public List<String> getJavaOpts() {
-        if(javaOpts.size()==0 || containerType!=null) {
+        if(javaOpts.size()==0 && containerType!=null) {
             return containerType.javaOptions(this);
         }
 
@@ -227,7 +227,7 @@ public class JBossManagerConfiguration {
     }
 
     public List<String> getProcessControllerJavaOpts() {
-        if(processControllerJavaOpts.size()==0 || containerType!=null) {
+        if(processControllerJavaOpts.size()==0 && containerType!=null) {
             return containerType.javaOptions(this);
         }
         return processControllerJavaOpts;
@@ -239,7 +239,7 @@ public class JBossManagerConfiguration {
     }
 
     public List<String> getHostControllerJavaOpts() {
-        if(hostControllerJavaOpts.size() == 0 || containerType!=null) {
+        if(hostControllerJavaOpts.size() == 0 && containerType!=null) {
             return containerType.javaOptions(this);
         }
 
