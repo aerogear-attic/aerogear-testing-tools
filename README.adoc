@@ -1,3 +1,6 @@
+## Deprecation Notice
+This repository has been deprecated and is not being maintained. If you have any questions, please get in touch with the collaborators.
+
 = Aerogear Testing Tooling image:https://travis-ci.org/aerogear/aerogear-testing-tools.svg["Build Status", link="https://travis-ci.org/aerogear/aerogear-testing-tools"]
 
 This repository contains various tools used to test Aerogear project.
